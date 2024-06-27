@@ -2,61 +2,79 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>de.bund.bva.isyfact</groupId>
-        <artifactId>isyfact-standards</artifactId>
-        <version>${revision}</version>
-    </parent>
-
+    <groupId>de.bund.bva.isyfact</groupId>
     <artifactId>isy-security</artifactId>
+    <version>${revision}</version>
     <packaging>jar</packaging>
+
 
     <name>IsyFact-Security</name>
     <description>Überarbeitete Komponente für die Autorisierung von Benutzern in IsyFact-Anwendungen.</description>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>de.bund.bva.isyfact</groupId>
-                <artifactId>isyfact-products-bom</artifactId>
-                <version>${project.parent.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>de.bund.bva.isyfact</groupId>
-                <artifactId>isyfact-standards-bom</artifactId>
-                <version>${project.parent.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <properties>
+        <revision>4.0.0-SNAPSHOT</revision>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.version>3.11.0</maven.compiler.version>
+        <maven.surefire.version>3.1.2</maven.surefire.version>
+        <maven.jar.version>3.3.0</maven.jar.version>
+        <maven.deploy.version>2.8.2</maven.deploy.version>
+        <maven.jacoco.version>0.8.12</maven.jacoco.version>
+        <maven.flatten.version>1.2.7</maven.flatten.version>
+        <maven.cyclondx.version>2.7.11</maven.cyclondx.version>
+        <maven.javadoc.plugin.version>3.3.2</maven.javadoc.plugin.version>
+        <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
+        <junit.version>4.13.2</junit.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <spring.framework.version>5.3.37</spring.framework.version>
+        <spring.boot.version>3.3.1</spring.boot.version>
+        <spring.security.version>6.3.1</spring.security.version>
+
+        <isy-logging.version>3.0.1</isy-logging.version>
+
+        <jackson.version>2.17.1</jackson.version>
+        <hibernate.core.version>5.6.15.Final</hibernate.core.version>
+        <hibernate.validator.version>7.0.5.Final</hibernate.validator.version>
+        <dbunit.version>2.7.2</dbunit.version>
+        <h2.version>2.1.210</h2.version>
+
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>de.bund.bva.isyfact</groupId>
             <artifactId>isy-logging</artifactId>
+            <version>${isy-logging.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>${spring.boot.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
+            <version>${spring.security.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-jose</artifactId>
+            <version>${spring.security.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-resource-server</artifactId>
+            <version>${spring.security.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-client</artifactId>
+            <version>${spring.security.version}</version>
             <!-- only required if the application wants to authenticate clients -->
             <optional>true</optional>
         </dependency>
@@ -64,56 +82,64 @@
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
         <!-- for generating metadata -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
+            <version>${spring.boot.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure-processor</artifactId>
+            <version>${spring.boot.version}</version>
             <optional>true</optional>
         </dependency>
-
+<!--
         <dependency>
             <groupId>de.bund.bva.isyfact</groupId>
             <artifactId>isy-security-test</artifactId>
-            <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
-
+-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring.boot.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
+            <version>${spring.security.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
+            <version>${spring.framework.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- to enable rest controllers in tests -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
+            <version>${spring.framework.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
+            <version>${spring.boot.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
+            <version>${hibernate.validator.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -127,4 +153,29 @@
             </exclusions>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${maven.jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
