@@ -1,5 +1,9 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-orange)](https://opensource.org/licenses/Apache-2.0)
 ![GitHub Sprache](https://img.shields.io/badge/Language-Java_21-orange)
+[![Dependency](https://img.shields.io/badge/Uses-Hibernate-blue)](https://hibernate.org/)
+![Dependency](https://img.shields.io/badge/Isyfact-IsyLogging_3.0.1-blue)
+[![Dependency](https://img.shields.io/badge/Uses-Spring-yellow)](https://hibernate.org/)
+[![Dependency](https://img.shields.io/badge/Uses-Spring_Boot-yellow)](https://hibernate.org/)
 
 
 # isy-security
