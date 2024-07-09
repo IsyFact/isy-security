@@ -8,25 +8,19 @@
 
 # isy-security
 
-Diese Bibliothek stellt Funktionen ...
-
+Diese Bibliothek Funktionen für die Autorisierung von Benutzern in IsyFact-Anwendungen bereit.
 
 ## IsyFact
 
-
-
 ## Features
-
 
 ### Mithelfen
 Wir freuen uns über Beiträge zur Weiterentwicklung von isy-security.
 
 ### Lizenz
 
-
 Dieses Projekt ist unter der Apache-2-Lizenz lizenziert. Weitere Informationen findest du in der [Lizenzdatei](license/LICENSE).
 
 ### Kontakt
-
 
 __Vielen Dank für die Verwendung von isy-security!__

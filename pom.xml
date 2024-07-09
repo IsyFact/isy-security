@@ -9,7 +9,7 @@
 
 
     <name>IsyFact-Security</name>
-    <description>Überarbeitete Komponente für die Autorisierung von Benutzern in IsyFact-Anwendungen.</description>
+    <description>Komponente für die Autorisierung von Benutzern in IsyFact-Anwendungen.</description>
 
     <properties>
         <revision>4.0.0-SNAPSHOT</revision>
@@ -25,16 +25,17 @@
         <isy-logging.version>3.0.1</isy-logging.version>
 
         <spring.framework.version>6.1.6</spring.framework.version>
-        <spring.boot.version>3.3.1</spring.boot.version>
+        <spring.boot.version>3.3.0</spring.boot.version>
         <spring.security.version>6.3.1</spring.security.version>
 
-        <jackson.version>2.17.1</jackson.version>
+        <jackson.version>2.15.4</jackson.version>
         <hibernate.core.version>5.6.15.Final</hibernate.core.version>
         <hibernate.validator.version>7.0.5.Final</hibernate.validator.version>
 
         <junit.version>4.13.2</junit.version>
         <dbunit.version>2.7.2</dbunit.version>
         <h2.version>2.1.210</h2.version>
+        <wiremock.version>3.8.0</wiremock.version>
 
     </properties>
 
@@ -73,13 +74,15 @@
             <!-- only required if the application wants to authenticate clients -->
             <optional>true</optional>
         </dependency>
-        <!-- for parsing the role privileges mapping -->
+
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
             <version>${jackson.version}</version>
         </dependency>
-        <!-- for generating metadata -->
+
+
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -92,13 +95,13 @@
             <version>${spring.boot.version}</version>
             <optional>true</optional>
         </dependency>
-<!--
+
         <dependency>
-            <groupId>de.bund.bva.isyfact</groupId>
-            <artifactId>isy-security-test</artifactId>
-            <scope>test</scope>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.framework.version}</version>
         </dependency>
--->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -111,33 +114,34 @@
             <version>${spring.security.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
             <version>${spring.framework.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- to enable rest controllers in tests -->
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <version>${spring.framework.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <version>${spring.boot.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock</artifactId>
-            <version>3.8.0</version>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
-
-
 
         <dependency>
             <groupId>org.hibernate.validator</groupId>
