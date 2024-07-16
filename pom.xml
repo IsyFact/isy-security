@@ -11,10 +11,12 @@
     <name>IsyFact-Security</name>
     <description>Komponente für die Autorisierung von Benutzern in IsyFact-Anwendungen.</description>
 
+
+
     <properties>
         <revision>4.0.0-SNAPSHOT</revision>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.version>3.11.0</maven.compiler.version>
         <maven.surefire.version>3.1.2</maven.surefire.version>
         <maven.jacoco.version>0.8.12</maven.jacoco.version>
@@ -47,6 +49,7 @@
         <assertj.version>3.24.2</assertj.version>
         <wiremock.version>3.4.2</wiremock.version>
 
+        <maven.compiler.version>3.13.0</maven.compiler.version>
     </properties>
 
     <dependencies>
@@ -294,6 +297,14 @@
             <version>${spring.security.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.14.18</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
@@ -310,10 +321,15 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+
+
     </dependencies>
 
     <build>
         <plugins>
+
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
