@@ -23,7 +23,7 @@
 
         <isy-logging.version>3.0.1</isy-logging.version>
 
-        <spring.framework.version>6.1.6</spring.framework.version>
+        <spring.framework.version>6.1.11</spring.framework.version>
         <spring.boot.version>3.2.5</spring.boot.version>
         <spring.security.version>6.2.4</spring.security.version>
 
