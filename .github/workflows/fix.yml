@@ -1,12 +1,9 @@
-name: Feature Workflow
+name: Bugfix Workflow
 
 on:
   push:
     branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
+      - fix/*
   workflow_dispatch:
 jobs:
   MavenBuild:
