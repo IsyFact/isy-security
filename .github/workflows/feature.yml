@@ -3,7 +3,6 @@ name: Feature Workflow
 on:
   push:
     branches:
-      - fix/*
       - develop
   pull_request:
     branches:
