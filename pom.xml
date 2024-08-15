@@ -45,6 +45,7 @@
         <h2.version>2.1.210</h2.version>
         <assertj.version>3.24.2</assertj.version>
         <wiremock.version>3.4.2</wiremock.version>
+        <commons-text.version>1.10.0</commons-text.version>
 
     </properties>
 
@@ -346,6 +347,34 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.8.5.0</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>high</threshold>
+                    <xmlOutput>true</xmlOutput>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>execute-spot-bugs</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-text</artifactId>
+                        <version>${commons-text.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
         </plugins>
     </build>
 </project>
