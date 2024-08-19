@@ -11,10 +11,19 @@ on:
     branches:
       - develop
   workflow_dispatch:
+
 jobs:
-  MavenBuild:
-    uses: IsyFact/isyfact-standards/.github/workflows/maven_build_template.yml@master
+  Version:
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/next_version.yml@v1.0.0
     with:
+      next-version: 4.0.0
+      calculate-rc: ${{ startsWith(github.ref, 'refs/heads/release/') }}
+
+  MavenBuild:
+    needs: [ Version ]
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_build_template.yml@v1.0.0
+    with:
+      version: ${{ needs.Version.outputs.next-version }}
       jdk-version: 21
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
