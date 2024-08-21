@@ -10,6 +10,21 @@
     <name>IsyFact-Security</name>
     <description>Komponente für die Autorisierung von Benutzern in IsyFact-Anwendungen.</description>
 
+    <developers>
+        <developer>
+            <name>IsyFact-Team</name>
+            <email>isyfact@bva.bund.de</email>
+            <organization>Bundesverwaltungsamt (BVA)</organization>
+            <organizationUrl>https://www.bva.bund.de</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/IsyFact/isy-security.git</connection>
+        <developerConnection>scm:git:ssh://github.com:IsyFact/isy-security.git</developerConnection>
+        <url>https://github.com/IsyFact/isy-security</url>
+    </scm>
+
     <properties>
         <revision>4.0.0-SNAPSHOT</revision>
         <maven.compiler.source>17</maven.compiler.source>
@@ -17,6 +32,8 @@
         <maven.compiler.version>3.11.0</maven.compiler.version>
         <maven.surefire.version>3.1.2</maven.surefire.version>
         <maven.jacoco.version>0.8.12</maven.jacoco.version>
+        <maven.javadoc.plugin.version>3.3.2</maven.javadoc.plugin.version>
+        <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -331,6 +348,48 @@
                         <outputName>${project.artifactId}-${project.version}-cyclonedx</outputName>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.version}</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${maven.javadoc.plugin.version}</version>
+                    <configuration>
+                        <!-- The encoding is important for the representation of special characters. -->
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                        <charset>${project.build.sourceEncoding}</charset>
+                        <doclint>none</doclint>
+                        <quiet>true</quiet>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${maven.source.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -391,4 +450,57 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>centralRelease</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.13</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>GPGsigning</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <keyname>${gpg.keyname}</keyname>
+                            <passphrase>${gpg.passphrase}</passphrase>
+                            <!-- Prevent gpg from using pinentry programs -->
+                            <!-- Required for compatibility with gpg version 2.1 or later -->
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
