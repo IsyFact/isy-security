@@ -11,7 +11,7 @@ on:
     - cron: "5 0 * * *"
 
 jobs:
-  dependencies:
+  SnykScan:
     uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_dependency_scan_template.yml@v1.5.0
     with:
       jdk-version: 21
