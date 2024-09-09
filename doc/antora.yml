@@ -1,0 +1,7 @@
+name: isy-security-doc
+title: isy-security
+version: '4.0.0 SNAPSHOT'
+display_version: '4.0.0 SNAPSHOT'
+start_page: ROOT:konzept/master.adoc
+nav:
+- modules/ROOT/nav.adoc
