@@ -5,6 +5,7 @@
 [[software-architektur-security-baustein]]
 == Software-Architektur des Security-Bausteins
 
+
 Die Software-Architektur des Security-Bausteins bildet das Fundament für die Sicherheit von Anwendungen in modernen Softwarelösungen.
 Die korrekte Gestaltung und Implementierung dieser Architektur ist entscheidend, um Schutzmechanismen gegen potenzielle Sicherheitsbedrohungen zu etablieren.
 In diesem Kapitel wird detailliert auf die verschiedenen Aspekte der Software-Architektur des Security-Bausteins eingegangen und bewährte Methoden sowie bewährte Praktiken vorgestellt, um eine robuste und zuverlässige Sicherheitsinfrastruktur zu schaffen.
@@ -310,7 +311,7 @@ Die Methoden erlauben es technische Nutzer zur Laufzeit mit ihren Zugangsdaten �
 Mit diesem Mechanismus wird sichergestellt, dass nur autorisierte Clients Zugriff auf die Ressourcen erhalten.
 Durch die Nutzung dieses speziellen Authentifizierungsmechanismus wird eine robuste und zuverlässige Sicherheitsschicht implementiert, um unautorisierten Zugriff und potenzielle Sicherheitslücken zu verhindern.
 
-Weitere Informationen und detaillierte Anleitungen zur Verwendung können im Abschnitt zum xref:isy-security:nutzungsvorgaben/inhalt.adoc#authentifizierungsmanager-interface[Authentifizierungsmanager] gefunden werden.
+Weitere Informationen und detaillierte Anleitungen zur Verwendung können im Abschnitt zum xref:nutzungsvorgaben/inhalt.adoc#authentifizierungsmanager-interface[Authentifizierungsmanager] gefunden werden.
 
 [[absicherung_von_batches_tasks]]
 == Absicherung von Batches und Tasks
