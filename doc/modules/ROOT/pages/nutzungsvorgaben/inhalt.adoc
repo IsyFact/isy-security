@@ -12,7 +12,7 @@ In diesem Kapitel wird detailliert auf die verschiedenen Aspekte der Software-Ar
 
 
 
-Im Folgenden werden die xref:..\konzept\inhalt.adoc#aussensicht-der-komponente-security[Interfaces des Bausteins Security] genauer erläutert.
+Im Folgenden werden die xref:../konzept/inhalt.adoc#aussensicht-der-komponente-security[Interfaces des Bausteins Security] genauer erläutert.
 
 [[security-interface]]
 === Security
@@ -318,7 +318,7 @@ Weitere Informationen und detaillierte Anleitungen zur Verwendung können im Abs
 
 Für detaillierte Informationen und Anleitung zur Absicherung von Batches und Tasks wird auf die Dokumentation unter
 * xref:isyfact-standards-doku:blaupausen:detailkonzept-komponente-batch/inhalt.adoc#authentifizierung-und-autorisierung[Authentifizierung und Autorisierung von Batches]
-* bzw. xref:isyfact-standards-doku:isy-task:nutzungsvorgaben.adoc#absicherung-von-tasks[Absicherung von Tasks]
+* bzw. xref:4.0.x@isyfact-standards-doku:isy-task:nutzungsvorgaben.adoc#absicherung-von-tasks[Absicherung von Tasks]
 
 verwiesen. Diese bieten praxisorientierte Richtlinien zur Gewährleistung der Sicherheit von Batches und Tasks.
 
