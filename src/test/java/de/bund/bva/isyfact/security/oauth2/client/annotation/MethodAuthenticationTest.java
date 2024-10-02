@@ -1,15 +1,8 @@
 package de.bund.bva.isyfact.security.oauth2.client.annotation;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.AdditionalMatchers.not;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-
-import java.util.UUID;
-
+import de.bund.bva.isyfact.security.example.service.ExampleMethodAuthentication;
+import de.bund.bva.isyfact.security.oauth2.client.Authentifizierungsmanager;
+import de.bund.bva.isyfact.util.logging.MdcHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,18 +14,24 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import de.bund.bva.isyfact.logging.util.MdcHelper;
-import de.bund.bva.isyfact.security.example.service.ExampleMethodAuthentication;
-import de.bund.bva.isyfact.security.oauth2.client.Authentifizierungsmanager;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.AdditionalMatchers.not;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 
 @SpringBootTest(
-        classes = { AuthenticateInterceptor.class, ExampleMethodAuthentication.class },
-        properties = { "test.auth.client-id = my-auth-client" }
+        classes = {AuthenticateInterceptor.class, ExampleMethodAuthentication.class},
+        properties = {"test.auth.client-id = my-auth-client"}
 )
 @EnableAutoConfiguration
 public class MethodAuthenticationTest {
 
-    private static final String[] TEST_AUTHORITIES = { "PRIV_test", "ROLE_test" };
+    private static final String[] TEST_AUTHORITIES = {"PRIV_test", "ROLE_test"};
 
     private static final TestingAuthenticationToken TEST_AUTH_TOKEN =
             new TestingAuthenticationToken("user", "pass", TEST_AUTHORITIES);

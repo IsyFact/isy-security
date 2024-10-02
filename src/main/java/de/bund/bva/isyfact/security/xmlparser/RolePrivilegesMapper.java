@@ -1,5 +1,10 @@
 package de.bund.bva.isyfact.security.xmlparser;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -10,19 +15,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.core.io.Resource;
-
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-
-import de.bund.bva.isyfact.logging.IsyLogger;
-import de.bund.bva.isyfact.logging.IsyLoggerFactory;
-
 public class RolePrivilegesMapper {
 
     /**
      * Logger.
      */
-    private static final IsyLogger LOG = IsyLoggerFactory.getLogger(RolePrivilegesMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RolePrivilegesMapper.class);
 
     private String applicationId = "";
 
