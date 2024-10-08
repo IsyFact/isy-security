@@ -5,7 +5,6 @@
 [![Dependency](https://img.shields.io/badge/Uses-Spring-yellow)](https://hibernate.org/)
 [![Dependency](https://img.shields.io/badge/Uses-Spring_Boot-yellow)](https://hibernate.org/)
 
-
 # isy-security
 
 Diese Bibliothek Funktionen für die Autorisierung von Benutzern in IsyFact-Anwendungen bereit.
