@@ -1,11 +1,8 @@
 package de.bund.bva.isyfact.security.authentication;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
+import de.bund.bva.isyfact.security.xmlparser.RolePrivilegesMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,9 +10,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import de.bund.bva.isyfact.logging.IsyLogger;
-import de.bund.bva.isyfact.logging.IsyLoggerFactory;
-import de.bund.bva.isyfact.security.xmlparser.RolePrivilegesMapper;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Based on {@link org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter} but with additional
@@ -23,20 +22,26 @@ import de.bund.bva.isyfact.security.xmlparser.RolePrivilegesMapper;
  */
 public class RolePrivilegeGrantedAuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 
-    /** Logger. */
-    private static final IsyLogger LOG = IsyLoggerFactory.getLogger(RolePrivilegeGrantedAuthoritiesConverter.class);
-
-    /** Authority prefix to use for all mapped authorities. */
+    /**
+     * Authority prefix to use for all mapped authorities.
+     */
     public static final String AUTHORITY_PREFIX = "PRIV_";
-
-    /** Well known authorities claim names to check in order if no {@link #authoritiesClaimName} is set. */
+    /**
+     * Logger.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(RolePrivilegeGrantedAuthoritiesConverter.class);
+    /**
+     * Well known authorities claim names to check in order if no {@link #authoritiesClaimName} is set.
+     */
     private static final Collection<String> WELL_KNOWN_AUTHORITIES_CLAIM_NAMES = Arrays.asList("scope", "scp");
-
-    /** The claim name to check for authorities. */
-    private String authoritiesClaimName;
-
-    /** Mapper from roles to privileges. */
+    /**
+     * Mapper from roles to privileges.
+     */
     private final RolePrivilegesMapper rolePrivilegesMapper;
+    /**
+     * The claim name to check for authorities.
+     */
+    private String authoritiesClaimName;
 
     public RolePrivilegeGrantedAuthoritiesConverter(RolePrivilegesMapper rolePrivilegesMapper) {
         this.rolePrivilegesMapper = rolePrivilegesMapper;

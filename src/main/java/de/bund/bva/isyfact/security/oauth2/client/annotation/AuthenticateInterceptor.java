@@ -1,8 +1,7 @@
 package de.bund.bva.isyfact.security.oauth2.client.annotation;
 
-import java.lang.reflect.Method;
-import java.util.UUID;
-
+import de.bund.bva.isyfact.security.oauth2.client.Authentifizierungsmanager;
+import de.bund.bva.isyfact.util.logging.MdcHelper;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -17,8 +16,8 @@ import org.springframework.security.authorization.method.AuthorizationIntercepto
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.Assert;
 
-import de.bund.bva.isyfact.logging.util.MdcHelper;
-import de.bund.bva.isyfact.security.oauth2.client.Authentifizierungsmanager;
+import java.lang.reflect.Method;
+import java.util.UUID;
 
 /**
  * MethodInterceptor that authenticates an OAuth 2.0 client and sets the authenticated principal in the Security Context.
@@ -33,11 +32,14 @@ import de.bund.bva.isyfact.security.oauth2.client.Authentifizierungsmanager;
  */
 public class AuthenticateInterceptor extends EmbeddedValueResolutionSupport implements MethodInterceptor, PointcutAdvisor, Ordered {
 
-    /** Make sure the interceptor runs before Spring annotations like @Secured. */
-    private int order = AuthorizationInterceptorsOrder.FIRST.getOrder();
-
-    /** The manager used for authenticating the OAuth 2.0 client. */
+    /**
+     * The manager used for authenticating the OAuth 2.0 client.
+     */
     private final Authentifizierungsmanager authentifizierungsmanager;
+    /**
+     * Make sure the interceptor runs before Spring annotations like @Secured.
+     */
+    private int order = AuthorizationInterceptorsOrder.FIRST.getOrder();
 
     public AuthenticateInterceptor(Authentifizierungsmanager authentifizierungsmanager) {
         this.authentifizierungsmanager = authentifizierungsmanager;
@@ -67,8 +69,7 @@ public class AuthenticateInterceptor extends EmbeddedValueResolutionSupport impl
     /**
      * Authenticates the OAuth 2.0 client based on the properties of the method annotation.
      *
-     * @param invocation
-     *         the method invocation
+     * @param invocation the method invocation
      */
     private void authenticateOAuth2Client(MethodInvocation invocation) {
         Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
@@ -88,10 +89,8 @@ public class AuthenticateInterceptor extends EmbeddedValueResolutionSupport impl
     /**
      * Detects the {@link Authenticate} annotation on the invoked method.
      *
-     * @param method
-     *         the invoked method
-     * @param targetClass
-     *         the target class
+     * @param method      the invoked method
+     * @param targetClass the target class
      * @return the annotation or {@code null}
      */
     private Authenticate detectAuthAnnotation(Method method, Class<?> targetClass) {
@@ -109,9 +108,7 @@ public class AuthenticateInterceptor extends EmbeddedValueResolutionSupport impl
         // Fallback is to look at the original method.
         if (specificMethod != method) {
             ann = AnnotationUtils.findAnnotation(method, Authenticate.class);
-            if (ann != null) {
-                return ann;
-            }
+            return ann;
         }
 
         return null;

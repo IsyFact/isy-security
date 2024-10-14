@@ -1,11 +1,8 @@
 package de.bund.bva.isyfact.security.core;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import de.bund.bva.isyfact.security.oauth2.util.IsySecurityTokenUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,9 +11,11 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.server.resource.authentication.AbstractOAuth2TokenAuthenticationToken;
 import org.springframework.util.Assert;
 
-import de.bund.bva.isyfact.logging.IsyLogger;
-import de.bund.bva.isyfact.logging.IsyLoggerFactory;
-import de.bund.bva.isyfact.security.oauth2.util.IsySecurityTokenUtil;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of the {@link Berechtigungsmanager} that should suffice for most use cases.
@@ -26,8 +25,10 @@ import de.bund.bva.isyfact.security.oauth2.util.IsySecurityTokenUtil;
  */
 public class IsyOAuth2Berechtigungsmanager implements Berechtigungsmanager {
 
-    /** Logger. */
-    private static final IsyLogger LOG = IsyLoggerFactory.getLogger(IsyOAuth2Berechtigungsmanager.class);
+    /**
+     * Logger.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(IsyOAuth2Berechtigungsmanager.class);
 
     /**
      * The JWT claim name that contains the roles.
