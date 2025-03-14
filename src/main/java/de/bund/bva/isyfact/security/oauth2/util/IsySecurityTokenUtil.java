@@ -16,8 +16,7 @@ import org.springframework.security.oauth2.server.resource.authentication.Abstra
 /**
  * This class contains utility methods for isy-security. It provides access to the claims of the current OAuth 2.0 token.
  */
-public class IsySecurityTokenUtil {
-
+public final class IsySecurityTokenUtil {
 
     /**
      * The resource bundle that contains the token configuration.
@@ -56,6 +55,12 @@ public class IsySecurityTokenUtil {
      */
     private static String getConfigPropertyValueAsString(String suffix) {
         return BUNDLE.getString(PREFIX + suffix);
+    }
+
+    /**
+     * Utility class should not be instantiated.
+     */
+    private IsySecurityTokenUtil() {
     }
 
     /**
@@ -130,11 +135,9 @@ public class IsySecurityTokenUtil {
      *         if the authenticated principal is not a {@link AbstractOAuth2TokenAuthenticationToken}
      */
     public static boolean hasTokenExpired(Duration expirationTimeOffset) {
-        OAuth2Token token = getAuthenticationToken().getToken();
-        if (token.getExpiresAt() != null) {
-            return Instant.now().isAfter(token.getExpiresAt().minus(expirationTimeOffset));
-        }
-        return true;
+        return Optional.ofNullable(getAuthenticationToken().getToken().getExpiresAt())
+                .map(expiresAt -> Instant.now().isAfter(expiresAt.minus(expirationTimeOffset)))
+                .orElse(true);
     }
 
     /**
