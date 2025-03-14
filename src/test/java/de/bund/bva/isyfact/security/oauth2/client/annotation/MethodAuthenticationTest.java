@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.doAnswer;
         properties = {"test.auth.client-id = my-auth-client"}
 )
 @EnableAutoConfiguration
+@EnableMethodSecurity(securedEnabled = true)
 public class MethodAuthenticationTest {
 
     private static final String[] TEST_AUTHORITIES = {"PRIV_test", "ROLE_test"};
