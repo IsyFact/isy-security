@@ -1,3 +1,7 @@
+# 5.0.0
+
+- `IFS-4577`: Portierung fehlender Tickets aus isyfact-standards
+
 # 4.0.0
 
 - `ISY-305`: Implementierung von IsySecurityTokenUtil zum Auslesen von Attributen aus dem Bearer Token
