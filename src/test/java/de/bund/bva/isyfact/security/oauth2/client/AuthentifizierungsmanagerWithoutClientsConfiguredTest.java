@@ -108,7 +108,7 @@ public class AuthentifizierungsmanagerWithoutClientsConfiguredTest extends Abstr
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
                 .build();
 
-        AdditionalCredentials additionalCredentials = AdditionalCredentials.withUsernamePasswordBhknz(
+        AdditionalCredentials additionalCredentials = AdditionalCredentials.createWithUsernamePasswordBhknz(
                 "newUser", "newPassword", "900600");
 
         authentifizierungsmanager.authentifiziere(clientRegistration, additionalCredentials);
