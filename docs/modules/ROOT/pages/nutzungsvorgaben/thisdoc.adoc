@@ -18,6 +18,6 @@ Die folgenden Kapitel leiten durch die Funktionen des Bausteins `isy-security`.
 
 Schließlich beschreibt das letzte Kapitel xref:nutzungsvorgaben/master.adoc#testunterstuetzung[Testunterstützung], welche Hilfen der Baustein *isy-security* zum Erstellen von (automatisierten) Tests bereitstellt.
 
-Die konzeptionellen Aspekte der Authentifizierung und Autorisierung werden im xref:isy-security:konzept/master.adoc[Security - Konzept] beschrieben.
+Die konzeptionellen Aspekte der Authentifizierung und Autorisierung werden im xref:konzept/master.adoc[Security - Konzept] beschrieben.
 
 // end::inhalt[]

@@ -350,15 +350,15 @@ Die Methoden erlauben es technische Nutzer zur Laufzeit mit ihren Zugangsdaten �
 Mit diesem Mechanismus wird sichergestellt, dass nur autorisierte Clients Zugriff auf die Ressourcen erhalten.
 Durch die Nutzung dieses speziellen Authentifizierungsmechanismus wird eine robuste und zuverlässige Sicherheitsschicht implementiert, um unautorisierten Zugriff und potenzielle Sicherheitslücken zu verhindern.
 
-Weitere Informationen und detaillierte Anleitungen zur Verwendung können im Abschnitt zum xref:isy-security:nutzungsvorgaben/inhalt.adoc#authentifizierungsmanager-interface[Authentifizierungsmanager] gefunden werden.
+Weitere Informationen und detaillierte Anleitungen zur Verwendung können im Abschnitt zum xref:nutzungsvorgaben/master.adoc#authentifizierungsmanager-interface[Authentifizierungsmanager] gefunden werden.
 
 [[absicherung_von_batches_tasks]]
 == Absicherung von Batches und Tasks
 
 Für detaillierte Informationen und Anleitung zur Absicherung von Batches und Tasks wird auf die Dokumentation unter
 
-* xref:referenzarchitektur:software-technisch/batch/batchrahmen.adoc#authentifizierung-und-autorisierung[Authentifizierung und Autorisierung von Batches]
-* bzw. xref:isy-task:nutzungsvorgaben.adoc#absicherung-von-tasks[Absicherung von Tasks]
+* xref:isyfact-standards-doku:referenzarchitektur:software-technisch/batch/batchrahmen.adoc#authentifizierung-und-autorisierung[Authentifizierung und Autorisierung von Batches]
+* bzw. xref:task::nutzungsvorgaben.adoc#absicherung-von-tasks[Absicherung von Tasks]
 
 verwiesen. Diese bieten praxisorientierte Richtlinien zur Gewährleistung der Sicherheit von Batches und Tasks.
 
@@ -651,7 +651,7 @@ Dadurch sind Ausdrücke möglich wie:
 @PreAuthorize("hasAuthority('PRIV_Recht_A') and hasAuthority('PRIV_Recht_B')")
 ----
 
-Die annotationsbasierte Autorisierung auf Methoden-/Klassenlevel muss durch setzen der `@EnableMethodSecurity`-Annotation an einer `@Configuration`-Klasse aktiviert werden.
+Die annotationsbasierte Autorisierung auf Methoden-/Klassenlevel muss durch Setzen der `@EnableMethodSecurity`-Annotation an einer `@Configuration`-Klasse aktiviert werden.
 Dabei kann mit den Optionen `securedEnabled` und `prePostEnabled` die Verwendung von `@Secured` und `@PreAuthorize` aktiviert/deaktiviert werden.
 Die Option `prePostEnabled` ist standardmäßig aktiviert.
 
