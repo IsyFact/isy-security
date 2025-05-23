@@ -1,4 +1,6 @@
 # 4.0.0
+- `IFS-4713`: Dokumentation mit Stand aus `isyfact-standards` zusammengeführt und technische Schulden behoben.
+- `IFS-4714`: Zentrale Versionierung eingeführt.
 - `IFS-3821`: Thematik zur internen und externen URL bei der Authentifizierung beschrieben (Multiple Issuer-URIs)
 - `IFS-3834`: Kapitel Authentifizierung & Autorisierung um Multi-Tenancy erweitert.
 - `IFS-3051`: Kapitel zu Multi-Realms um konkrete Vorgabe erweitert.
