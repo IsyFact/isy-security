@@ -1,8 +1,6 @@
 = Nutzungsvorgaben Security
 
-include::glossary:licence:partial$licence.adoc[]
-
-include::docinfo.adoc[]
+include::partial$library.adoc[]
 
 include::thisdoc.adoc[tags=inhalt]
 
