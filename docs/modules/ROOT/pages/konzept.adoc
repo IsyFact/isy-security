@@ -123,7 +123,8 @@ Bei seiner Instanziierung wird die anwendungsspezifische Rollen-Rechte-Datei ein
 Das Interface `Security` stellt der Geschäftsanwendung die im Weiteren beschriebenen `Authentifizierungsmanager` und `Berechtigungsmanager` zur Verfügung.
 Außerdem kann die Geschäftsanwendung über die Methode `getAlleRollen` eine Liste von allen im System hinterlegten Rollen erhalten.
 
-Der `Authentifizierungsmanager` übernimmt die programmatische Authentifizierung und Autorisierung interner und externer Anwendungen durch das IAM für den Zugang zu IsyFact-Nachbaranwendungen. Er bietet verschiedene Methoden für die Authentifizierung, sowohl über Registration-IDs als auch über direkte ClientRegistration-Objekte.
+Der `Authentifizierungsmanager` übernimmt die programmatische Authentifizierung und Autorisierung interner und externer Anwendungen durch das IAM für den Zugang zu IsyFact-Nachbaranwendungen.
+Er bietet verschiedene Methoden für die Authentifizierung, sowohl über Registration-IDs als auch über direkte ClientRegistration-Objekte.
 
 Batches und Tasks sind als Confidential Client eingestuft und verwahren ihre Authentifizierungsdaten (entweder Client-ID u. Client-Secret oder Nutzername u. Passwort) in ihrer Konfiguration (mit einer `oauth2ClientRegistrationId` als Schlüssel).
 Die Methode `authentifiziere(String oauth2ClientRegistrationId)` im Authentifizierungsmanager liest diese Authentifizierungsdaten aus der betrieblichen Konfiguration und führt damit eine OAuth2.0-konforme Authentifizierung und Autorisierung der Anwendung gegenüber dem IAM-System durch.
@@ -375,8 +376,7 @@ Um diesen Prozess effektiv umzusetzen, empfiehlt sich die Verwendung der Methode
 Mit dessen Hilfe ist es möglich, den Client zu authentifizieren und sicherzustellen, dass nur autorisierte Clients Zugriff auf die Ressourcen erhalten.
 Durch die Nutzung dieses speziellen Authentifizierungsmechanismus wird eine robuste und zuverlässige Sicherheitsschicht implementiert, um unautorisierten Zugriff und potenzielle Sicherheitslücken zu verhindern.
 
-Weitere Informationen und detaillierte Anleitungen zur Verwendung der `authentifiziere`-Methode können in der entsprechenden Dokumentation des Authentifizierungsmanagers
-oder in den xref:nutzungsvorgaben.adoc#authentifizierungsmanager-interface[Nutzungsvorgaben] gefunden werden.
+Weitere Informationen und detaillierte Anleitungen zur Verwendung der `authentifiziere`-Methode können in der entsprechenden Dokumentation des Authentifizierungsmanagers oder in den xref:nutzungsvorgaben.adoc#authentifizierungsmanager-interface[Nutzungsvorgaben] gefunden werden.
 
 
 In einer zukünftigen Version von `IsyFact` wird in einer neu eingeführten aber separierten Komponente der Anwendungslandschaft (_Authentication-Gateway_) eine neue Authentifizierungslogik (xref:aufruf-service-gateway-mit-authentication-gateway[]) für die Authentifizierung von Anwendungen eingeführt.
@@ -656,6 +656,7 @@ Die Implementierung des IAM-Service muss für die 2-Faktor-Authentifizierung die
 Wenn die IAM-Service-Implementierung dieses Feature unterstützt, dann wird ein mit den Authentifizierungsdaten gemeinsam übergebenes Behördenkennzeichen gegen das Behördenkennzeichen aus dem zu authentifizierenden Nutzerprofil geprüft.
 
 Wie in <<aussensicht-der-komponente-security>> beschrieben, wird bei der Authentifizierungsmethode `authentifiziere()` das Behördenkennzeichen, sowie Username und Password in den `AdditionalCredentials` als optionaler Parameter an den `Authentifizierungsmanager` übergeben, der es mit den anderen Authentifizierungsdaten zusammen an den IAM-Service weiterleitet.
+
 
 [[multiple-uris]]
 === Aufruf des IAM-Services über unterschiedliche URIs

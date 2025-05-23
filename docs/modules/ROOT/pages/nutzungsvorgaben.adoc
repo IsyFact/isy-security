@@ -438,10 +438,10 @@ public class OAuth2ServerSecurityConfig {
 }
 ----
 
-[INFO]
+[NOTE]
 ====
-Bei der Verwendung von `isy-sicherheit` wurde der CSRF-Filter von Spring Security in vielen Fällen standarmäßig deaktiviert.
-Damit die von der Anwendung bereitgestellten Schnittstellen weiterhin ohne Probleme erreicht werden können, muss dieser mglw. durch entsprechende Konfiguration der `SecurityFilterChain` wieder deaktiviert werden: `http.csrf().disable()`.
+Bei der Verwendung von `isy-sicherheit` wurde der CSRF-Filter von Spring Security in vielen Fällen standardmäßig deaktiviert.
+Damit die von der Anwendung bereitgestellten Schnittstellen weiterhin ohne Probleme erreicht werden können, muss dieser möglicherweise durch entsprechende Konfiguration der `SecurityFilterChain` wieder deaktiviert werden: `http.csrf().disable()`.
 Dies soll nur falls absolut notwendig durchgeführt werden, um die Angriffsfläche der Anwendung nicht zu vergrößern.
 ====
 
@@ -692,7 +692,7 @@ Method Level Security ist für die Nutzung in der Service Schicht.
 Die Verwendung an `@Controller` Klassen/Methoden kann zu Fehlern führen und wird nicht empfohlen.
 Für Webcontroller ohne Service-Schicht kann https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html[Request Level Autorisierung] genutzt werden.
 
-Das mehrfache setzen der `@EnableMethodSecurity`-Annotation sollte vermieden werden.
+Das mehrfache Setzen der `@EnableMethodSecurity`-Annotation sollte vermieden werden.
 Mit abweichender Konfiguration kann dies zu unerwartetem Verhalten und Fehlern führen.
 ====
 
