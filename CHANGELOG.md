@@ -1,5 +1,7 @@
 # 4.0.0
-
+- `IFS-3821`: Thematik zur internen und externen URL bei der Authentifizierung beschrieben (Multiple Issuer-URIs)
+- `IFS-3834`: Kapitel Authentifizierung & Autorisierung um Multi-Tenancy erweitert.
+- `IFS-3051`: Kapitel zu Multi-Realms um konkrete Vorgabe erweitert.
 - `ISY-305`: Implementierung von IsySecurityTokenUtil zum Auslesen von Attributen aus dem Bearer Token
 - `ISY-980`: Anpassung der Dokumentation aufgrund von Security-Umstellungen
 
