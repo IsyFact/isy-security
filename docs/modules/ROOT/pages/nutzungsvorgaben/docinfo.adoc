@@ -4,4 +4,5 @@
 |====
 |Name |Art |Version
 |isy-security |Bibliothek |v{page-component-version}
+|isy-security-test |Bibliothek |v{page-component-version}
 |====

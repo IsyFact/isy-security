@@ -5,14 +5,11 @@
 [[software-architektur-security-baustein]]
 == Software-Architektur des Security-Bausteins
 
-
 Die Software-Architektur des Security-Bausteins bildet das Fundament für die Sicherheit von Anwendungen in modernen Softwarelösungen.
 Die korrekte Gestaltung und Implementierung dieser Architektur ist entscheidend, um Schutzmechanismen gegen potenzielle Sicherheitsbedrohungen zu etablieren.
 In diesem Kapitel wird detailliert auf die verschiedenen Aspekte der Software-Architektur des Security-Bausteins eingegangen und bewährte Methoden sowie bewährte Praktiken vorgestellt, um eine robuste und zuverlässige Sicherheitsinfrastruktur zu schaffen.
 
-
-
-Im Folgenden werden die xref:../konzept/inhalt.adoc#aussensicht-der-komponente-security[Interfaces des Bausteins Security] genauer erläutert.
+Im Folgenden werden die xref:konzept/inhalt.adoc#aussensicht-der-komponente-security[Interfaces des Bausteins Security] genauer erläutert.
 
 [[security-interface]]
 === Security
@@ -319,7 +316,7 @@ isy.security.oauth2.client.default-certificate-ou=TESTOU
 
 Mit dem `OAuth 2.0`-Grant `client_credentials` steht eine vereinfachte Zugriffskontrolle für eine Client-Anwendung im Rahmen des _Client Credentials_ Flow zur Verfügung.
 
-Spring Security bietet umfassenden Support für `OAuth 2.0` und unterstützt die Authentifizierung interner Systeme auf Basis des `Client Credentials Flow`, wobei auf Spring interne Mechanismen zugegriffen wird.
+Spring Security bietet umfassenden Support für `OAuth 2.0` und unterstützt die Authentifizierung auf Basis des `Client Credentials Flow`, wobei auf Spring interne Mechanismen zugegriffen wird.
 
 Um clientseitig die automatische Konfiguration einer Anwendung zu ermöglichen, werden zunächst die oben aufgeführten Abhängigkeiten eingebunden und eine Client-Registration für den `Client Credentials Flow` angelegt.
 Um im Rahmen des `Client Credentials Flows` HTTP-Anfragen an einen Ressourcenserver stellen zu können, ist zusätzlich die Konfiguration des reaktiven `WebClient` erforderlich.
@@ -353,14 +350,15 @@ Die Methoden erlauben es technische Nutzer zur Laufzeit mit ihren Zugangsdaten �
 Mit diesem Mechanismus wird sichergestellt, dass nur autorisierte Clients Zugriff auf die Ressourcen erhalten.
 Durch die Nutzung dieses speziellen Authentifizierungsmechanismus wird eine robuste und zuverlässige Sicherheitsschicht implementiert, um unautorisierten Zugriff und potenzielle Sicherheitslücken zu verhindern.
 
-Weitere Informationen und detaillierte Anleitungen zur Verwendung können im Abschnitt zum xref:nutzungsvorgaben/inhalt.adoc#authentifizierungsmanager-interface[Authentifizierungsmanager] gefunden werden.
+Weitere Informationen und detaillierte Anleitungen zur Verwendung können im Abschnitt zum xref:isy-security:nutzungsvorgaben/inhalt.adoc#authentifizierungsmanager-interface[Authentifizierungsmanager] gefunden werden.
 
 [[absicherung_von_batches_tasks]]
 == Absicherung von Batches und Tasks
 
 Für detaillierte Informationen und Anleitung zur Absicherung von Batches und Tasks wird auf die Dokumentation unter
-* xref:isyfact-standards-doku:blaupausen:detailkonzept-komponente-batch/inhalt.adoc#authentifizierung-und-autorisierung[Authentifizierung und Autorisierung von Batches]
-* bzw. xref:4.0.x@isyfact-standards-doku:isy-task:nutzungsvorgaben.adoc#absicherung-von-tasks[Absicherung von Tasks]
+
+* xref:referenzarchitektur:software-technisch/batch/batchrahmen.adoc#authentifizierung-und-autorisierung[Authentifizierung und Autorisierung von Batches]
+* bzw. xref:isy-task:nutzungsvorgaben.adoc#absicherung-von-tasks[Absicherung von Tasks]
 
 verwiesen. Diese bieten praxisorientierte Richtlinien zur Gewährleistung der Sicherheit von Batches und Tasks.
 
