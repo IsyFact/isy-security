@@ -27,7 +27,7 @@ Im Abschnitt <<token>> wird der Aufbau und die Verwendung von Access-Tokens erkl
 
 Das Kapitel <<rollen-und-rechte>> beschreibt dann abschließend, wie Rollen und Rechte für eine neue Geschäftsanwendung spezifiziert werden.
 
-// tag::inhalt[]
+
 [[sicherheitsarchitektur-eines-it-systems]]
 == Sicherheitsarchitektur eines IT-Systems
 
@@ -376,7 +376,7 @@ Mit dessen Hilfe ist es möglich, den Client zu authentifizieren und sicherzuste
 Durch die Nutzung dieses speziellen Authentifizierungsmechanismus wird eine robuste und zuverlässige Sicherheitsschicht implementiert, um unautorisierten Zugriff und potenzielle Sicherheitslücken zu verhindern.
 
 Weitere Informationen und detaillierte Anleitungen zur Verwendung der `authentifiziere`-Methode können in der entsprechenden Dokumentation des Authentifizierungsmanagers
-oder in den xref:nutzungsvorgaben/inhalt.adoc#authentifizierungsmanager-interface[Nutzungsvorgaben] gefunden werden.
+oder in den xref:nutzungsvorgaben.adoc#authentifizierungsmanager-interface[Nutzungsvorgaben] gefunden werden.
 
 
 In einer zukünftigen Version von `IsyFact` wird in einer neu eingeführten aber separierten Komponente der Anwendungslandschaft (_Authentication-Gateway_) eine neue Authentifizierungslogik (xref:aufruf-service-gateway-mit-authentication-gateway[]) für die Authentifizierung von Anwendungen eingeführt.
@@ -682,11 +682,11 @@ Um nun in einer Geschäftsanwendung Access-Tokens erfolgreich zu validieren, die
 Dies geschieht über die Anwendungskonfiguration.
 Auf diese Weise können beliebig viele IAM-URIs konfiguriert werden.
 
-Weitere Details zur Konfiguration mehrerer URIs eines IAM wird in den xref:nutzungsvorgaben/inhalt.adoc#konfiguration-von-multi-iam-uris[Nutzungsvorgaben - Konfiguration von mehreren IAM-URIs] beschrieben.
+Weitere Details zur Konfiguration mehrerer URIs eines IAM wird in den xref:nutzungsvorgaben.adoc#konfiguration-von-multi-iam-uris[Nutzungsvorgaben - Konfiguration von mehreren IAM-URIs] beschrieben.
 
 *Konfigurationsdetails*
 
-Zur weiteren Vertiefung dieser Sonderkonstellation kann in der https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html#oauth2resourceserver-jwt-jwkseturi[_Spring_-Dokumentation] und für Details bei der Implementierung bzw. Konfiguration kann in den xref:nutzungsvorgaben/inhalt.adoc#spring-konfiguration[Nutzungsvorgaben] nachgeschlagen werden.
+Zur weiteren Vertiefung dieser Sonderkonstellation kann in der https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html#oauth2resourceserver-jwt-jwkseturi[_Spring_-Dokumentation] und für Details bei der Implementierung bzw. Konfiguration kann in den xref:nutzungsvorgaben.adoc#spring-konfiguration[Nutzungsvorgaben] nachgeschlagen werden.
 
 
 [[multi-tenancy]]
@@ -985,5 +985,3 @@ Ist der Schalter (und damit der Testmodus) aktiv, wird zusätzlich zur üblichen
 Somit ist sichergestellt, dass beim Ablösen von alten Geschäftsanwendungen auch die neue Geschäftsanwendung mit denselben Rollen abgesichert und (falls nötig) parallel betrieben werden kann.
 Genauso funktioniert auch das Freischalten einer neuen Geschäftsanwendung für einen zunächst kleinen Kreis von Anwendern.
 In beiden Fällen muss zur eigentlichen Inbetriebnahme, anstatt einer aufwändigen Migration, nur ein Schalter in der betrieblichen Konfiguration umgelegt werden.
-
-// end::inhalt[]

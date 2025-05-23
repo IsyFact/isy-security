@@ -1,6 +1,26 @@
-= Nutzungsvorgaben Security: Inhalt
+= Nutzungsvorgaben Security
 
-// tag::inhalt[]
+include::partial$library.adoc[]
+
+[[einleitung]]
+== Einleitung
+
+Dieses Dokument beschreibt, wie der Baustein Security und die von ihm bereitgestellte Bibliothek `isy-security` verwendet werden, um die Autorisierung innerhalb von IT-Systemen umzusetzen.
+Es richtet sich an Entwickler, die ein IT-System gemäß den Vorgaben der IsyFact mit der Fähigkeit zur Autorisierung ausstatten müssen und beschreibt, wie und in welchen Teilen einer Anwendung die Autorisierung umzusetzen ist.
+Der Baustein Security ist OAuth2.0 konform und greift hauptsächlich auf die Möglichkeiten von Spring Security zurück.
+
+Die folgenden Kapitel leiten durch die Funktionen des Bausteins Security:
+
+* <<software-architektur-security-baustein>>,
+* <<aufrufen-von-nachbarsystemen>>,
+* <<auth_sgw>>,
+* <<absicherung_von_batches_tasks>>,
+* <<absicherung_von_service_schnittstellen>>.
+
+Schließlich beschreibt das letzte Kapitel <<testunterstuetzung>>, welche Hilfen der Baustein Security zum Erstellen von (automatisierten) Tests bereitstellt.
+
+Die konzeptionellen Aspekte der Authentifizierung und Autorisierung werden im xref:konzept.adoc[] beschrieben.
+
 
 [[software-architektur-security-baustein]]
 == Software-Architektur des Security-Bausteins
@@ -350,7 +370,7 @@ Die Methoden erlauben es technische Nutzer zur Laufzeit mit ihren Zugangsdaten �
 Mit diesem Mechanismus wird sichergestellt, dass nur autorisierte Clients Zugriff auf die Ressourcen erhalten.
 Durch die Nutzung dieses speziellen Authentifizierungsmechanismus wird eine robuste und zuverlässige Sicherheitsschicht implementiert, um unautorisierten Zugriff und potenzielle Sicherheitslücken zu verhindern.
 
-Weitere Informationen und detaillierte Anleitungen zur Verwendung können im Abschnitt zum xref:nutzungsvorgaben/master.adoc#authentifizierungsmanager-interface[Authentifizierungsmanager] gefunden werden.
+Weitere Informationen und detaillierte Anleitungen zur Verwendung können im Abschnitt zum <<authentifizierungsmanager-interface>> gefunden werden.
 
 [[absicherung_von_batches_tasks]]
 == Absicherung von Batches und Tasks
@@ -358,7 +378,7 @@ Weitere Informationen und detaillierte Anleitungen zur Verwendung können im Abs
 Für detaillierte Informationen und Anleitung zur Absicherung von Batches und Tasks wird auf die Dokumentation unter
 
 * xref:isyfact-standards-doku:referenzarchitektur:software-technisch/batch/batchrahmen.adoc#authentifizierung-und-autorisierung[Authentifizierung und Autorisierung von Batches]
-* bzw. xref:task::nutzungsvorgaben.adoc#absicherung-von-tasks[Absicherung von Tasks]
+* bzw. xref:task:ROOT:nutzungsvorgaben.adoc#absicherung-von-tasks[Absicherung von Tasks]
 
 verwiesen. Diese bieten praxisorientierte Richtlinien zur Gewährleistung der Sicherheit von Batches und Tasks.
 
@@ -554,7 +574,7 @@ Der Pfad der Datei kann wie folgt angepasst werden:
 |isy.security.role-privileges-mapping-file | Resource | classpath:/resources/sicherheit/rollenrechte.xml | Pfad zu der XML-Datei, welche die Rollen-/Berechtigungszuordnungen enthält.
 |===
 
-Der Baustein liefert ein xref:nutzungsvorgaben/master.adoc#anhang-rollen-rechte-schema[XML-Schema für den Aufbau der Konfigurationsdatei] mit.
+Der Baustein liefert ein xref:nutzungsvorgaben/anhang.adoc#anhang-rollen-rechte-schema[XML-Schema für den Aufbau der Konfigurationsdatei] mit.
 
 NOTE: Die Bereitstellung einer Datei mit den erforderlichen Rollen und Rechten erfolgt optional.
 Im Falle einer nicht vorhandenen Datei verbleibt die Liste der Rollen und Rechte leer, d. h. eine Absicherung der Anwendung findet nicht statt.
