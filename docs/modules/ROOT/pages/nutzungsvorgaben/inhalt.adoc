@@ -9,7 +9,7 @@ Die Software-Architektur des Security-Bausteins bildet das Fundament für die Si
 Die korrekte Gestaltung und Implementierung dieser Architektur ist entscheidend, um Schutzmechanismen gegen potenzielle Sicherheitsbedrohungen zu etablieren.
 In diesem Kapitel wird detailliert auf die verschiedenen Aspekte der Software-Architektur des Security-Bausteins eingegangen und bewährte Methoden sowie bewährte Praktiken vorgestellt, um eine robuste und zuverlässige Sicherheitsinfrastruktur zu schaffen.
 
-Im Folgenden werden die xref:konzept/inhalt.adoc#aussensicht-der-komponente-security[Interfaces des Bausteins Security] genauer erläutert.
+Im Folgenden werden die xref:konzept.adoc#aussensicht-der-komponente-security[Interfaces des Bausteins Security] genauer erläutert.
 
 [[security-interface]]
 === Security
