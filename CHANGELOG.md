@@ -4,7 +4,11 @@
 - `IFS-4591`: Hinzufügen von Authentifizierungsmethoden zur Authentifizierung von Clients und Systemen ohne Issuer-URI.
 
 # 4.0.0
-
+- `IFS-4713`: Dokumentation mit Stand aus `isyfact-standards` zusammengeführt und technische Schulden behoben.
+- `IFS-4714`: Zentrale Versionierung eingeführt.
+- `IFS-3821`: Thematik zur internen und externen URL bei der Authentifizierung beschrieben (Multiple Issuer-URIs)
+- `IFS-3834`: Kapitel Authentifizierung & Autorisierung um Multi-Tenancy erweitert.
+- `IFS-3051`: Kapitel zu Multi-Realms um konkrete Vorgabe erweitert.
 - `ISY-305`: Implementierung von IsySecurityTokenUtil zum Auslesen von Attributen aus dem Bearer Token
 - `ISY-980`: Anpassung der Dokumentation aufgrund von Security-Umstellungen
 - `IFS-2248`: Bereitstellen von Funktionalität zur Token-Gültigkeitsüberprüfung und erneuten Authentifizierung

@@ -1,12 +1,9 @@
-= Nutzungsvorgaben Security: Anhänge
+= Anhang
 
-// tag::inhalt[]
-== Anhang
-
-[[konfigurationsdateien]]
+:!sectnums:
 
 [[anhang-rollen-rechte-schema]]
-=== Anhang A: Rollen-Rechte-Schema
+== Anhang A: Rollen-Rechte-Schema
 
 Im Folgenden ist der Inhalt der Datei `RollenRechteSchema.xsd` wiedergegeben, die das Format der Konfigurationsdatei für Rollen und Rechte (`rollenrechte.xml`) festlegt.
 
@@ -42,5 +39,3 @@ Im Folgenden ist der Inhalt der Datei `RollenRechteSchema.xsd` wiedergegeben, di
   </complexType>
 </schema>
 ----
-
-// end::inhalt[]
