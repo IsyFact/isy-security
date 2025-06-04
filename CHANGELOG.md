@@ -2,7 +2,8 @@
 
 - `IFS-4577`: Portierung fehlender Tickets aus isyfact-standards
 - `IFS-4591`: Hinzufügen von Authentifizierungsmethoden zur Authentifizierung von Clients und Systemen ohne Issuer-URI.
-
+- `IFS-4655`: Update von Maven Checkstyle Plugin auf Version 3.6.0
+- 
 # 4.0.0
 - `IFS-4713`: Dokumentation mit Stand aus `isyfact-standards` zusammengeführt und technische Schulden behoben.
 - `IFS-4714`: Zentrale Versionierung eingeführt.
