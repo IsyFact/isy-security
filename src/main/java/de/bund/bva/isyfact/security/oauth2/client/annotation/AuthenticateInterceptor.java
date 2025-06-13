@@ -1,7 +1,8 @@
 package de.bund.bva.isyfact.security.oauth2.client.annotation;
 
-import de.bund.bva.isyfact.security.oauth2.client.Authentifizierungsmanager;
-import de.bund.bva.isyfact.util.logging.MdcHelper;
+import java.lang.reflect.Method;
+import java.util.UUID;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -16,8 +17,8 @@ import org.springframework.security.authorization.method.AuthorizationIntercepto
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.Assert;
 
-import java.lang.reflect.Method;
-import java.util.UUID;
+import de.bund.bva.isyfact.security.oauth2.client.Authentifizierungsmanager;
+import de.bund.bva.isyfact.util.logging.MdcHelper;
 
 /**
  * MethodInterceptor that authenticates an OAuth 2.0 client and sets the authenticated principal in the Security Context.
