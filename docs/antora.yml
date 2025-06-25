@@ -1,7 +1,6 @@
-name: isy-security-doc
-title: isy-security
-version: '4.0.0 SNAPSHOT'
-display_version: '4.0.0 SNAPSHOT'
-start_page: ROOT:konzept/master.adoc
+name: security
+title: Baustein Security
+prerelease: '(DEV)'
+start_page: ROOT:konzept.adoc
 nav:
 - modules/ROOT/nav.adoc

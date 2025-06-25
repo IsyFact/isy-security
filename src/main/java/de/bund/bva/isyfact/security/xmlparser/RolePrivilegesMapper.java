@@ -1,10 +1,5 @@
 package de.bund.bva.isyfact.security.xmlparser;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -14,6 +9,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 public class RolePrivilegesMapper {
 

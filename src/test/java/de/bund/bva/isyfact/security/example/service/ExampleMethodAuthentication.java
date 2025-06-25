@@ -1,10 +1,11 @@
 package de.bund.bva.isyfact.security.example.service;
 
-import de.bund.bva.isyfact.security.oauth2.client.annotation.Authenticate;
-import de.bund.bva.isyfact.util.logging.MdcHelper;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import de.bund.bva.isyfact.security.oauth2.client.annotation.Authenticate;
+import de.bund.bva.isyfact.util.logging.MdcHelper;
 
 public class ExampleMethodAuthentication {
 
