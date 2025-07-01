@@ -1,6 +1,11 @@
 package de.bund.bva.isyfact.security.authentication;
 
-import de.bund.bva.isyfact.security.xmlparser.RolePrivilegesMapper;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
@@ -10,11 +15,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import de.bund.bva.isyfact.security.xmlparser.RolePrivilegesMapper;
 
 /**
  * Based on {@link org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter} but with additional
