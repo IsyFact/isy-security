@@ -1,5 +1,5 @@
 # 5.0.0
-
+### Features
 - `IFS-4577`: Portierung fehlender Tickets aus isyfact-standards
 - `IFS-4591`: Hinzufügen von Authentifizierungsmethoden zur Authentifizierung von Clients und Systemen ohne Issuer-URI.
 - `IFS-4655`: Update von Maven Checkstyle Plugin auf Version 3.6.0
@@ -19,7 +19,6 @@
 - `IFS-4248`: Hinzufügen einer Klasse `ClaimsOnlyOAuth2AuthenticationToken`, welche innerhalb einer Anwendung verwendet werden kann, um Metadaten (bspw. der Name eines laufenden Batches) über den SecurityContext auszutauschen
 
 # 3.0.0
-
 - `IFS-2561`: Die Konfiguration via `rollenrechte.xml` erfolgt optional. 
     - Initialisierung mit Standardwerten
 - `IFS-1852`: Bereitstellung einer Implementierung zur Authentifizierung eines Clients mit Client Credentials

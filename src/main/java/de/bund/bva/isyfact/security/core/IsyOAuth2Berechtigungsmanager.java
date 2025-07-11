@@ -1,6 +1,11 @@
 package de.bund.bva.isyfact.security.core;
 
-import de.bund.bva.isyfact.security.oauth2.util.IsySecurityTokenUtil;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,11 +16,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.server.resource.authentication.AbstractOAuth2TokenAuthenticationToken;
 import org.springframework.util.Assert;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import de.bund.bva.isyfact.security.oauth2.util.IsySecurityTokenUtil;
 
 /**
  * Default implementation of the {@link Berechtigungsmanager} that should suffice for most use cases.
