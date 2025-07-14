@@ -11,6 +11,7 @@
     <name>IsyFact-Security</name>
     <description>Komponente für die Autorisierung von Benutzern in IsyFact-Anwendungen.</description>
     <url>http://isyfact.de</url>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -53,8 +54,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <spring.boot.version>3.4.5</spring.boot.version>
-
-        <ehcache.version>3.10.8</ehcache.version>
         <logback.json.version>0.1.5</logback.json.version>
         <logback.jackson.version>0.1.5</logback.jackson.version>
         <logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
@@ -74,6 +73,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
