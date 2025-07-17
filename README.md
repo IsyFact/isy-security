@@ -17,7 +17,7 @@ Wir freuen uns über Beiträge zur Weiterentwicklung von isy-security.
 
 ### Lizenz
 
-Dieses Projekt ist unter der Apache-2-Lizenz lizenziert. Weitere Informationen findest du in der [Lizenzdatei](license/LICENSE).
+Die Software des Projekts ist unter der Apache License, Version 2.0 (Apache-2.0) lizenziert. Die Dokumentation des Projekts ist unter der Namensnennung 4.0 International (CC-BY-4.0) lizenziert.
 
 ### Kontakt
 
