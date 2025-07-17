@@ -1,9 +1,7 @@
 package de.bund.bva.isyfact.security.oauth2.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.Duration;
@@ -27,11 +25,12 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import de.bund.bva.isyfact.security.AbstractOidcProviderTest;
+import de.bund.bva.isyfact.security.config.AdditionalCredentials;
 import de.bund.bva.isyfact.security.autoconfigure.IsyOAuth2ClientAutoConfiguration;
 import de.bund.bva.isyfact.security.autoconfigure.IsySecurityAutoConfigurationTest;
-import de.bund.bva.isyfact.security.config.AdditionalCredentials;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsAuthorizedClientAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsClientRegistrationAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.PasswordClientRegistrationAuthenticationProvider;
@@ -47,6 +46,10 @@ import de.bund.bva.isyfact.security.oauth2.client.authentication.token.PasswordC
  */
 @ActiveProfiles("test-clients")
 @SpringBootTest
+@TestPropertySource(properties = {
+        "isy.security.cache.ttl=300",
+        "isy.security.cache.maxelements=100"
+})
 public class AuthentifizierungsmanagerTest extends AbstractOidcProviderTest {
 
     @MockBean
@@ -72,12 +75,13 @@ public class AuthentifizierungsmanagerTest extends AbstractOidcProviderTest {
         SecurityContextHolder.getContext().setAuthentication(null);
 
         mockJwt = mock(JwtAuthenticationToken.class);
+        JwtAuthenticationToken secondMockJwt = mock(JwtAuthenticationToken.class);
 
         when(clientCredentialsAuthorizedClientAuthenticationProvider.supports(any())).thenCallRealMethod();
         when(clientCredentialsAuthorizedClientAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt);
 
         when(passwordClientRegistrationAuthenticationProvider.supports(any())).thenCallRealMethod();
-        when(passwordClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt);
+        when(passwordClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt, secondMockJwt);
 
         when(clientCredentialsClientRegistrationAuthenticationProvider.supports(any())).thenCallRealMethod();
         when(clientCredentialsClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt);
@@ -463,4 +467,101 @@ public class AuthentifizierungsmanagerTest extends AbstractOidcProviderTest {
         assertThat(exception).hasMessageContainingAll("unsupported-grant-type", "not supported");
     }
 
+    @Test
+    public void testCacheHitOnSecondAuthentication() {
+
+        // override value from @BeforeEach otherwise the authentication.isAuthenticated returns always false
+        when(mockJwt.isAuthenticated()).thenReturn(true);
+
+        ClientRegistration reg = ClientRegistration.withRegistrationId("testid")
+            .issuerUri(getIssuer())
+            .clientId("testid")
+            .clientSecret("testsecret")
+            .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+            .tokenUri("http://localhost/token")
+            .build();
+        AdditionalCredentials creds = AdditionalCredentials.createWithUsernamePassword("testuser", "testpw");
+
+        authentifizierungsmanager.authentifiziere(reg, creds);
+        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        SecurityContextHolder.clearContext();
+
+        authentifizierungsmanager.authentifiziere(reg, creds);
+        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
+
+        // clear context and cache so no other tests are affected
+        authentifizierungsmanager.clearCache();
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    public void testCacheWithSameUsernameButDifferentPassword() {
+        ClientRegistration reg1 = ClientRegistration.withRegistrationId("testid1")
+            .issuerUri(getIssuer())
+            .clientId("testid1")
+            .clientSecret("testsecret")
+            .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+            .tokenUri("http://localhost/token")
+            .build();
+        AdditionalCredentials creds1 = AdditionalCredentials.createWithUsernamePassword("testuser", "testpw");
+
+        // First authentication attempt with credentials from testid1
+        // Provider is called
+        authentifizierungsmanager.authentifiziere(reg1, creds1);
+        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        Authentication firstAuthentication = SecurityContextHolder.getContext().getAuthentication();
+        SecurityContextHolder.clearContext();
+
+        AdditionalCredentials creds2 = AdditionalCredentials.createWithUsernamePassword("testuser", "otherpw");
+
+        // Second authentication attempt with credentials from testid1, but with different user password
+        // provider is called once again because the first stored cashedKey is different
+        authentifizierungsmanager.authentifiziere(reg1, creds2);
+        verify(passwordClientRegistrationAuthenticationProvider, times(2)).authenticate(any());
+        Authentication secondAuthentication = SecurityContextHolder.getContext().getAuthentication();
+        assertNotNull(secondAuthentication);
+        assertNotEquals(firstAuthentication, secondAuthentication);
+
+        // clear context and cache so no other tests are affected
+        authentifizierungsmanager.clearCache();
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    public void testNoCachingForClientCredentialsRegistrationId() {
+        authentifizierungsmanager.authentifiziere("cc-client");
+        verify(clientCredentialsAuthorizedClientAuthenticationProvider, times(1)).authenticate(any());
+
+        SecurityContextHolder.clearContext();
+        authentifizierungsmanager.authentifiziere("cc-client");
+        verify(clientCredentialsAuthorizedClientAuthenticationProvider, times(2)).authenticate(any());
+
+        authentifizierungsmanager.clearCache();
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    public void testCacheClearedAfterClearCache() {
+        ClientRegistration reg = ClientRegistration.withRegistrationId("testid")
+            .issuerUri(getIssuer())
+            .clientId("testid")
+            .clientSecret("testsecret")
+            .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+            .tokenUri("http://localhost/token")
+            .build();
+
+        authentifizierungsmanager.authentifiziere(reg);
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+
+        authentifizierungsmanager.clearCache();
+        SecurityContextHolder.clearContext();
+        authentifizierungsmanager.authentifiziere(reg);
+
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(2)).authenticate(any());
+
+        // clear context and cache so no other tests are affected
+        authentifizierungsmanager.clearCache();
+        SecurityContextHolder.clearContext();
+    }
 }

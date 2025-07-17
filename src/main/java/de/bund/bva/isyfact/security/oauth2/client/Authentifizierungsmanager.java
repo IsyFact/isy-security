@@ -128,4 +128,9 @@ public interface Authentifizierungsmanager {
      * @see AdditionalCredentials
      */
     void authentifiziere(ClientRegistration clientRegistration, AdditionalCredentials credentials) throws AuthenticationException;
+
+    /**
+     * Clears the cache from isy-security. Authentication data is deleted after the method is called.
+     */
+    void clearCache();
 }
