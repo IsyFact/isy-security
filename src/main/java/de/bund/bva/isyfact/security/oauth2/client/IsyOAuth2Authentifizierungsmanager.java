@@ -85,6 +85,11 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
      */
     private final ClientRegistrationRepository clientRegistrationRepository;
 
+    /**
+     * Minimal remaining token validity in seconds of a cached token.
+     */
+    private final int tokenExpirationTimeOffset;
+
     public IsyOAuth2Authentifizierungsmanager(ProviderManager providerManager,
                                               IsyOAuth2ClientConfigurationProperties isyOAuth2ClientProps,
                                               @Nullable ClientRegistrationRepository clientRegistrationRepository,
@@ -97,6 +102,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
         this.cacheManager = cacheSetupResult.cacheManager;
         this.authenticationCache = cacheSetupResult.cache;
         this.cacheEnabled = isySecurityConfigurationProps.getCache().getTtl() > 0;
+        this.tokenExpirationTimeOffset = isySecurityConfigurationProps.getCache().getTokenExpirationTimeOffset();
     }
 
     @Override
@@ -356,7 +362,12 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
 
         Authentication cachedAuthentication = authenticationCache.get(cacheKey);
         if (cachedAuthentication != null) {
-            return cachedAuthentication;
+            SecurityContextHolder.getContext().setAuthentication(cachedAuthentication);
+            if (IsySecurityTokenUtil.hasTokenExpired(Duration.ofSeconds(tokenExpirationTimeOffset))) {
+                authenticationCache.remove(cacheKey);
+            } else {
+                return cachedAuthentication;
+            }
         }
 
         Authentication authentication = performAuthentication(unauthenticatedToken);
