@@ -10,3 +10,4 @@
   * Hinzufügen von Maven Enforcer Plugin auf Version 3.6.0
   * Setzen der Maven Version auf 3.6.3
 - `IFS-4785`: Hinzufügen einer Property für die Restlebensdauer gecachter OAuth2-Token
+- `IFS-4810`: Ausbau der Validierung des "aud"-Claims erstellter Tokens
