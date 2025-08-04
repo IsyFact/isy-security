@@ -5,21 +5,14 @@ on:
       - develop
       - release/**
     paths:
-      - 'pom.xml'
-  workflow_dispatch:
-  schedule:
-    - cron: "5 0 * * *"
+      - pom.xml
 
 jobs:
   SnykScan:
-    uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_dependency_scan_template.yml@v1.6.0
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_dependency_scan_template.yml@v1.7.0
     with:
       jdk-version: 21
       snyk-reference: ${{ github.ref_name }}
       snyk-organization: ${{ vars.SNYK_ORG_ID }}
     secrets:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-#  ORT:
-#    uses: IsyFact/isy-github-actions-templates/.github/workflows/oss_review_toolkit_template.yml@v1.5.0
-#    with:
-#      ANTORA_TRIGGER_TOKEN: ${{ secrets.ANTORA_TRIGGER_TOKEN }}
