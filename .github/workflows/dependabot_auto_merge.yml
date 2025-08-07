@@ -1,4 +1,5 @@
 name: Dependabot Auto Merge
+
 on:
   pull_request:
     branches:
@@ -6,6 +7,6 @@ on:
 
 jobs:
   DependabotAutoMerge:
-    uses: IsyFact/isy-github-actions-templates/.github/workflows/dependabot_auto_merge_template.yml@v1.6.0
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/dependabot_auto_merge_template.yml@v1.7.0
     secrets:
       DEPENDABOT_TOKEN: ${{ secrets.DEPENDABOT_TOKEN }}
