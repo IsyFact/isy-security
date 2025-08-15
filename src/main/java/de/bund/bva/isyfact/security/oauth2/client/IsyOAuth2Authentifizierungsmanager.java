@@ -66,7 +66,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
      * Cache used to provide authentication data for repeated requests.
      * Can be configured via properties 'ttl' and 'maxelements'.
      */
-    private final Cache<Integer, Authentication> authenticationCache;
+    private final Cache<byte[], Authentication> authenticationCache;
 
     /** Returns whether the cache is enabled or not. */
     private final boolean cacheEnabled;
@@ -249,10 +249,10 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
             return new CacheSetupResult(null, null);
         }
 
-        CacheConfiguration<Integer, Authentication> cacheConfiguration =
+        CacheConfiguration<byte[], Authentication> cacheConfiguration =
             CacheConfigurationBuilder
                 .newCacheConfigurationBuilder(
-                    Integer.class,
+                    byte[].class,
                     Authentication.class,
                     ResourcePoolsBuilder.heap(properties.getCache().getMaxelements()))
                 .withExpiry(
@@ -265,7 +265,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
                 .withCache(CACHE_ALIAS, cacheConfiguration)
                 .build(true);
 
-        Cache<Integer, Authentication> cache = configuredCacheManager.getCache(CACHE_ALIAS, Integer.class, Authentication.class);
+        Cache<byte[], Authentication> cache = configuredCacheManager.getCache(CACHE_ALIAS, byte[].class, Authentication.class);
 
         return new CacheSetupResult(configuredCacheManager, cache);
     }
@@ -354,7 +354,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
         // ClientCredentialsRegistrationIdAuthenticationToken will return null-value for cacheKey
         // and so it will not be cached by the logic of Isy-Security
         // because it is cached by Spring's OAuth2AuthorizedClientManager
-        Integer cacheKey = isyAuthenticationToken.generateCacheKey();
+        byte[] cacheKey = isyAuthenticationToken.generateCacheKey();
 
         if (cacheKey == null) {
             return performAuthentication(unauthenticatedToken);
@@ -399,9 +399,9 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
         /**
          * The Cache.
          */
-        private final Cache<Integer, Authentication> cache;
+        private final Cache<byte[], Authentication> cache;
 
-        CacheSetupResult(CacheManager cacheManager, Cache<Integer, Authentication> cache) {
+        CacheSetupResult(CacheManager cacheManager, Cache<byte[], Authentication> cache) {
             this.cacheManager = cacheManager;
             this.cache = cache;
         }
@@ -410,7 +410,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
             return cacheManager;
         }
 
-        public Cache<Integer, Authentication> getCache() {
+        public Cache<byte[], Authentication> getCache() {
             return cache;
         }
     }

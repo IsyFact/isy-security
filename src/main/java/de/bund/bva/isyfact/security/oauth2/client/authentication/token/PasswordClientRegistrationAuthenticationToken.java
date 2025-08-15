@@ -1,5 +1,7 @@
 package de.bund.bva.isyfact.security.oauth2.client.authentication.token;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 import org.springframework.lang.Nullable;
@@ -47,7 +49,17 @@ public class PasswordClientRegistrationAuthenticationToken extends AbstractClien
      * @return the generated cache key as hash code or null
      */
     @Override
-    public Integer generateCacheKey() {
-        return Objects.hash(super.generateCacheKey(), getUsername(), getPassword());
+    public byte[] generateCacheKey() {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+
+            digest.update(super.generateCacheKey());
+            digest.update(getUsername().getBytes());
+            digest.update(getPassword().getBytes());
+
+            return digest.digest();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-512 nicht verfügbar.", e);
+        }
     }
 }
