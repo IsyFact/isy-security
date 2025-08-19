@@ -2,10 +2,8 @@ package de.bund.bva.isyfact.security.oauth2.client.authentication.token;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -18,15 +16,10 @@ public abstract class AbstractClientRegistrationAuthenticationToken extends Abst
     /** Client Registration of the OAuth 2.0 client. */
     private final ClientRegistration clientRegistration;
 
-    /** Salt to ensure safe hash code */
-    private final byte[] salt;
-
     protected AbstractClientRegistrationAuthenticationToken(String principal, ClientRegistration clientRegistration, @Nullable String bhknz) {
         super(principal, bhknz);
         this.clientRegistration = clientRegistration;
         setAuthenticated(false);
-        salt = new byte[16];
-        new SecureRandom().nextBytes(salt);
     }
 
     public ClientRegistration getClientRegistration() {
@@ -47,7 +40,7 @@ public abstract class AbstractClientRegistrationAuthenticationToken extends Abst
      * @return the generated cache key as hash code or null
      */
     @Override
-    public byte[] generateCacheKey() {
+    public byte[] generateCacheKey(byte[] salt) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-512");
             digest.update(salt);
