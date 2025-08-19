@@ -1,6 +1,8 @@
 package de.bund.bva.isyfact.security.oauth2.client;
 
+import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.Base64;
 
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
@@ -66,7 +68,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
      * Cache used to provide authentication data for repeated requests.
      * Can be configured via properties 'ttl' and 'maxelements'.
      */
-    private final Cache<byte[], Authentication> authenticationCache;
+    private final Cache<String, Authentication> authenticationCache;
 
     /** Returns whether the cache is enabled or not. */
     private final boolean cacheEnabled;
@@ -258,10 +260,10 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
             return new CacheSetupResult(null, null);
         }
 
-        CacheConfiguration<byte[], Authentication> cacheConfiguration =
+        CacheConfiguration<String, Authentication> cacheConfiguration =
             CacheConfigurationBuilder
                 .newCacheConfigurationBuilder(
-                    byte[].class,
+                    String.class,
                     Authentication.class,
                     ResourcePoolsBuilder.heap(properties.getCache().getMaxelements()))
                 .withExpiry(
@@ -274,7 +276,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
                 .withCache(CACHE_ALIAS, cacheConfiguration)
                 .build(true);
 
-        Cache<byte[], Authentication> cache = configuredCacheManager.getCache(CACHE_ALIAS, byte[].class, Authentication.class);
+        Cache<String, Authentication> cache = configuredCacheManager.getCache(CACHE_ALIAS, String.class, Authentication.class);
 
         return new CacheSetupResult(configuredCacheManager, cache);
     }
@@ -369,11 +371,12 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
             return performAuthentication(unauthenticatedToken);
         }
 
-        Authentication cachedAuthentication = authenticationCache.get(cacheKey);
+        String encodedCacheKey = Base64.getEncoder().encodeToString(isyAuthenticationToken.generateCacheKey(salt));
+        Authentication cachedAuthentication = authenticationCache.get(encodedCacheKey);
         if (cachedAuthentication != null) {
             SecurityContextHolder.getContext().setAuthentication(cachedAuthentication);
             if (IsySecurityTokenUtil.hasTokenExpired(Duration.ofSeconds(tokenExpirationTimeOffset))) {
-                authenticationCache.remove(cacheKey);
+                authenticationCache.remove(encodedCacheKey);
             } else {
                 return cachedAuthentication;
             }
@@ -381,7 +384,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
 
         Authentication authentication = performAuthentication(unauthenticatedToken);
         if (authentication != null && authentication.isAuthenticated()) {
-            authenticationCache.put(cacheKey, authentication);
+            authenticationCache.put(encodedCacheKey, authentication);
         }
 
         return authentication;
@@ -408,9 +411,9 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
         /**
          * The Cache.
          */
-        private final Cache<byte[], Authentication> cache;
+        private final Cache<String, Authentication> cache;
 
-        CacheSetupResult(CacheManager cacheManager, Cache<byte[], Authentication> cache) {
+        CacheSetupResult(CacheManager cacheManager, Cache<String, Authentication> cache) {
             this.cacheManager = cacheManager;
             this.cache = cache;
         }
@@ -419,7 +422,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
             return cacheManager;
         }
 
-        public Cache<byte[], Authentication> getCache() {
+        public Cache<String, Authentication> getCache() {
             return cache;
         }
     }
