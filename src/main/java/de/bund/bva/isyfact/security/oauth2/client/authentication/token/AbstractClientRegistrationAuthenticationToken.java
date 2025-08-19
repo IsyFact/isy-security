@@ -3,6 +3,8 @@ package de.bund.bva.isyfact.security.oauth2.client.authentication.token;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.lang.Nullable;
@@ -51,23 +53,27 @@ public abstract class AbstractClientRegistrationAuthenticationToken extends Abst
             digest.update(salt);
 
             ClientRegistration clientReg = getClientRegistration();
-            String principal = getPrincipal().toString();
-            String bhknz = getBhknz() != null ? getBhknz() : "";
-            String issuerUri = clientReg.getProviderDetails().getIssuerUri();
-            String clientId = clientReg.getClientId();
-            String clientSecret = clientReg.getClientSecret();
-            String authorizationGrantType = clientReg.getAuthorizationGrantType().toString();
 
-            digest.update(principal.getBytes());
-            digest.update(bhknz.getBytes());
-            digest.update(issuerUri.getBytes());
-            digest.update(clientId.getBytes());
-            digest.update(clientSecret.getBytes());
-            digest.update(authorizationGrantType.getBytes());
+            List<Object> objectsToHash = Arrays.asList(
+                getPrincipal(),
+                getBhknz(),
+                clientReg.getProviderDetails().getIssuerUri(),
+                clientReg.getClientId(),
+                clientReg.getClientSecret(),
+                clientReg.getAuthorizationGrantType()
+            );
+
+            for (Object obj : objectsToHash) {
+                digest.update(getBytesSafely(obj));
+            }
 
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-512 nicht verfügbar.", e);
         }
+    }
+
+    private byte[] getBytesSafely(Object obj) {
+        return obj != null ? obj.toString().getBytes() : new byte[0];
     }
 }
