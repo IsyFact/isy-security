@@ -51,5 +51,5 @@ public abstract class AbstractIsyAuthenticationToken extends AbstractAuthenticat
     }
 
     @Nullable
-    public abstract byte[] generateCacheKey(byte[] salt);
+    public abstract byte[] generateCacheKey(String hashAlgorithm, byte[] salt);
 }

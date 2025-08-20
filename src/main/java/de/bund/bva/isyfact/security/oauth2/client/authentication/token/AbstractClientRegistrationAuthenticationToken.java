@@ -40,9 +40,9 @@ public abstract class AbstractClientRegistrationAuthenticationToken extends Abst
      * @return the generated cache key as hash code or null
      */
     @Override
-    public byte[] generateCacheKey(byte[] salt) {
+    public byte[] generateCacheKey(String hashAlgorithm, byte[] salt) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            MessageDigest digest = MessageDigest.getInstance(hashAlgorithm);
             digest.update(salt);
 
             ClientRegistration clientReg = getClientRegistration();
@@ -62,7 +62,7 @@ public abstract class AbstractClientRegistrationAuthenticationToken extends Abst
 
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-512 nicht verfügbar.", e);
+            throw new RuntimeException(hashAlgorithm + " nicht verfügbar.", e);
         }
     }
 

@@ -92,12 +92,13 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
      */
     private final int tokenExpirationTimeOffset;
 
-
     /** Salt to increase security of token hash. */
     private final byte[] salt;
 
     /** The size of the salt byte array. */
-    private static final Integer SALT_BYTES = 16;
+    private static final Integer SALT_BYTES = 64;
+
+    private static final String HASH_ALGORITHM = "SHA-512";
 
     public IsyOAuth2Authentifizierungsmanager(ProviderManager providerManager,
                                               IsyOAuth2ClientConfigurationProperties isyOAuth2ClientProps,
@@ -365,13 +366,15 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
         // ClientCredentialsRegistrationIdAuthenticationToken will return null-value for cacheKey
         // and so it will not be cached by the logic of Isy-Security
         // because it is cached by Spring's OAuth2AuthorizedClientManager
-        byte[] cacheKey = isyAuthenticationToken.generateCacheKey(salt);
+        byte[] cacheKey = isyAuthenticationToken.generateCacheKey(HASH_ALGORITHM, salt);
 
         if (cacheKey == null) {
             return performAuthentication(unauthenticatedToken);
         }
 
-        String encodedCacheKey = Base64.getEncoder().encodeToString(isyAuthenticationToken.generateCacheKey(salt));
+        String encodedCacheKey = Base64.getEncoder().encodeToString(
+            isyAuthenticationToken.generateCacheKey(HASH_ALGORITHM, salt)
+        );
         Authentication cachedAuthentication = authenticationCache.get(encodedCacheKey);
         if (cachedAuthentication != null) {
             SecurityContextHolder.getContext().setAuthentication(cachedAuthentication);
