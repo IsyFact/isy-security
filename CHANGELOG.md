@@ -1,7 +1,9 @@
 # 5.0.0
 
 ### Breaking Change
-- `IFS-4812`: Verwendung sicherer Hashfunktion für Caching
+- `IFS-4812`: Verwendung sicherer Hashfunktion mit SHA-512 für Caching
+  * Rückgabe eines Byte-Arrays statt eines Integers in der Methode `generateCacheKey` der Klasse `AbstractClientRegistrationAuthenticationToken`
+  * Konfigurierbare Properties für Hashfunktion und Bytegröße des Salts
 
 ### Features
 - `IFS-4577`: Portierung fehlender Tickets aus isyfact-standards
