@@ -30,9 +30,11 @@ import de.bund.bva.isyfact.security.oauth2.client.authentication.PasswordClientR
  */
 @SpringBootTest
 @TestPropertySource(properties = {
-        "isy.security.cache.ttl=300",
-        "isy.security.cache.maxelements=2",
-        "isy.security.cache.token-expiration-time-offset=10"
+    "isy.security.cache.ttl=300",
+    "isy.security.cache.maxelements=2",
+    "isy.security.cache.token-expiration-time-offset=10",
+    "isy.security.cache.salt-bytes=64",
+    "isy.security.cache.hash-algorithm=SHA-512"
 })
 public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcProviderTest {
 
@@ -60,7 +62,6 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
 
         when(passwordClientRegistrationAuthenticationProvider.supports(any())).thenCallRealMethod();
         when(passwordClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt);
-
     }
 
     @Test
