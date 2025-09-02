@@ -4,7 +4,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
