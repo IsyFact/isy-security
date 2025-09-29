@@ -14,6 +14,7 @@
 - `IFS-4810`: Ausbau der Validierung des "aud"-Claims erstellter Tokens
 
 ### DEPENDENCY UPGRADES
+- Update IsyFact/isy-github-actions-templates von Version 1.7.0 auf 1.8.0
 - `IFS-4655`: Update von Maven Checkstyle Plugin auf Version 3.6.0
 - `IFS-4580`: Spring Boot Update auf Version 3.4.5
 - `IFS-4531`: Update von Flatten Maven Plugin auf Version 1.7.1
