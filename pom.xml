@@ -46,6 +46,7 @@
         <maven.jacoco.version>0.8.12</maven.jacoco.version>
         <maven.javadoc.plugin.version>3.3.2</maven.javadoc.plugin.version>
         <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
+        <tidy-maven-plugin.version>1.4.0</tidy-maven-plugin.version>
 
         <isy-checkstyle-config.version>0.2.0</isy-checkstyle-config.version>
 
@@ -411,29 +412,33 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>tidy-maven-plugin</artifactId>
+                    <version>${tidy-maven-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>tidy-before-check</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>pom</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>check-pom-style</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>tidy-maven-plugin</artifactId>
-                <version>1.4.0</version>
-                <executions>
-                    <execution>
-                        <id>tidy-before-check</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>pom</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>check-pom-style</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
