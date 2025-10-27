@@ -21,7 +21,7 @@ public class IsyAccessTokenDecoderFactory implements JwtDecoderFactory<ClientReg
 
     @Override
     public JwtDecoder createDecoder(ClientRegistration clientRegistration) {
-        return this.jwtDecoders.computeIfAbsent(clientRegistration.getRegistrationId(), (key) -> {
+        return this.jwtDecoders.computeIfAbsent(clientRegistration.getRegistrationId(), (_) -> {
             NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder
                     .withJwkSetUri(clientRegistration.getProviderDetails().getJwkSetUri())
                     .build();

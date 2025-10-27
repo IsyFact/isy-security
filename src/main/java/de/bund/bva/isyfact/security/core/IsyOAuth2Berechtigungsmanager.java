@@ -44,7 +44,7 @@ public class IsyOAuth2Berechtigungsmanager implements Berechtigungsmanager {
         Object tokenRoles = null;
         try {
             tokenRoles = IsySecurityTokenUtil.getTokenAttribute(rolesClaimName);
-        } catch (OAuth2AuthenticationException ex) {
+        } catch (OAuth2AuthenticationException _) {
             LOG.debug("Current authenticated principal is not an OAuth token. Returned roles will be empty");
         }
         if (tokenRoles instanceof Collection) {
@@ -69,15 +69,15 @@ public class IsyOAuth2Berechtigungsmanager implements Berechtigungsmanager {
     public void pruefeRecht(String recht) throws AccessDeniedException {
         Assert.notNull(recht, "recht cannot be null");
         if (!hatRecht(recht)) {
-            throw new AccessDeniedException(String.format("Berechtigung %s nicht vorhanden!", recht));
+            throw new AccessDeniedException("Berechtigung %s nicht vorhanden!".formatted(recht));
         }
     }
 
     @Deprecated
     public Object getTokenAttribute(String key) {
         Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-        if (currentAuthentication instanceof AbstractOAuth2TokenAuthenticationToken) {
-            return ((AbstractOAuth2TokenAuthenticationToken<?>) currentAuthentication).getTokenAttributes().get(key);
+        if (currentAuthentication instanceof AbstractOAuth2TokenAuthenticationToken<?> token) {
+            return token.getTokenAttributes().get(key);
         } else {
             return null;
         }

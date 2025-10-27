@@ -81,10 +81,10 @@ public class RsaKeyGenerator {
      * @param args
      *         command line arguments (ignored)
      */
-    public static void main(String[] args) {
+    void main() {
         final RsaKeyGenerator gen = new RsaKeyGenerator();
-        System.out.println("Public key:" + encodePublicKey(gen.getPublicKey()));
-        System.out.println("Private key:" + encodePrivateKey(gen.getPrivateKey()));
+        IO.println("Public key:" + encodePublicKey(gen.getPublicKey()));
+        IO.println("Private key:" + encodePrivateKey(gen.getPrivateKey()));
     }
 
 }

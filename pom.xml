@@ -34,16 +34,16 @@
 
     <properties>
         <revision>0.0.0-SNAPSHOT</revision>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <maven.compiler.version>3.11.0</maven.compiler.version>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.version>3.14.1</maven.compiler.version>
         <maven-enforcer-plugin.version>3.6.0</maven-enforcer-plugin.version>
         <enforced.jdk.version>[17,22)</enforced.jdk.version>
         <enforced.maven.version>[3.6.3,4)</enforced.maven.version>
         <maven.surefire.version>3.1.2</maven.surefire.version>
         <maven.checkstyle.version>3.6.0</maven.checkstyle.version>
         <flatten-maven-plugin.version>1.7.1</flatten-maven-plugin.version>
-        <maven.jacoco.version>0.8.12</maven.jacoco.version>
+        <maven.jacoco.version>0.8.14</maven.jacoco.version>
         <maven.javadoc.plugin.version>3.3.2</maven.javadoc.plugin.version>
         <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
         <tidy-maven-plugin.version>1.4.0</tidy-maven-plugin.version>
@@ -54,13 +54,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <spring.boot.version>3.4.5</spring.boot.version>
+        <spring.boot.version>3.5.7</spring.boot.version>
         <logback.json.version>0.1.5</logback.json.version>
         <logback.jackson.version>0.1.5</logback.jackson.version>
         <logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
 
         <dbunit.version>2.7.2</dbunit.version>
-        <wiremock.version>3.4.2</wiremock.version>
+        <wiremock.version>3.13.1</wiremock.version>
         <central-publishing-maven-plugin.version>0.8.0</central-publishing-maven-plugin.version>
     </properties>
 
@@ -314,8 +314,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.compiler.version}</version>
                     <configuration>
-                        <source>${maven.compiler.source}</source>
-                        <target>${maven.compiler.target}</target>
+                        <release>25</release>
                     </configuration>
                 </plugin>
                 <plugin>
