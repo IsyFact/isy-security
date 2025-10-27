@@ -22,3 +22,4 @@ Die Software des Projekts ist unter der Apache License, Version 2.0 (Apache-2.0)
 ### Kontakt
 
 __Vielen Dank für die Verwendung von isy-security!__
+Bei Fragen oder Anmerkungen können Sie uns unter folgender E-Mail-Adresse kontaktieren: [isyfact@bva.bund.de](mailto:isyfact@bva.bund.de)
