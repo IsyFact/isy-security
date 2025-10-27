@@ -38,6 +38,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.version>3.11.0</maven.compiler.version>
         <maven-enforcer-plugin.version>3.6.0</maven-enforcer-plugin.version>
+        <enforced.jdk.version>[17,22)</enforced.jdk.version>
         <enforced.maven.version>[3.6.3,4)</enforced.maven.version>
         <maven.surefire.version>3.1.2</maven.surefire.version>
         <maven.checkstyle.version>3.6.0</maven.checkstyle.version>
@@ -387,10 +388,25 @@
                             </goals>
                             <configuration>
                                 <rules>
+                                    <requireJavaVersion>
+                                        <version>${enforced.jdk.version}</version>
+                                    </requireJavaVersion>
                                     <requireMavenVersion>
                                         <version>${enforced.maven.version}</version>
                                     </requireMavenVersion>
                                 </rules>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>enforce-dependency-convergence</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <dependencyConvergence/>
+                                </rules>
+                                <fail>true</fail>
                             </configuration>
                         </execution>
                     </executions>
