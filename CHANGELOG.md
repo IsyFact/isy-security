@@ -12,6 +12,7 @@
 - `IFS-4752`: Wiederherstellen der initialen Authentication nach Authentifizierung mit @Authenticate-Annotation
 - `IFS-4785`: Hinzufügen einer Property für die Restlebensdauer gecachter OAuth2-Token
 - `IFS-4810`: Ausbau der Validierung des "aud"-Claims erstellter Tokens
+- `IFS-4583`: Wiedereinführung der Quality-Gates
 
 ### DEPENDENCY UPGRADES
 - `IFS-4655`: Update von Maven Checkstyle Plugin auf Version 3.6.0
