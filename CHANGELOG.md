@@ -1,10 +1,5 @@
 # 5.0.0
 
-### BREAKING CHANGE
-- `IFS-4812`: Verwendung sicherer Hashfunktion mit SHA-512 für Caching
-  * Rückgabe eines Byte-Arrays statt eines Integers in der Methode `generateCacheKey` der Klasse `AbstractClientRegistrationAuthenticationToken`
-  * Konfigurierbare Properties für Hashfunktion und Bytegröße des Salts
-
 ### FEATURES
 - `IFS-4577`: Portierung fehlender Tickets aus isyfact-standards
 - `IFS-4591`: Hinzufügen von Authentifizierungsmethoden zur Authentifizierung von Clients und Systemen ohne Issuer-URI.
@@ -13,6 +8,12 @@
 - `IFS-4785`: Hinzufügen einer Property für die Restlebensdauer gecachter OAuth2-Token
 - `IFS-4810`: Ausbau der Validierung des "aud"-Claims erstellter Tokens
 - `IFS-4583`: Wiedereinführung der Quality-Gates
+
+### BREAKING CHANGE
+- `IFS-4812`: Verwendung sicherer Hashfunktion mit SHA-512 für Caching
+    * Rückgabe eines Byte-Arrays statt eines Integers in der Methode `generateCacheKey` der Klasse `AbstractClientRegistrationAuthenticationToken`
+    * Konfigurierbare Properties für Hashfunktion und Bytegröße des Salts
+- `IFS-4922`: Aktualisierung von Java 17 auf 25
 
 ### DEPENDENCY UPGRADES
 - `IFS-4655`: Update von Maven Checkstyle Plugin auf Version 3.6.0
