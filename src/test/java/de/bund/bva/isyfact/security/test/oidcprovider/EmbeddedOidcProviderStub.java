@@ -113,7 +113,7 @@ public class EmbeddedOidcProviderStub {
         this.port = port;
         this.tokenLifespan = tokenLifespan;
 
-        this.issuer = appendPath(URI.create(String.format("http://%s:%s", host, port)), issuerPath);
+        this.issuer = appendPath(URI.create("http://%s:%s".formatted(host, port)), issuerPath);
 
         this.keyId = UUID.randomUUID().toString();
         this.publicKey = (RSAPublicKey) keyPair.getPublic();

@@ -73,9 +73,9 @@ public class RolePrivilegeGrantedAuthoritiesConverter implements Converter<Jwt, 
             LOG.trace("Looking for roles in claim {}", claimName);
         }
         Object rolesClaim = jwt.getClaim(claimName);
-        if (rolesClaim instanceof String) {
-            if (StringUtils.hasText((String) rolesClaim)) {
-                return Arrays.asList(((String) rolesClaim).split(" "));
+        if (rolesClaim instanceof String rolesClaimString) {
+            if (StringUtils.hasText(rolesClaimString)) {
+                return Arrays.asList(rolesClaimString.split(" "));
             }
             return Collections.emptyList();
         }

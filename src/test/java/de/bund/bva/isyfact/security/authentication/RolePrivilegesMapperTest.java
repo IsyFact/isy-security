@@ -66,8 +66,10 @@ class RolePrivilegesMapperTest {
 
     @Test
     void testToString() {
-        String expected = "AnwendungsId: Default\n"
-                + "RollenRechteMapping: {Rolle_C=[Recht_C], Rolle_Keine=[], Rolle_B=[Recht_B], Rolle_A=[Recht_A], Rolle_ABC=[Recht_A, Recht_B, Recht_C]}";
+        String expected = """
+                AnwendungsId: Default
+                RollenRechteMapping: {Rolle_C=[Recht_C], Rolle_Keine=[], Rolle_B=[Recht_B], Rolle_A=[Recht_A], Rolle_ABC=[Recht_A, Recht_B, Recht_C]}\
+                """;
 
         assertThat(mapper).hasToString(expected);
     }
@@ -81,8 +83,8 @@ class RolePrivilegesMapperTest {
         assertThat(mapper.getApplicationId()).isEmpty();
 
         // verify logging info
-        final String expectedMsg = String.format("Rollenrechte-Mapping Datei unter class path resource [%s] nicht gefunden.",
-            "resources/sicherheit/noRollenrechte.xml");
+        final String expectedMsg = "Rollenrechte-Mapping Datei unter class path resource [%s] nicht gefunden.".formatted(
+                "resources/sicherheit/noRollenrechte.xml");
 
         assertThat(listAppender.list)
             .extracting(ILoggingEvent::getLevel, ILoggingEvent::getFormattedMessage)

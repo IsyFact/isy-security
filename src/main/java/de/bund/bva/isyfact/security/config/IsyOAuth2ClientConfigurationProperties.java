@@ -63,12 +63,12 @@ public class IsyOAuth2ClientConfigurationProperties implements InitializingBean 
             getRegistration().keySet().forEach(key -> {
                 if (!springOAuth2ClientProperties.getRegistration().containsKey(key)) {
                     throw new IllegalStateException(
-                            String.format("A Spring ClientRegistration with the same ID must be registered, ID: %s", key));
+                            "A Spring ClientRegistration with the same ID must be registered, ID: %s".formatted(key));
                 }
             });
         }
 
-        getRegistration().values().stream().filter(value -> value.getBhknz() != null).findAny().ifPresent(e -> {
+        getRegistration().values().stream().filter(value -> value.getBhknz() != null).findAny().ifPresent(_ -> {
             if (!StringUtils.hasText(getDefaultCertificateOu())) {
                 throw new IllegalStateException("Default certificate OU must not be empty when any BHKNZ is set.");
             }

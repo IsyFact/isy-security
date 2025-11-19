@@ -50,7 +50,7 @@ public class MethodAuthenticationTest {
     @BeforeEach
     public void setup() {
         // if the auth manager gets called it'll set the security context
-        doAnswer(inv -> {
+        doAnswer(_ -> {
             SecurityContextHolder.getContext().setAuthentication(TEST_AUTH_TOKEN);
             return null;
         }).when(authentifizierungsmanager).authentifiziere(eq(CLIENT_ID));

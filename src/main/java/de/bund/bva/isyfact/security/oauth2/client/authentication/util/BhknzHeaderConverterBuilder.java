@@ -34,7 +34,7 @@ public class BhknzHeaderConverterBuilder {
 
         @Override
         public HttpHeaders convert(OAuth2PasswordGrantRequest request) {
-            String headerValue = String.format("%s:%s", bhknz, defaultCertificateOu);
+            String headerValue = "%s:%s".formatted(bhknz, defaultCertificateOu);
 
             HttpHeaders headers = new HttpHeaders();
             headers.add(headerName, headerValue);

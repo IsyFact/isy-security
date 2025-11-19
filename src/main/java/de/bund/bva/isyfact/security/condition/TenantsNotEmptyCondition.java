@@ -21,8 +21,8 @@ public class TenantsNotEmptyCondition implements Condition {
     public boolean matches(ConditionContext context, @NonNull AnnotatedTypeMetadata metadata) {
         ConfigurableEnvironment env = (ConfigurableEnvironment) context.getEnvironment();
         for (PropertySource<?> propertySource : env.getPropertySources()) {
-            if (propertySource instanceof EnumerablePropertySource) {
-                if (isTenantIssuerUriPresent((EnumerablePropertySource<?>) propertySource)) {
+            if (propertySource instanceof EnumerablePropertySource<?> source) {
+                if (isTenantIssuerUriPresent(source)) {
                     return true;
                 }
             }

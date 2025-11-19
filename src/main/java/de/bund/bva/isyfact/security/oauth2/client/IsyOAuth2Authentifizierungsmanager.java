@@ -205,7 +205,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
                 return new PasswordClientRegistrationAuthenticationToken(clientRegistration, props.getUsername(), props.getPassword(), bhknz);
             } else {
                 throw new BadCredentialsException(
-                        String.format("No configured credentials (username, password) found for client with registrationId: %s.",
+                        "No configured credentials (username, password) found for client with registrationId: %s.".formatted(
                                 clientRegistration.getRegistrationId()));
             }
 
@@ -247,7 +247,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
         } else if (AuthorizationGrantType.PASSWORD.equals(grantType)) {
             if (!credentials.hasUsernamePassword()) {
                 throw new BadCredentialsException(
-                        String.format("No configured credentials (username, password) found for client with registrationId: %s.",
+                        "No configured credentials (username, password) found for client with registrationId: %s.".formatted(
                                 clientRegistration.getRegistrationId()));
             } else {
                 return new PasswordClientRegistrationAuthenticationToken(clientRegistration,

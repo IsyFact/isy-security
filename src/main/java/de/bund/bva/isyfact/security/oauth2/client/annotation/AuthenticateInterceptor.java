@@ -78,7 +78,7 @@ public class AuthenticateInterceptor extends EmbeddedValueResolutionSupport impl
         Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
         Authenticate ann = detectAuthAnnotation(invocation.getMethod(), targetClass);
-        Assert.notNull(ann, String.format("The annotation %s is missing on the method %s.",
+        Assert.notNull(ann, "The annotation %s is missing on the method %s.".formatted(
                 Authenticate.class.getSimpleName(), invocation.getMethod()));
 
         // resolve property placeholders in the annotation value (if present)

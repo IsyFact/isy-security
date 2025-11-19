@@ -161,10 +161,10 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
 
         String tokenEndpoint = appendToIssuerPath(TOKEN_ENDPOINT);
 
-        String clientCredentialsGrantType = String.format("%s=%s", GRANT_TYPE, CLIENT_CREDENTIALS.getValue());
+        String clientCredentialsGrantType = "%s=%s".formatted(GRANT_TYPE, CLIENT_CREDENTIALS.getValue());
 
         stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(2)
-                .withRequestBody(new NegativeRegexPattern(String.format(".*%s=.*", GRANT_TYPE)))
+                .withRequestBody(new NegativeRegexPattern(".*%s=.*".formatted(GRANT_TYPE)))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.BAD_REQUEST.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -205,10 +205,10 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
         Set<StubMapping> stubMappings = new HashSet<>();
 
         String tokenEndpoint = appendToIssuerPath(TOKEN_ENDPOINT);
-        String validLogin = String.format("%s=%s&username=%s&password=%s", GRANT_TYPE, PASSWORD.getValue(), username, password);
+        String validLogin = "%s=%s&username=%s&password=%s".formatted(GRANT_TYPE, PASSWORD.getValue(), username, password);
 
         if (bhknz.isPresent()) {
-            String bhknzPattern = String.format("%1$s:%2$s|%2$s:%1$s", bhknz.get(), secondOu);
+            String bhknzPattern = "%1$s:%2$s|%2$s:%1$s".formatted(bhknz.get(), secondOu);
 
             // Require the bhknz header if the user has a bhknz
             stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(1)
@@ -245,7 +245,7 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
         }
 
         stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(5)
-                .withRequestBody(new NegativeRegexPattern(String.format(".*username=%s.*", username)))
+                .withRequestBody(new NegativeRegexPattern(".*username=%s.*".formatted(username)))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.UNAUTHORIZED.value())
                         .withHeader(HttpHeaders.WWW_AUTHENTICATE, "dummy")
@@ -254,7 +254,7 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
                 )));
 
         stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(5)
-                .withRequestBody(new NegativeRegexPattern(String.format(".*password=%s.*", password)))
+                .withRequestBody(new NegativeRegexPattern(".*password=%s.*".formatted(password)))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.UNAUTHORIZED.value())
                         .withHeader(HttpHeaders.WWW_AUTHENTICATE, "dummy")
@@ -268,7 +268,7 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
     private Set<StubMapping> generateClientMapping(String clientId, String secret, String accessTokenResponse) {
         Set<StubMapping> stubMappings = new HashSet<>();
 
-        String clientCredentialsGrantType = String.format("%s=%s", GRANT_TYPE, CLIENT_CREDENTIALS.getValue());
+        String clientCredentialsGrantType = "%s=%s".formatted(GRANT_TYPE, CLIENT_CREDENTIALS.getValue());
 
         stubMappings.add(stubFor(
                 post(urlEqualTo(appendToIssuerPath(TOKEN_ENDPOINT)))
