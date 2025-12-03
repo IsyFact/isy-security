@@ -719,7 +719,7 @@ Eine detaillierte Beschreibung anhand eines Beispiels findet sich im nächsten K
 
 *Für IsyFact-Anwendungslandschaften werden mindestens folgende zwei Tenants für den Zugriff von außerhalb der Anwendungslandschaft gefordert:*
 
-. Tenant 1: Gruppierung aller Systeme mit Zugriffsweg über das Service-Gateway.
+. Tenant 1: Gruppierung aller Systeme mit Zugriffsweg über ein Service-Gateway.
 . Tenant 2: Gruppierung aller Anwender mit Zugriffsweg über das Portal.
 
 Hintergrund: Ein Benutzer darf nur über einen festgelegten Zugriffsweg Zugriff auf die Anwendungslandschaft erhalten.
