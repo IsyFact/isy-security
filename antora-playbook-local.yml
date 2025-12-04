@@ -1,0 +1,61 @@
+site:
+  title: IsyFact (Security - Local)
+  url: https://isyfact.github.io/
+  start_page: security::konzept.adoc
+urls:
+  latest_version_segment: current
+  latest_prerelease_version_segment: dev
+content:
+  branches: []
+  # Comment: Configuration for development (e.g. with feature branches that aren't pushed yet)
+  # Convention: All git repositories are cloned in the same parent directory.
+  sources:
+    - url: https://github.com/IsyFact/isy-documentation.git
+      branches: [master]
+      start_path: glossary
+      version: ~
+      lfs: true
+    - url: https://github.com/IsyFact/isy-documentation.git
+      branches: [master]
+      start_path: documentation-guide
+      version: ~
+      lfs: true
+    - url: https://github.com/IsyFact/isy-security.git
+      branches: [develop]
+      start_path: docs
+      version: 'next'
+      lfs: true
+    - url: ./
+      branches: [HEAD]
+      start_path: docs
+      version: true
+runtime:
+  fetch: true
+  log:
+    level: info
+    failure_level: fatal
+asciidoc:
+  attributes:
+    page-component-order: 'security, *, glossary'
+    page-toctitle: Inhalt
+    sectnums: true
+    sectnumlevels: 5
+    caution-caption: Achtung
+    important-caption: Wichtig
+    note-caption: Hinweis
+    tip-caption: Tipp
+    warning-caption: Warnung
+    appendix-caption: Anhang
+    example-caption: Beispiel
+    figure-caption: Abbildung
+    table-caption: Tabelle
+    listing-caption: Listing
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+antora:
+  extensions:
+    - require: '@opendevise/antora-git-lfs-extension'
+    - require: '@antora/lunr-extension'
+      languages: [en, de]
