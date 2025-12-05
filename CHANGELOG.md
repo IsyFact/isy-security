@@ -17,6 +17,7 @@
 - `IFS-4922`: Aktualisierung von Java 17 auf 25
 
 ### DEPENDENCY UPGRADES
+- Update IsyFact/isy-github-actions-templates/.github/workflows/docs_build_template.yml von Version 1.7.0 auf 1.8.0
 - `IFS-4655`: Update von Maven Checkstyle Plugin auf Version 3.6.0
 - `IFS-4580`: Spring Boot Update auf Version 3.4.5
 - `IFS-4531`: Update von Flatten Maven Plugin auf Version 1.7.1
