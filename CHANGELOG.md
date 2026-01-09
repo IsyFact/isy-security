@@ -17,6 +17,7 @@
 - `IFS-4922`: Aktualisierung von Java 17 auf 25
 
 ### DEPENDENCY UPGRADES
+- Update net.logstash.logback:logstash-logback-encoder von Version 8.0 auf 8.1
 - Update org.apache.maven.plugins:maven-surefire-plugin von Version 3.3.1 auf 3.5.4
 - Update IsyFact/isy-github-actions-templates/.github/workflows/maven_create_release_template.yml von Version 1.7.0 auf 1.8.0
 - Update IsyFact/isy-github-actions-templates/.github/workflows/maven_deploy_template.yml von Version 1.7.0 auf 1.8.0
