@@ -720,7 +720,7 @@ public class SecurityConfiguration {
 ====
 Method Level Security ist für die Nutzung in der Service Schicht.
 Die Verwendung an `@Controller` Klassen/Methoden kann zu Fehlern führen und wird nicht empfohlen.
-Für Webcontroller ohne Service-Schicht kann https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html[Request Level Autorisierung] genutzt werden.
+Für Webcontroller ohne Serviceschicht kann https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html[Request Level Autorisierung] genutzt werden.
 
 Das mehrfache Setzen der `@EnableMethodSecurity`-Annotation sollte vermieden werden.
 Mit abweichender Konfiguration kann dies zu unerwartetem Verhalten und Fehlern führen.
