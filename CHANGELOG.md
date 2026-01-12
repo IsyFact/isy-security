@@ -17,6 +17,7 @@
 - `IFS-4922`: Aktualisierung von Java 17 auf 25
 
 ### DEPENDENCY UPGRADES
+- Update org.apache.maven.plugins:maven-enforcer-plugin von Version 3.6.0 auf 3.6.2
 - Update org.sonatype.central:central-publishing-maven-plugin von Version 0.8.0 auf 0.10.0
 - Update org.springframework.boot:spring-boot-dependencies von Version 3.5.7 auf 3.5.9
 - Update org.apache.maven.plugins:maven-surefire-plugin von Version 3.3.1 auf 3.5.4
