@@ -17,6 +17,7 @@
 - `IFS-4922`: Aktualisierung von Java 17 auf 25
 
 ### DEPENDENCY UPGRADES
+- Update org.codehaus.mojo:flatten-maven-plugin von Version 1.7.1 auf 1.7.3
 - Update net.logstash.logback:logstash-logback-encoder von Version 8.0 auf 8.1
 - Update org.apache.maven.plugins:maven-enforcer-plugin von Version 3.6.0 auf 3.6.2
 - Update org.sonatype.central:central-publishing-maven-plugin von Version 0.8.0 auf 0.10.0
