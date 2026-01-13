@@ -41,7 +41,7 @@
         <enforced.maven.version>[3.6.3,4)</enforced.maven.version>
         <maven.surefire.version>3.1.2</maven.surefire.version>
         <maven.checkstyle.version>3.6.0</maven.checkstyle.version>
-        <flatten-maven-plugin.version>1.7.1</flatten-maven-plugin.version>
+        <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
         <maven.jacoco.version>0.8.14</maven.jacoco.version>
         <maven.javadoc.plugin.version>3.3.2</maven.javadoc.plugin.version>
         <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
