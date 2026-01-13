@@ -8,4 +8,4 @@ on:
 
 jobs:
   generate-changelog-entry:
-    uses: IsyFact/isy-github-actions-templates/.github/workflows/dependabot_auto_changelog_template.yml@v1.8.0
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/dependabot_auto_changelog_template.yml@v2.1.1
