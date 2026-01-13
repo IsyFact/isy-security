@@ -59,7 +59,7 @@
         <logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
 
         <dbunit.version>2.7.2</dbunit.version>
-        <wiremock.version>3.13.1</wiremock.version>
+        <wiremock.version>3.13.2</wiremock.version>
         <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
     </properties>
 
