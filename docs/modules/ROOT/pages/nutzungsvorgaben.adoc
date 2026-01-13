@@ -393,7 +393,7 @@ Zum Löschen des Cache steht die folgende Methode zur Verfügung:
 
 [[auth_sgw]]
 == Authentifizierung über das SGW am IAM-Service
-Die Authentifizierung über das Service Gateway (SGW) stellt einen wichtigen Schritt in der Sicherung von Anwendungen dar.
+Die Authentifizierung über das Service-Gateway (SGW) stellt einen wichtigen Schritt in der Sicherung von Anwendungen dar.
 Um diesen Prozess effektiv umzusetzen, empfiehlt sich die Verwendung des neu entwickelten Authentifizierungsmanagers und dessen Methoden.
 
 Die Methoden erlauben es technische Nutzer zur Laufzeit mit ihren Zugangsdaten über den IAM-Service zu authentifizieren.
@@ -413,8 +413,8 @@ Für detaillierte Informationen und Anleitung zur Absicherung von Batches und Ta
 verwiesen. Diese bieten praxisorientierte Richtlinien zur Gewährleistung der Sicherheit von Batches und Tasks.
 
 [[absicherung_von_service_schnittstellen]]
-== Absicherung von Service-Schnittstellen
-Spring Security unterstützt die automatische Absicherung von Endpunkten einer Anwendung und eine feingranulare Autorisierung im Rahmen von `OAuth 2.0`.
+== Absicherung von Services
+Spring Security unterstützt die automatische Absicherung von Services einer Anwendung und eine feingranulare Autorisierung im Rahmen von `OAuth 2.0`.
 
 === Maven Dependency
 Dazu ist die Einbindung der folgenden Abhängigkeiten notwendig:
@@ -481,7 +481,7 @@ Dies soll nur falls absolut notwendig durchgeführt werden, um die Angriffsfläc
 Für die korrekte Anbindung an den `IAM-Service` ist die Angabe der folgenden Konfigurationsparameter notwendig. Das Präfix sämtlicher Konfigurationsparameter `spring.security.oauth2` wird zur Vereinfachung in der Liste unten weggelassen.
 
 [[table-parameter-service]]
-.Konfigurationsparameter einer Service-Schnittstelle
+.Konfigurationsparameter eines Services
 [cols="3m,2m,2m,8",options="header"]
 |===
 |Parameter |Wertebereich |Default |Beschreibung
@@ -491,7 +491,7 @@ Für die korrekte Anbindung an den `IAM-Service` ist die Angabe der folgenden Ko
 Zusätzlich sind folgende Isyfact-spezifische Konfigurationsparameter notwendig.
 
 [[table-parameter-service-isyfact]]
-.Isyfact-spezifische Konfigurationsparameter einer Service-Schnittstelle
+.Isyfact-spezifische Konfigurationsparameter eines Services
 [cols="3m,2m,2m,8",options="header"]
 |===
 |Parameter |Wertebereich |Default |Beschreibung
@@ -667,12 +667,12 @@ Jeder Rolle muss also zumindest ein Recht zugeordnet werden, um anhand dessen ei
 Werden im Lebenszyklus der Geschäftsanwendung weitere Rollen (z.B. für neu hinzukommende Akteure) spezifiziert und mit bestehenden Rechten ausgestattet, sind neben den Änderungen in der Konfigurationsdatei keine weiteren Änderungen notwendig.
 
 [[autorisierung_service_schnittstelle]]
-=== Autorisierung an einer Service-Schnittstelle
+=== Autorisierung an einem Service
 
 Zentral für die Autorisierung ist die von Spring bereitgestellte Annotation `@Secured`, die alle benötigten Rechte des Aufrufers überprüft.
 Eine Autorisierung direkt über die Rollen des Aufrufers ist nicht möglich.
 
-Die Annotation kommt in der Service-Schicht zur Anwendung und autorisiert den Zugriff auf eine Service-Methode.
+Die Annotation kommt in der Serviceschicht zur Anwendung und autorisiert den Zugriff auf eine Service-Methode.
 Sollten alle Methoden die gleiche Autorisierung erfordern, kann alternativ die Annotation auch an der Service-Klasse verwendet werden.
 
 Folgendes Beispiel (<<listing-absichern-einer-service-methode>>) verdeutlicht die Implementierung einer abgesicherten Service-Methode.
