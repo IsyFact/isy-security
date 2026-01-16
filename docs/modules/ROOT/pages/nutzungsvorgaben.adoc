@@ -15,7 +15,7 @@ Die folgenden Kapitel leiten durch die Funktionen des Bausteins Security:
 * <<aufrufen-von-nachbarsystemen>>,
 * <<auth_sgw>>,
 * <<absicherung_von_batches_tasks>>,
-* <<absicherung_von_service_schnittstellen>>.
+* <<absicherung_von_services>>.
 
 Schließlich beschreibt das letzte Kapitel <<testunterstuetzung>>, welche Hilfen der Baustein Security zum Erstellen von (automatisierten) Tests bereitstellt.
 
@@ -412,7 +412,7 @@ Für detaillierte Informationen und Anleitung zur Absicherung von Batches und Ta
 
 verwiesen. Diese bieten praxisorientierte Richtlinien zur Gewährleistung der Sicherheit von Batches und Tasks.
 
-[[absicherung_von_service_schnittstellen]]
+[[absicherung_von_services]]
 == Absicherung von Services
 Spring Security unterstützt die automatische Absicherung von xref:glossary::terms-definitions.adoc#service[Services] einer Anwendung und eine feingranulare Autorisierung im Rahmen von `OAuth 2.0`.
 
