@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.bund.bva.isyfact</groupId>
-    <artifactId>isy-security</artifactId>
+    <artifactId>isy-security-parent</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
 
