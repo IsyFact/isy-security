@@ -4,14 +4,14 @@
 
     <parent>
         <groupId>de.bund.bva.isyfact</groupId>
-        <artifactId>isy-security</artifactId>
+        <artifactId>isy-security-parent</artifactId>
         <version>${revision}</version>
     </parent>
 
     <artifactId>isy-security-test</artifactId>
     <packaging>jar</packaging>
 
-    <name>IsyFact-Security-Test</name>
+    <name>IsyFact Security Test</name>
     <description>Stellt Utility-Klassen für das Testen von Authentifizierung und Autorisierung bereit.</description>
 
     <properties>
