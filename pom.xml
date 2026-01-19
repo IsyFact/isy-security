@@ -5,7 +5,7 @@
     <groupId>de.bund.bva.isyfact</groupId>
     <artifactId>isy-security-parent</artifactId>
     <version>${revision}</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>IsyFact-Security</name>
     <description>Komponente für die Autorisierung von Benutzern in IsyFact-Anwendungen.</description>
@@ -25,6 +25,9 @@
             <organizationUrl>https://www.bva.bund.de</organizationUrl>
         </developer>
     </developers>
+    <modules>
+        <module>isy-security-test</module>
+    </modules>
 
     <scm>
         <connection>scm:git:git://github.com/IsyFact/isy-security.git</connection>
