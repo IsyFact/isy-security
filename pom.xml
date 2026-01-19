@@ -28,6 +28,7 @@
     <modules>
         <module>isy-security-test</module>
         <module>isy-security</module>
+        <module>isy-security-doc</module>
     </modules>
 
     <scm>
