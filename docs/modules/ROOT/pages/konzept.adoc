@@ -50,7 +50,7 @@ Aus den xref:isyfact-standards-doku:referenzarchitektur:software-technisch.adoc#
 
 * Anfragen, die am Dialog (Web-App) eines IT-Systems eingehen, sind immer vorher über die mitgegebenen Authentifizierungsdaten durch das IAM-System bzw. die lokale Authentifizierung erfolgreich authentifiziert.
 Durch die Authentifizierung des IAM-Systems enthält der HTTP-Header der Anfrage die Identifikation des Anwenders und dessen Rollen (in Form eines JWT Zugriffstoken).
-* Anfragen, die an einer Service-Schnittstelle (von außen über ein Service-Gateway (SGW) oder von anderen IT-Systemen innerhalb der IT-Systemlandschaft) eines IT-Systems eingehen, sind ebenso bereits authentifiziert.
+* Anfragen, die an einen Service (von außen über ein Service-Gateway (SGW) oder von anderen IT-Systemen innerhalb der IT-Systemlandschaft) eines IT-Systems eingehen, sind ebenso bereits authentifiziert.
 * Prozesse, die unabhängig von eingehenden Anfragen (über Dialog und Service) durch ein IT-System gestartet werden (z.B. Batch/Task), müssen zunächst einen (technischen) Nutzer gegen das IAM-System bzw. die lokale Authentifizierung erfolgreich authentifizieren, um ein JWT Access-Token zu erhalten.
 Mit diesem können sie dann Services anderer IT-Systeme innerhalb derselben Anwendungslandschaft verwenden.
 * Das aufgerufene IT-System prüft das Vorhandensein eines (gültigen) Access-Tokens und übernimmt dieses mit den darin enthaltenen Anwenderinformationen in den `SecurityContext`, wobei es die Rollen des Anwenders auf systemspezifische Rechte abbildet.
@@ -73,7 +73,8 @@ Im Folgenden werden die Aufgaben und grobe Funktionsweise der Komponenten für d
 
 Der Baustein `isy-security` basiert auf dem Framework Spring Security und bietet querschnittliche Funktionalität zur Authentifizierung und Autorisierung von Anfragen, die von internen oder externen Anwendungen an eine IsyFact-Anwendung gestellt werden (M2M-Kommunikation).
 Die Authentifizierung und Autorisierung von Anfragen, die von menschlichen Nutzern über eine Benutzeroberfläche (Browser) gestellt werden, findet im Zuge der Einführung von Single-Page-Applications (SPAs) nicht mehr über das Backend oder den Baustein `isy-security` statt, sondern innerhalb des Portal-Webservers.
-Ausserdem sichert der Baustein `isy-security` die Service-Schnittstellen der IsyFact-Anwendungen ab, indem er Funktionalität zur Berechtigungsprüfung anbietet. Hier wird geprüft, ob die gewährte Autorisierung auch das Recht zur Nutzung der angefragten Service-Schnittstelle beinhaltet.
+Außerdem sichert der Baustein `isy-security` die Services der IsyFact-Anwendungen ab, indem er Funktionalität zur Berechtigungsprüfung anbietet. 
+Hier wird geprüft, ob die gewährte Autorisierung auch das Recht zur Nutzung des angefragten Services beinhaltet.
 
 Um IsyFact-spezifische Anforderungen, wie z.B. die Nutzung des Behördenkennzeichens, zu erfüllen, existiert eine Zugriffsschicht, die eben diese Funktionalität bereitstellt und den Zugriff auf Spring Security (und das IAM-System) kapselt.
 Die einheitliche Zugriffsschicht für Authentifizierung und Autorisierung erleichtert zudem, durch die teilweise Übernahme bestehender Schnittstellen, die Migration von einer älteren IsyFact Version.
@@ -86,21 +87,19 @@ Der Zugriff auf den Baustein erfolgt über das Interface `Security`, das Methode
 Zusätzlich bietet das `Security`-Interface eine Zugriffsmöglichkeit auf eine Liste von allen im System hinterlegten Rollen an.
 
 Der `Authentifizierungsmanager` ist für die Kommunikation mit dem IAM-Service über den `OAuth2AuthorizedClientProvider` zuständig.
-Die Authentifizierung (Anmeldung) von internen oder externen Anwendungen verläuft über Servicemethoden, die dieser Manager anbietet.
+Die Authentifizierung (Anmeldung) von internen oder externen Anwendungen verläuft über Service-Methoden, die dieser Manager anbietet.
 Das Ergebnis einer erfolgreichen Authentifizierung ist die Autorisierung durch ein Access-Token, das die dem Benutzer zugeordneten Rollen enthält.
-Dieses Access-Token legt die aufrufende Anwendung (bzw. das SGW als Mittelsmann) anschließend im `SecurityContext` ab und präsentiert es der aufgerufenen Service-Schnittstelle der IsyFact-Anwendung.
+Dieses Access-Token legt die aufrufende Anwendung (bzw. das Service-Gateway als Mittelsmann) anschließend im `SecurityContext` ab und präsentiert es dem aufgerufenen Service der IsyFact-Anwendung.
 
 Über den `Berechtigungsmanager` kann die Anwendung die Rollen und anwendungsspezifischen Rechte des angemeldeten Benutzers abfragen.
 
 Der `RolePrivilegeGrantedAuthoritiesConverter` ist für die Konvertierung der vom IAM-Service im Access-Token übermittelten Rollen des Benutzers in die anwendungsspezifischen Rechte zuständig.
 
-Die Absicherung der Service-Schnittstellen von IsyFact-Anwendungen erfolgt über folgende AOP-Annotationen:
-
-- Mit der von Spring Security bereitgestellten Annotation `@Secured` werden angebotene Services der Anwendung abgesichert.
+Die Absicherung der Services von IsyFact-Anwendungen erfolgt über die von Spring Security bereitgestellte Annotation `@Secured`.
 Dieser Annotation muss noch der Name eines anwendungsspezifischen Rechts mitgegeben werden, das für die Verwendung dieses Service benötigt wird.
 Im Interceptor `SecuredInterceptor` wird sichergestellt, dass nur dann der Zugriff gewährt wird, wenn der angemeldete Nutzer über seine Rollen auch dieses anwendungsspezifische Recht besitzt.
 
-Hinweis: Die Annotation `@Secured` löst die Annotation `@Gesichert` ab und ist analog dazu verwenden.
+TIP: Die Annotation `@Secured` löst die Annotation `@Gesichert` ab und ist analog dazu verwenden.
 
 Eine Absicherung von Services auf Ebene des Ressourcenbesitzers (Resource Owner), also eines technischen Nutzers bzw. OAuth-2-Client bietet die IsyFact-Annotation `@Authenticate`.
 Dieser Annotation muss noch die oauth2ClientRegistrationId mitgegeben werden, unter der der Ressourcenbesitzer in der betrieblichen Konfiguration registriert ist.
@@ -371,7 +370,7 @@ aber ohne _Authentication-Gateway_ noch einmal verdeutlicht:
 [id="image-sequenzdiagramm-sgw-without-agw",reftext="{figure-caption} {counter:figures}"]
 image::konzept/Squenzdiagramm_ServiceGateway_ohne_AuthGateway.dn.svg[align="center"]
 
-Die Authentifizierung über das SGW (Service Gateway) stellt einen wichtigen Schritt in der Sicherung von Anwendungen dar.
+Die Authentifizierung über das Service-Gateway stellt einen wichtigen Schritt in der Sicherung von Anwendungen dar.
 Um diesen Prozess effektiv umzusetzen, empfiehlt sich die Verwendung der Methode `authentifiziere` des Authentifizierungsmanagers.
 Mit dessen Hilfe ist es möglich, den Client zu authentifizieren und sicherzustellen, dass nur autorisierte Clients Zugriff auf die Ressourcen erhalten.
 Durch die Nutzung dieses speziellen Authentifizierungsmechanismus wird eine robuste und zuverlässige Sicherheitsschicht implementiert, um unautorisierten Zugriff und potenzielle Sicherheitslücken zu verhindern.
@@ -397,8 +396,8 @@ image::konzept/ServiceGateway_plus_AuthGateway.dn.svg[align="center"]
 
 In der Abbildung sind die folgenden Ablaufschritte dargestellt:
 
-. Für die Authentifizierung einer externen Anwendung existiert ein eigener Servicepunkt, das _Authentication-Gateway_. 
-An diesen Servicepunkt werden von der externen Anwendung die Authentifizierungsdaten übergeben.
+. Für die Authentifizierung einer externen Anwendung existiert das _Authentication-Gateway_.
+Dort werden von der externen Anwendung die Authentifizierungsdaten übergeben.
 . Das _Authentication-Gateway_ leitet die Authentifizierungsdaten an den _IAM-Service_ weiter.
 . Der _IAM-Service_ prüft die Authentifizierungsdaten und liefert dem  _Authentication-Gateway_ ein Access-Token zurück.
 . Das _Authentication-Gateway_ übergibt das Access-Token der externen Anwendung.
@@ -836,14 +835,14 @@ Technische Rollen können fachlichen Rollen allerdings untergeordnet werden (sie
 [[untergeordnete-rollen]]
 *Untergeordnete Rollen:* Optional können fachliche Rollen untergeordnete technische Rollen besitzen.
 Dies ist z.B. immer dann notwendig, wenn ein Anwendungsfall die Services eines xref:glossary::terms-definitions.adoc#nachbarsystem[Nachbarsystems] verwendet.
-Somit muss im Rahmen des Anwendungsfalls die Service-Schnittstelle des Nachbarsystems aufgerufen werden.
+Somit muss im Rahmen des Anwendungsfalls der Service des Nachbarsystems aufgerufen werden.
 Die dazu benötigte, technische Rolle muss der fachlichen Rolle untergeordnet werden, damit dies funktioniert.
 
 *Sichtbarkeit der Rolle:* Die Sichtbarkeit der Rollen bei der Zuordnung an Anwender und Systeme kann eingeschränkt werden, um die Administration zu vereinfachen.
 
 Die meisten Rollen sind fachlicher Natur.
-Technische Rollen treten oft im Rahmen von Service-Schnittstellen auf.
-Bietet eine Geschäftsanwendung Funktionalität über Service-Schnittstellen an, so ist die Nutzung jeder Service-Schnittstelle zumindest durch eine technische Rolle abzusichern.
+Technische Rollen treten oft im Rahmen von Services auf.
+Bietet eine Geschäftsanwendung Funktionalität über Services an, so ist die Nutzung jedes Services zumindest durch eine technische Rolle abzusichern.
 Diese Rollen werden nicht direkt an Anwender vergeben, sondern fachlichen Rollen anderer Geschäftsanwendungen untergeordnet.
 
 [[richtlinien-zum-schnitt-der-rollen]]

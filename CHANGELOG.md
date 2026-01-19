@@ -1,8 +1,9 @@
 # 5.0.0
 
 ### FEATURES
+- `IFS-4734`: Verwendungen des Begriffs "Service" und damit verwandter Begriffe korrigieren
 - `IFS-4924`: Anpassungen im Text und Grafiken wegen der Einführung des Begriffs "API-Gateway"
-- `IFS-4577`: Portierung fehlender Tickets aus isyfact-standards
+- `IFS-4577`: Portierung fehlender Tickets aus `isyfact-standards`
 - `IFS-4591`: Hinzufügen von Authentifizierungsmethoden zur Authentifizierung von Clients und Systemen ohne Issuer-URI.
 - `IFS-4754`: Einführung von Caching im Authentifizierungsprozess
 - `IFS-4752`: Wiederherstellen der initialen Authentication nach Authentifizierung mit @Authenticate-Annotation
