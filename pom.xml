@@ -7,7 +7,7 @@
     <version>${revision}</version>
     <packaging>pom</packaging>
 
-    <name>IsyFact-Security</name>
+    <name>IsyFact Security</name>
     <description>Komponente für die Autorisierung von Benutzern in IsyFact-Anwendungen.</description>
     <url>http://isyfact.de</url>
     <licenses>
@@ -27,6 +27,7 @@
     </developers>
     <modules>
         <module>isy-security-test</module>
+        <module>isy-security</module>
     </modules>
 
     <scm>
