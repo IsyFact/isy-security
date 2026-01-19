@@ -6,10 +6,14 @@
     <parent>
         <groupId>de.bund.bva.isyfact</groupId>
         <artifactId>isy-security-parent</artifactId>
-        <version>0.0.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>isy-security</artifactId>
+    <packaging>jar</packaging>
+
+    <name>IsyFact Security</name>
+    <description>Komponente für die Autorisierung von Benutzern in IsyFact-Anwendungen.</description>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
