@@ -19,6 +19,7 @@
 - `IFS-4922`: Aktualisierung von Java 17 auf 25
 
 ### DEPENDENCY UPGRADES
+- Update org.springframework.boot:spring-boot-starter-test von Version 3.5.5 auf 3.5.9
 - Update com.github.spotbugs:spotbugs-maven-plugin von Version 4.9.8.1 auf 4.9.8.2
 - Update org.apache.maven.plugins:maven-source-plugin von Version 3.2.1 auf 3.4.0
 - Update org.apache.maven.plugins:maven-gpg-plugin von Version 3.0.1 auf 3.2.8
