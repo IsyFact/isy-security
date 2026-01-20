@@ -12,7 +12,7 @@ on:
       - bugfix/**
     paths:
       - .github/**
-      - src/**
+      - ../../isy-security/src/**
       - pom.xml
   workflow_dispatch:
 
