@@ -156,6 +156,7 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
     /**
      * Set up error responses when no stub for the token endpoint (user or client) were found or the request contains invalid data.
      */
+    @SuppressWarnings("java:S2068")
     private Set<StubMapping> setupDefaultTokenEndpoints() {
         Set<StubMapping> stubMappings = new HashSet<>();
 
