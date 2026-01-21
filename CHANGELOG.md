@@ -11,6 +11,7 @@
 - `IFS-4810`: Ausbau der Validierung des "aud"-Claims erstellter Tokens
 - `IFS-4583`: Wiedereinführung der Quality-Gates
 - `IFS-4579`: Wiederherstellung von isy-security-test
+- `IFS-5004`: Vorbereitung von isy-security für Update auf Spring Boot 4
 
 ### BREAKING CHANGE
 - `IFS-4812`: Verwendung sicherer Hashfunktion mit SHA-512 für Caching
