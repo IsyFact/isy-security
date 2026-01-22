@@ -39,7 +39,7 @@
 
     <properties>
         <revision>0.0.0-SNAPSHOT</revision>
-        <isyfact-bom.version>4.1.0</isyfact-bom.version>
+        <isyfact-bom.version>5.0.0-SNAPSHOT</isyfact-bom.version>
         <maven.compiler.release>25</maven.compiler.release>
         <maven.compiler.version>3.14.1</maven.compiler.version>
         <maven.dependency.version>3.9.0</maven.dependency.version>
@@ -53,6 +53,7 @@
         <maven.javadoc.plugin.version>3.3.2</maven.javadoc.plugin.version>
         <maven.source.plugin.version>3.4.0</maven.source.plugin.version>
         <tidy-maven-plugin.version>1.4.0</tidy-maven-plugin.version>
+        <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
 
         <isy-checkstyle-config.version>0.2.0</isy-checkstyle-config.version>
         <spotbugs.version>4.9.8.2</spotbugs.version>
@@ -64,9 +65,8 @@
         <logback.json.version>0.1.5</logback.json.version>
         <logback.jackson.version>0.1.5</logback.jackson.version>
         <logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
+        <cyclonedx-maven-plugin.version>2.7.9</cyclonedx-maven-plugin.version>
 
-        <dbunit.version>2.7.2</dbunit.version>
-        <wiremock.version>3.13.2</wiremock.version>
         <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
     </properties>
 
@@ -115,7 +115,7 @@
                 <plugin>
                     <groupId>org.cyclonedx</groupId>
                     <artifactId>cyclonedx-maven-plugin</artifactId>
-                    <version>2.7.9</version>
+                    <version>${cyclonedx-maven-plugin.version}</version>
                     <configuration>
                         <outputFormat>json</outputFormat>
                         <outputName>${project.artifactId}-${project.version}-cyclonedx</outputName>
@@ -428,7 +428,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.8</version>
+                        <version>${maven-gpg-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>

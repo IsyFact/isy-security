@@ -22,11 +22,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>de.bund.bva.isyfact</groupId>
-            <artifactId>isy-security-test</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
@@ -133,6 +128,7 @@
         <dependency>
             <groupId>de.bund.bva.isyfact</groupId>
             <artifactId>isy-security-test</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
