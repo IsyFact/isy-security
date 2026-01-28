@@ -37,7 +37,6 @@ import de.bund.bva.isyfact.security.oauth2.client.annotation.AuthenticateInterce
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsAuthorizedClientAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsClientRegistrationAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.IsyAccessTokenDecoderFactory;
-import de.bund.bva.isyfact.security.oauth2.client.authentication.PasswordClientRegistrationAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.util.BhknzHeaderConverterBuilder;
 
 /**
@@ -79,14 +78,6 @@ public class IsyOAuth2ClientAutoConfiguration {
     public ClientCredentialsClientRegistrationAuthenticationProvider clientCredentialsClientRegistrationAuthenticationProvider(
             JwtAuthenticationConverter jwtAuthenticationConverter) {
         return new ClientCredentialsClientRegistrationAuthenticationProvider(jwtAuthenticationConverter);
-    }
-
-    // does not have a dependency on ClientRegistrations and should always be created
-    @Bean
-    public PasswordClientRegistrationAuthenticationProvider passwordClientRegistrationAuthenticationProvider(
-            JwtAuthenticationConverter jwtAuthenticationConverter,
-            @Lazy BhknzHeaderConverterBuilder bhknzHeaderConverterBuilder) {
-        return new PasswordClientRegistrationAuthenticationProvider(jwtAuthenticationConverter, bhknzHeaderConverterBuilder);
     }
 
     @Bean
