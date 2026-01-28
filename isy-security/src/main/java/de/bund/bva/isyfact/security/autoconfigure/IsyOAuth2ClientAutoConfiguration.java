@@ -7,14 +7,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.security.oauth2.client.ClientsConfiguredCondition;
+import org.springframework.boot.autoconfigure.security.oauth2.client.ConditionalOnOAuth2ClientRegistrationProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -37,7 +35,6 @@ import de.bund.bva.isyfact.security.oauth2.client.annotation.AuthenticateInterce
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsAuthorizedClientAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsClientRegistrationAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.IsyAccessTokenDecoderFactory;
-import de.bund.bva.isyfact.security.oauth2.client.authentication.util.BhknzHeaderConverterBuilder;
 
 /**
  * Autoconfiguration for beans related to OAuth 2.0 client authentication.
@@ -62,14 +59,6 @@ public class IsyOAuth2ClientAutoConfiguration {
     @Bean
     public JwtDecoderFactory<ClientRegistration> isyJwtDecoderFactory() {
         return new IsyAccessTokenDecoderFactory();
-    }
-
-    // lazy converter because we only need it when an optional BHKNZ is passed during authentication
-    @Lazy
-    @Bean
-    @ConditionalOnMissingBean
-    public BhknzHeaderConverterBuilder bhknzHeaderConverterBuilder(IsyOAuth2ClientConfigurationProperties isyOAuth2ClientConfigurationProperties) {
-        return new BhknzHeaderConverterBuilder(isyOAuth2ClientConfigurationProperties);
     }
 
     // does not have a dependency on ClientRegistrations and should always be created
@@ -104,7 +93,7 @@ public class IsyOAuth2ClientAutoConfiguration {
      * Beans defined in this class are only required if any ClientRegistrations are configured.
      */
     @Configuration
-    @Conditional(ClientsConfiguredCondition.class)
+    @ConditionalOnOAuth2ClientRegistrationProperties
     public static class ClientsConfiguredDependentBeans {
 
         /** Identifier for the AuthorizedClientManager created by isy-security. */
