@@ -108,7 +108,7 @@ class EmbeddedOidcProviderMockTest {
     void testTokenEndpointWithoutUsernameFails() {
         String body = webClient.post().uri(TOKEN_ENDPOINT)
                 .body(BodyInserters.fromFormData(OAuth2ParameterNames.GRANT_TYPE, AuthorizationGrantType.CLIENT_CREDENTIALS.getValue())
-                        .with(OAuth2ParameterNames.PASSWORD, USER_PASSWORD)
+                        .with("password", USER_PASSWORD)
                 ).exchangeToMono(response -> {
                     assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode());
                     return response.bodyToMono(String.class);
@@ -121,7 +121,7 @@ class EmbeddedOidcProviderMockTest {
     void testTokenEndpointWithoutPasswordFails() {
         String body = webClient.post().uri(TOKEN_ENDPOINT)
                 .body(BodyInserters.fromFormData(OAuth2ParameterNames.GRANT_TYPE, AuthorizationGrantType.CLIENT_CREDENTIALS.getValue())
-                        .with(OAuth2ParameterNames.USERNAME, USER_WITHOUT_BHKNZ)
+                        .with("username", USER_WITHOUT_BHKNZ)
                 ).exchangeToMono(response -> {
                     assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode());
                     return response.bodyToMono(String.class);
