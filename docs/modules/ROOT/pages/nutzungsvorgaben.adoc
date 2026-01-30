@@ -69,10 +69,11 @@ Authentifiziert einen OAuth 2.0 Client anhand seiner Client-Registration-ID mit 
 * `client_credentials`-GrantType: Hier kann ein BHKNZ über die AdditionalCredentials übergeben werden.
 
 `void authentifiziere(ClientRegistration clientRegistration)`::
-Authentifiziert einen OAuth 2.0 Client anhand des übergebenen ClientRegistration-Objektes. Diese Methode unterstützt ausschließlich den `client_credentials`-GrantType (_Client Credentials_ Flow).
+Authentifiziert einen OAuth 2.0 Client anhand des übergebenen ClientRegistration-Objektes. Unterstützt:
+* `client_credentials`-GrantType (_Client Credentials_ Flow).
 
 `void authentifiziere(ClientRegistration clientRegistration, AdditionalCredentials credentials)`::
-Authentifiziert einen OAuth 2.0 Client anhand des übergebenen ClientRegistration-Objektes mit zusätzlichen dynamischen Authentifizierungsdaten. Unterstützt beide Grant-Types:
+Authentifiziert einen OAuth 2.0 Client anhand des übergebenen ClientRegistration-Objektes mit zusätzlichen dynamischen Authentifizierungsdaten. Unterstützt:
 * `client_credentials`-GrantType: Hier kann ein BHKNZ über die AdditionalCredentials übergeben werden.
 
 .Verwendung der Authentifizierungsverfahren
@@ -177,34 +178,6 @@ Das Präfix sämtlicher Konfigurationsparameter `spring.security.oauth2` wird zu
 [[isyfact-specific-client-registration]]
 ==== Isyfact spezifische Konfigurationsparameter
 
-
-:linkaktuell: xref:spring-oauth2-client-registration[Client-Credentials-Flow]
-include::glossary:miscellaneous:partial$deprecated-abschnitt.adoc[]
-
-****
-*Anmerkung zur Deprecation*
-
-Dieser Flow soll gemäß OAuth2.0 Vorgaben nicht mehr verwendet werden und wird in zukünftigen Versionen aus dem OAuth-Standard entfernt.
-
-Die folgenden Konfigurationsparameter werden als Übergangslösung für technische Nutzer bereitgestellt.
-Der Client-Credentials Flow ist bevorzugt zu nutzen.
-****
-
-Zugangsdaten für technische Nutzer zur Authentifizierung von Tasks und Batches mit dem _Resource-Owner-Password-Credential_ Flow können über die folgenden Parameter konfiguriert werden:
-
-[[table-isyfact-client-registration-extension]]
-.Isyfact spezifische Erweiterung der Spring ClientRegistration
-[cols="3m,2m,2m,8",options="header"]
-|===
-|Parameter |Wertebereich |Default |Beschreibung
-|isy.security.oauth2.client.registration._<registrationId>_.username |String | null | Benutzername für Grant-Type `password`.
-|isy.security.oauth2.client.registration._<registrationId>_.password |String | null | Benutzerpassword für Grant-Type `password`.
-|isy.security.oauth2.client.registration._<registrationId>_.bhknz |String | null | Behördenkennzeichen für Grant-Type `password`. (optional)
-|isy.security.oauth2.client.bhknz-header-name |String | x-client-cert-bhknz |Konfigurierbarer Headername für Zwei-Faktor-Authentifizierung.
-|isy.security.oauth2.client.default-certificate-ou |String | null | Organisational Unit, die in Verbindung mit bhknz verwendet wird, um den Wert für bhknz-header-name zu bilden.
-
-(Muss gesetzt werden, wenn eine `registration` mit `bhknz` konfiguriert ist)
-|===
 
 
 === Tokenweitergabe an Nachbarsysteme
