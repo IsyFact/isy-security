@@ -20,6 +20,7 @@
 - `IFS-4922`: Aktualisierung von Java 17 auf 25
 
 ### DEPENDENCY UPGRADES
+- Update IsyFact/isy-github-actions-templates/.github/workflows/dependency_review_template.yml von Version 2.1.1 auf 2.2.0
 - Update com.github.spotbugs:spotbugs-maven-plugin von Version 4.9.8.1 auf 4.9.8.2
 - Update org.apache.maven.plugins:maven-source-plugin von Version 3.2.1 auf 3.4.0
 - Update org.apache.maven.plugins:maven-gpg-plugin von Version 3.0.1 auf 3.2.8
