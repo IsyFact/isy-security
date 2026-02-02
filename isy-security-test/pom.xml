@@ -18,6 +18,8 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
     </properties>
 
     <dependencies>
@@ -63,6 +65,7 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock-standalone.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

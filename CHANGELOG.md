@@ -18,6 +18,9 @@
     * Rückgabe eines Byte-Arrays statt eines Integers in der Methode `generateCacheKey` der Klasse `AbstractClientRegistrationAuthenticationToken`
     * Konfigurierbare Properties für Hashfunktion und Bytegröße des Salts
 - `IFS-4922`: Aktualisierung von Java 17 auf 25
+- `IFS-4858`: Umstellung von isy-security auf Spring Boot 4 (inkludiert Update auf Spring Security 7)
+    * Nutzer von isy-security sollten ebenfalls auf Spring Boot 4 updaten, um Kompatibilitätsprobleme zu vermeiden
+    * Der Resource Owner Password Credential Flow wird mit dieser Version nicht mehr unterstützt. Anwendungen müssen zwingend auf den Client Credentials Flow umsteigen.
 
 ### DEPENDENCY UPGRADES
 - Update com.github.spotbugs:spotbugs-maven-plugin von Version 4.9.8.1 auf 4.9.8.2

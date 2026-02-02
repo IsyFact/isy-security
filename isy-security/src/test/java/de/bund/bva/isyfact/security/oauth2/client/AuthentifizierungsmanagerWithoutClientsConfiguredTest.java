@@ -4,36 +4,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import de.bund.bva.isyfact.security.AbstractOidcProviderTest;
 import de.bund.bva.isyfact.security.config.AdditionalCredentials;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsClientRegistrationAuthenticationProvider;
-import de.bund.bva.isyfact.security.oauth2.client.authentication.PasswordClientRegistrationAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.token.ClientCredentialsClientRegistrationAuthenticationToken;
-import de.bund.bva.isyfact.security.oauth2.client.authentication.token.PasswordClientRegistrationAuthenticationToken;
 
 @SpringBootTest
 public class AuthentifizierungsmanagerWithoutClientsConfiguredTest extends AbstractOidcProviderTest {
 
-    @MockBean
+    @MockitoBean
     private ClientCredentialsClientRegistrationAuthenticationProvider clientCredentialsClientRegistrationAuthenticationProvider;
-
-    @MockBean
-    private PasswordClientRegistrationAuthenticationProvider passwordClientRegistrationAuthenticationProvider;
 
     @Autowired
     private Authentifizierungsmanager authentifizierungsmanager;
@@ -52,15 +50,6 @@ public class AuthentifizierungsmanagerWithoutClientsConfiguredTest extends Abstr
 
         when(clientCredentialsClientRegistrationAuthenticationProvider.supports(any())).thenCallRealMethod();
         when(clientCredentialsClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt);
-
-        when(passwordClientRegistrationAuthenticationProvider.supports(any())).thenCallRealMethod();
-        when(passwordClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt);
-    }
-
-    @Test
-    public void testHasOnlyClientRegistrationAuthenticationProvider() {
-        assertThat(isyOAuth2AuthenticationProviderManager.getProviders())
-                .containsOnly(clientCredentialsClientRegistrationAuthenticationProvider, passwordClientRegistrationAuthenticationProvider);
     }
 
     @Test
@@ -96,31 +85,20 @@ public class AuthentifizierungsmanagerWithoutClientsConfiguredTest extends Abstr
     }
 
     @Test
-    public void testAuthWithDirectClientRegistrationAndCredentials() {
+    public void testAuthWithGranttypePasswordNotSupported() {
         ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("custom-ropc-client")
                 .tokenUri("http://localhost:9095/auth/realms/testrealm/protocol/openid-connect/token")
                 .jwkSetUri("http://localhost:9095/auth/realms/testrealm/protocol/openid-connect/certs")
                 .clientId("testid")
                 .clientSecret("testsecret")
-                .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                .authorizationGrantType(new AuthorizationGrantType("password"))
                 .build();
 
         AdditionalCredentials additionalCredentials = AdditionalCredentials.createWithUsernamePasswordBhknz(
                 "newUser", "newPassword", "900600");
 
-        authentifizierungsmanager.authentifiziere(clientRegistration, additionalCredentials);
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> authentifizierungsmanager.authentifiziere(clientRegistration, additionalCredentials));
 
-        ArgumentCaptor<PasswordClientRegistrationAuthenticationToken> tokenCaptor =
-                ArgumentCaptor.forClass(PasswordClientRegistrationAuthenticationToken.class);
-        verify(passwordClientRegistrationAuthenticationProvider).authenticate(tokenCaptor.capture());
-        PasswordClientRegistrationAuthenticationToken value = tokenCaptor.getValue();
-        assertEquals("custom-ropc-client", value.getClientRegistration().getRegistrationId());
-        assertEquals("testid", value.getClientRegistration().getClientId());
-        assertEquals("testsecret", value.getClientRegistration().getClientSecret());
-        assertEquals("newUser", value.getUsername());
-        assertEquals("newPassword", value.getPassword());
-        assertEquals("900600", value.getBhknz());
-
-        assertEquals(mockJwt, SecurityContextHolder.getContext().getAuthentication());
+        assertEquals(illegalArgumentException.getMessage(), "The AuthorizationGrantType 'password' is not supported.");
     }
 }

@@ -6,7 +6,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.CLIENT_CREDENTIALS;
-import static org.springframework.security.oauth2.core.AuthorizationGrantType.PASSWORD;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.GRANT_TYPE;
 
 import java.util.HashMap;
@@ -20,10 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.github.tomakehurst.wiremock.matching.NegativeRegexPattern;
-import com.github.tomakehurst.wiremock.matching.RegexPattern;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 
 /**
@@ -32,24 +29,51 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
  */
 public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
 
-    /** Name of the HTTP header that contains the BHKNZ and second OU. */
+    /**
+     * Name of the HTTP header that contains the BHKNZ and second OU.
+     */
     static final String BHKNZ_HEADER_NAME = "x-client-cert-bhknz";
 
+    /**
+     * Endpoint for the OpenID Connect configuration.
+     */
     static final String OIDC_CONFIG_ENDPOINT = "/.well-known/openid-configuration";
 
+    /**
+     * Endpoint for the authorization request.
+     */
     static final String AUTHORIZATION_ENDPOINT = "/protocol/openid-connect/auth";
 
+    /**
+     * Endpoint for the JSON Web Key Set (JWKS).
+     */
     static final String JWKS_ENDPOINT = "/protocol/openid-connect/certs";
 
+    /**
+     * Endpoint for the token request.
+     */
     static final String TOKEN_ENDPOINT = "/protocol/openid-connect/token";
 
+    /**
+     * Default value for the second OU used when none is explicitly set.
+     */
     private static final String DEFAULT_SECOND_OU = "TESTOU";
 
+    /**
+     * Current value of the second OU used for validation during login.
+     */
     private String secondOu = DEFAULT_SECOND_OU;
 
+    /**
+     * Stores all user-related stub mappings keyed by username.
+     */
     private final Map<String, Set<StubMapping>> userMappings = new HashMap<>();
 
+    /**
+     * Stores all client-related stub mappings keyed by client ID.
+     */
     private final Map<String, Set<StubMapping>> clientMappings = new HashMap<>();
+
 
     public OidcProviderMockBase(String host, int port, String issuerPath) {
         super(host, port, issuerPath);
@@ -75,8 +99,7 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
      * Sets the second OU value which is checked on login. The default is {@link #DEFAULT_SECOND_OU}. The value
      * <em>must</em> be set before the first call to {@link #addUser(String, String, String, String, Optional, Set)}!
      *
-     * @param secondOu
-     *         second OU to check during login
+     * @param secondOu second OU to check during login
      */
     public void setSecondOu(String secondOu) {
         this.secondOu = secondOu;
@@ -206,44 +229,6 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
         Set<StubMapping> stubMappings = new HashSet<>();
 
         String tokenEndpoint = appendToIssuerPath(TOKEN_ENDPOINT);
-        String validLogin = "%s=%s&username=%s&password=%s".formatted(GRANT_TYPE, PASSWORD.getValue(), username, password);
-
-        if (bhknz.isPresent()) {
-            String bhknzPattern = "%1$s:%2$s|%2$s:%1$s".formatted(bhknz.get(), secondOu);
-
-            // Require the bhknz header if the user has a bhknz
-            stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(1)
-                    .withHeader(BHKNZ_HEADER_NAME, new RegexPattern(bhknzPattern))
-                    .withRequestBody(new ContainsPattern(validLogin)).withBasicAuth(clientId, secret)
-                    .willReturn(aResponse()
-                            .withStatus(HttpStatus.OK.value())
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                            .withBody(accessTokenResponse)
-                    )));
-        } else {
-            // Only allow request without the bhknz header if the user does not have a bhknz.
-            // This makes sure that the token will never contain the bhknz if the header isn't present,
-            // even if a dedicated OIDC provider might return it anyway.
-            // Otherwise it is impossible to distinguish request with or without the bhknz header.
-            stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(1)
-                    .withRequestBody(new ContainsPattern(validLogin)).withBasicAuth(clientId, secret)
-                    .willReturn(aResponse()
-                            .withStatus(HttpStatus.OK.value())
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                            .withBody(accessTokenResponse)
-                    )));
-        }
-
-        if (bhknz.isPresent()) {
-            stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(5)
-                    .withRequestBody(new ContainsPattern(validLogin))
-                    .willReturn(aResponse()
-                            .withStatus(HttpStatus.UNAUTHORIZED.value())
-                            .withHeader(HttpHeaders.WWW_AUTHENTICATE, "dummy")
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                            .withBody(createErrorResponse("invalid_grant", "Invalid bhknz"))
-                    )));
-        }
 
         stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(5)
                 .withRequestBody(new NegativeRegexPattern(".*username=%s.*".formatted(username)))

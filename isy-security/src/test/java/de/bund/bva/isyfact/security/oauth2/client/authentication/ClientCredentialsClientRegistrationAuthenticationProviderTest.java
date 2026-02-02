@@ -64,7 +64,7 @@ public class ClientCredentialsClientRegistrationAuthenticationProviderTest exten
         List<String> grantedAuthorityNames = jwtAuth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-        assertThat(grantedAuthorityNames).containsOnly("PRIV_Recht_A");
+        assertThat(grantedAuthorityNames).containsExactlyInAnyOrder("PRIV_Recht_A", "FACTOR_BEARER");
         assertThat((List<String>) jwtAuth.getTokenAttributes().get(DEFAULT_ROLES_CLAIM_NAME)).containsOnly("Rolle_A");
     }
 
@@ -90,7 +90,7 @@ public class ClientCredentialsClientRegistrationAuthenticationProviderTest exten
         List<String> grantedAuthorityNames = jwtAuth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-        assertThat(grantedAuthorityNames).containsOnly("PRIV_Recht_A");
+        assertThat(grantedAuthorityNames).containsExactlyInAnyOrder("PRIV_Recht_A", "FACTOR_BEARER");
         assertThat((List<String>) jwtAuth.getTokenAttributes().get(DEFAULT_ROLES_CLAIM_NAME)).containsOnly("Rolle_A");
     }
 
