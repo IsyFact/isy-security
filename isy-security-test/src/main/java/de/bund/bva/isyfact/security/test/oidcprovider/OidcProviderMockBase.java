@@ -34,21 +34,46 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
      */
     static final String BHKNZ_HEADER_NAME = "x-client-cert-bhknz";
 
+    /**
+     * Endpoint for the OpenID Connect configuration.
+     */
     static final String OIDC_CONFIG_ENDPOINT = "/.well-known/openid-configuration";
 
+    /**
+     * Endpoint for the authorization request.
+     */
     static final String AUTHORIZATION_ENDPOINT = "/protocol/openid-connect/auth";
 
+    /**
+     * Endpoint for the JSON Web Key Set (JWKS).
+     */
     static final String JWKS_ENDPOINT = "/protocol/openid-connect/certs";
 
+    /**
+     * Endpoint for the token request.
+     */
     static final String TOKEN_ENDPOINT = "/protocol/openid-connect/token";
 
+    /**
+     * Default value for the second OU used when none is explicitly set.
+     */
     private static final String DEFAULT_SECOND_OU = "TESTOU";
 
+    /**
+     * Current value of the second OU used for validation during login.
+     */
     private String secondOu = DEFAULT_SECOND_OU;
 
+    /**
+     * Stores all user-related stub mappings keyed by username.
+     */
     private final Map<String, Set<StubMapping>> userMappings = new HashMap<>();
 
+    /**
+     * Stores all client-related stub mappings keyed by client ID.
+     */
     private final Map<String, Set<StubMapping>> clientMappings = new HashMap<>();
+
 
     public OidcProviderMockBase(String host, int port, String issuerPath) {
         super(host, port, issuerPath);
