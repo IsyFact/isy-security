@@ -18,6 +18,9 @@ import de.bund.bva.isyfact.security.test.oidcprovider.EmbeddedOidcProviderStub;
  */
 public class RsaKeyGenerator {
 
+    /**
+     * Keypair for the RSA key generator.
+     */
     private final KeyPair keyPair;
 
     public RsaKeyGenerator() {

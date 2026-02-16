@@ -23,8 +23,14 @@ public class RolePrivilegesMapper {
      */
     private static final Logger LOG = LoggerFactory.getLogger(RolePrivilegesMapper.class);
 
+    /**
+     * ID of the Anwendung.
+     */
     private String applicationId = "";
 
+    /**
+     * Map of {@link Role} and {@link Privilege}.
+     */
     private Map<String, Set<String>> rolePrivilegesMap = new HashMap<>();
 
     public RolePrivilegesMapper(Resource roleMappingXmlResource) {
