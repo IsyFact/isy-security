@@ -222,7 +222,7 @@ public class AuthentifizierungsmanagerTest extends AbstractOidcProviderTest {
                 .authorizationGrantType(AuthorizationGrantType.DEVICE_CODE)
                 .build();
 
-        AdditionalCredentials credentials = AdditionalCredentials.createWithUsernamePassword("user", "password");
+        AdditionalCredentials credentials = AdditionalCredentials.createWithBhknz("900600");
 
         assertThrows(IllegalArgumentException.class,
                 () -> authentifizierungsmanager.authentifiziere(clientRegistration, credentials));
