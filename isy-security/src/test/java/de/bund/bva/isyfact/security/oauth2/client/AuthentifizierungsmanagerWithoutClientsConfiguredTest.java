@@ -94,8 +94,7 @@ public class AuthentifizierungsmanagerWithoutClientsConfiguredTest extends Abstr
                 .authorizationGrantType(new AuthorizationGrantType("password"))
                 .build();
 
-        AdditionalCredentials additionalCredentials = AdditionalCredentials.createWithUsernamePasswordBhknz(
-                "newUser", "newPassword", "900600");
+        AdditionalCredentials additionalCredentials = AdditionalCredentials.createWithBhknz("900600");
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> authentifizierungsmanager.authentifiziere(clientRegistration, additionalCredentials));
 

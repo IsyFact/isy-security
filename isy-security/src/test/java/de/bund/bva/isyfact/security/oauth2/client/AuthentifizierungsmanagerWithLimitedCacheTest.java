@@ -77,7 +77,7 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
 
         // First authentication attempt with credentials from testid1
         // Provider is called
-        authentiziere("testId1", "testsecret1", "testuser1", "testpw1");
+        authentiziere("testId1", "testsecret1", "900601");
 
         verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
         SecurityContextHolder.clearContext();
@@ -85,33 +85,33 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
 
         // Second authentication attempt with credentials from testid1
         // provider is not called, authentication data is taken from cache
-        authentiziere("testId1", "testsecret1", "testuser1", "testpw1");
+        authentiziere("testId1", "testsecret1", "900601");
         verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
         SecurityContextHolder.clearContext();
 
         // First authentication attempt with credentials from testid2
         // Provider is called
-        authentiziere("testId2", "testsecret2", "testuser2", "testpw2");
+        authentiziere("testId2", "testsecret2", "900602");
         verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
         SecurityContextHolder.clearContext();
         clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
 
         // Second authentication attempt with credentials from testid2
         // provider is not called, authentication data is taken from cache
-        authentiziere("testId2", "testsecret2", "testuser2", "testpw2");
+        authentiziere("testId2", "testsecret2", "900602");
         verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
         SecurityContextHolder.clearContext();
 
         // First authentication attempt with credentials from testid3
         // Provider is called
-        authentiziere("testId3", "testsecret3", "testuser3", "testpw3");
+        authentiziere("testId3", "testsecret3", "900603");
         verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
         SecurityContextHolder.clearContext();
         clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
 
         // Now third authentication attempt with credentials from testid1
         // Provider is called because there is no more cached data for testid1 due to the maxelements specification
-        authentiziere("testId1", "testsecret1", "testuser1", "testpw1");
+        authentiziere("testId1", "testsecret1", "900601");
         verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
         SecurityContextHolder.clearContext();
     }
@@ -125,14 +125,14 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
 
         // First authentication attempt with credentials from testid1
         // Provider is called
-        authentiziere("testid1", "testsecret1", "testuser1", "testpw1");
+        authentiziere("testid1", "testsecret1", "900601");
         verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
         SecurityContextHolder.clearContext();
         clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
 
         // Second authentication attempt with credentials from testid1
         // provider is not called, authentication data is taken from cache
-        authentiziere("testid1", "testsecret1", "testuser1", "testpw1");
+        authentiziere("testid1", "testsecret1", "900601");
         verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
         SecurityContextHolder.clearContext();
 
@@ -141,7 +141,7 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
 
         // Now third authentication attempt with credentials from testid1
         // Provider is called because the cached token is expired
-        authentiziere("testid1", "testsecret1", "testuser1", "testpw1");
+        authentiziere("testid1", "testsecret1", "900601");
         verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
         clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
 
@@ -149,7 +149,7 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
         when(mockToken.getExpiresAt()).thenReturn(Instant.now().plusSeconds(20));
         // fourth authentication attempt with credentials from testid1
         // provider is not called, authentication data is taken from cache
-        authentiziere("testid1", "testsecret1", "testuser1", "testpw1");
+        authentiziere("testid1", "testsecret1", "900601");
         verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
         SecurityContextHolder.clearContext();
     }
@@ -160,7 +160,7 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
         SecurityContextHolder.clearContext();
     }
 
-    private void authentiziere(String clientId, String clientSecret, String username, String password) {
+    private void authentiziere(String clientId, String clientSecret, String bhknz) {
 
         ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("testid")
                 .tokenUri(getIssuer())
@@ -168,10 +168,7 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
                 .clientSecret(clientSecret)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .build();
-        AdditionalCredentials additionalCredentials = AdditionalCredentials.createWithUsernamePassword(
-                username,
-                password
-        );
+        AdditionalCredentials additionalCredentials = AdditionalCredentials.createWithBhknz(bhknz);
 
         authentifizierungsmanager.authentifiziere(clientRegistration, additionalCredentials);
     }

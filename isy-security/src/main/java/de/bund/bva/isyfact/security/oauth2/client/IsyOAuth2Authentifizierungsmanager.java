@@ -35,16 +35,15 @@ import de.bund.bva.isyfact.security.oauth2.util.IsySecurityTokenUtil;
 /**
  * Default implementation of the {@link Authentifizierungsmanager} that should suffice for most use cases.
  * <p>
- * It provides different ways to authorize OAuth 2.0 Clients (via the Client Credentials flow) and
- * System users (representing resource owners) via the Resource Owner Password Credentials flow.
+ * It provides different ways to authorize OAuth 2.0 Clients via the Client Credentials flow.
  * <p>
  * The primary way for authentication is {@link #authentifiziere(String)}, which depends on OAuth 2.0 Client Registrations
  * to be configured in the application properties.
  * The other {@link #authentifiziere(ClientRegistration) method takes a Client Registration
  * with the provided credentials and thus do not depend on any Registration to be configured in the application properties.
  * Both {@link #authentifiziere(String, AdditionalCredentials) and
- * {@link #authentifiziere(ClientRegistration, AdditionalCredentials) offer the option of overwriting
- * credentials like username, password and bhknz.
+ * {@link #authentifiziere(ClientRegistration, AdditionalCredentials) offer the option of providing
+ * bhknz via {@link AdditionalCredentials}.
  */
 public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsmanager, DisposableBean {
 
@@ -226,11 +225,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
         AuthorizationGrantType grantType = clientRegistration.getAuthorizationGrantType();
 
         if (AuthorizationGrantType.CLIENT_CREDENTIALS.equals(grantType)) {
-            if (credentials.hasUsernamePassword()) {
-                throw new IllegalArgumentException("The AuthorizationGrantType '" + grantType.getValue() + "' incorrectly contains credentials.");
-            } else {
-                return new ClientCredentialsRegistrationIdAuthenticationToken(oauth2ClientRegistrationId, credentials.getBhknz());
-            }
+            return new ClientCredentialsRegistrationIdAuthenticationToken(oauth2ClientRegistrationId, credentials.getBhknz());
         } else {
             throw new IllegalArgumentException("The AuthorizationGrantType '" + grantType.getValue() + "' is not supported.");
         }

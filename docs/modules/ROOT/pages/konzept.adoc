@@ -140,15 +140,13 @@ Dabei wird anhand des Typs der Authentifizierungsdaten der _Credential_-Flow xre
 * `authentifiziere(ClientRegistration clientRegistration)`: Erlaubt die direkte Verwendung eines ClientRegistration-Objekts mit Token-URI und JWKS-URI.
 * `authentifiziere(ClientRegistration clientRegistration, AdditionalCredentials credentials)`: Wie oben, ergänzt um die Möglichkeit, ein BHKNZ über die AdditionalCredentials anzugeben.
 
-Die Klasse `AdditionalCredentials` dient zur Kapselung zusätzlicher Authentifizierungsdaten bei der Authentifizierung mit ClientRegistration-Objekten.
+Die Klasse `AdditionalCredentials` dient zur Kapselung eines BHKNZ (Behördenkennzeichen) als zusätzliches Authentifizierungsmerkmal bei der Authentifizierung mit ClientRegistration-Objekten.
+Eine Instanz wird über die statische Factory-Methode `createWithBhknz` erstellt, die ein BHKNZ als Parameter erwartet.
+
+zusätzlicher Authentifizierungsdaten
 Sie ermöglicht die flexible Kombination verschiedener Credentials wie Benutzername, Passwort und BHKNZ.
-Über statische Builder-Methoden können Instanzen mit den gewünschten Kombinationen erstellt werden:
 
-- `createWithUsernamePassword` für Benutzername und Passwort,
-- `createWithUsernamePasswordBhknz` für Benutzername, Passwort und BHKNZ, sowie
-- `createWithBhknz` nur für das BHKNZ.
-
-Die Klasse bietet zudem Prüfmethoden wie `hasUsernamePassword` und `hasBhknz`, um die Verfügbarkeit bestimmter Credentials zu ermitteln.
+Die Klasse bietet zudem die rüfmethoden `hasBhknz`, um die Verfügbarkeit des BHKNZ zu ermitteln.
 
 Der `Berechtigungsmanager` gibt Auskunft über die Rollen und Rechte des Anwenders.
 Die in der Benutzeradministration dem Anwender zugewiesenen Rollen werden mithilfe einer anwendungsspezifischen Rollen-Rechte-Datei in konkrete Rechte des Anwenders für diese Anwendung umgewandelt.
@@ -351,9 +349,6 @@ Im IAM-Service erfolgt dann die eigentliche Authentifizierung.
 . Mit Erhalt eines gültigen Access-Tokens leitet das Service-Gateway die fachliche Anfrage zusammen mit dem Token an das eigentliche IT-System weiter.
 In der Anwendung kann anschließend die Ausführungsberechtigung des Benutzers verifiziert werden.
 
-Dabei muss die Authentifizierung der externen Anwendung noch nicht gemäß _SpringSecurity (OAuth2.0)_ auf einen _OAuth2.0 Client_ (mit Client-ID u. Client-Secret) migriert worden sein,
-sondern es kann nach wie vor ein technischer Nutzer (mit Username u. Passwort) zur Authentifizierung verwendet werden.
-
 Zu beachten ist, dass die externe Anwendung die Authentifizierungsdaten bei jeder fachlichen Anfrage an das Service-Gateway sendet.
 Das Service-Gateway initiiert die Authentifizierung über den Baustein `isy-security`, erhält ein gültiges Access-Token vom IAM-Service und leitet dieses dann in Verbindung mit der fachlichen Anfrage an die Geschäftsanwendung weiter.
 Das Access-Token wird dabei nicht an die externe Anwendung ausgeliefert, daher muss jede fachliche Anfrage der externen Anwendung erneut authentifiziert werden, obwohl das vorherige Access-Token noch gültig wäre.
@@ -462,8 +457,8 @@ Sie besitzen in der Regel einen kleineren Umfang als _Batches_ und werden nicht 
 Stattdessen werden sie durch die Anwendung selbst konfiguriert, zeitlich geplant und selbstständig ausgeführt.
 Daher müssen _Aufgaben_, als Teil einer Komponente des Anwendungskerns, über andere Mechanismen abgesichert werden.
 
-Mit Einführung des Bausteins `isy-security` wird auch für die Absicherung von _Aufgaben_ der _Credential_-Flow xref:client-credential-flow[] unterstützt.
-Das bedeutet, dass die für die _Aufgaben_-Authentifizierung verwendete Parametrisierung per Konfiguration in _isy_task_ nicht mehr wie bisher als _NatürlicherNutzer_ zu `Benutzer` und `Passwort` aufgelöst werden kann, sondern neu als _TechnischerNutzer_ (Client) zu `Client-ID` und `Client-Secret` aufgelöst werden muss.
+Für die Absicherung von _Aufgaben_ wird der _Credential_-Flow xref:client-credential-flow[] verwendet.
+Die für die _Aufgaben_-Authentifizierung verwendete Parametrisierung per Konfiguration in _isy_task_ wird als _TechnischerNutzer_ (Client) zu `Client-ID` und `Client-Secret` aufgelöst werden muss.
 
 Mit `IsyFact-5` wird der zuvor verfügbare Resource Owner Password Credential Flow mit `Benutzer` und `Passwort` nicht mehr unterstützt.
 
@@ -612,7 +607,7 @@ Als optional mögliche 2-Faktor-Authentifizierung ist im IAM-Service die Übermi
 Die Implementierung des IAM-Service muss für die 2-Faktor-Authentifizierung dieses Feature unterstützen, andernfalls wird das BHKNZ als optionales Attribut betrachtet.
 Wenn die IAM-Service-Implementierung dieses Feature unterstützt, dann wird ein mit den Authentifizierungsdaten gemeinsam übergebenes Behördenkennzeichen gegen das Behördenkennzeichen aus dem zu authentifizierenden Nutzerprofil geprüft.
 
-Wie in <<aussensicht-der-komponente-security>> beschrieben, wird bei der Authentifizierungsmethode `authentifiziere()` das Behördenkennzeichen, sowie Username und Password in den `AdditionalCredentials` als optionaler Parameter an den `Authentifizierungsmanager` übergeben, der es mit den anderen Authentifizierungsdaten zusammen an den IAM-Service weiterleitet.
+Wie in <<aussensicht-der-komponente-security>> beschrieben, wird bei der Authentifizierungsmethode `authentifiziere()` das Behördenkennzeichen in den `AdditionalCredentials` als optionaler Parameter an den `Authentifizierungsmanager` übergeben, der es mit den anderen Authentifizierungsdaten zusammen an den IAM-Service weiterleitet.
 
 
 [[multiple-uris]]
