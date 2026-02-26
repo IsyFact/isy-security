@@ -146,7 +146,7 @@ Eine Instanz wird über die statische Factory-Methode `createWithBhknz` erstellt
 zusätzlicher Authentifizierungsdaten
 Sie ermöglicht die flexible Kombination verschiedener Credentials wie Benutzername, Passwort und BHKNZ.
 
-Die Klasse bietet zudem die rüfmethoden `hasBhknz`, um die Verfügbarkeit des BHKNZ zu ermitteln.
+Die Klasse bietet zudem die Prüfmethoden `hasBhknz`, um die Verfügbarkeit des BHKNZ zu ermitteln.
 
 Der `Berechtigungsmanager` gibt Auskunft über die Rollen und Rechte des Anwenders.
 Die in der Benutzeradministration dem Anwender zugewiesenen Rollen werden mithilfe einer anwendungsspezifischen Rollen-Rechte-Datei in konkrete Rechte des Anwenders für diese Anwendung umgewandelt.
