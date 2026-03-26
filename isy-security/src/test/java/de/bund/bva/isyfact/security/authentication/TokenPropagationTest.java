@@ -8,9 +8,11 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +28,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
 
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TokenPropagationTest {
 
@@ -55,10 +58,6 @@ class TokenPropagationTest {
 
     @BeforeEach
     public void setup() {
-        bearerToken = "eYsupernicetoken";
-        when(oAuth2AccessToken.getTokenValue()).thenReturn(bearerToken);
-        when(authentication.getCredentials()).thenReturn(oAuth2AccessToken);
-
         // Initialize security context with mocked authentication that provides an OAuth2 access token
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -77,6 +76,10 @@ class TokenPropagationTest {
 
     @Test
     void shouldPropagateBearerTokenInHeader() {
+        bearerToken = "eYsupernicetoken";
+        when(oAuth2AccessToken.getTokenValue()).thenReturn(bearerToken);
+        when(authentication.getCredentials()).thenReturn(oAuth2AccessToken);
+
         webClient.get()
             .retrieve()
             .bodyToMono(Void.class)

@@ -9,9 +9,15 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 public class Role {
 
+    /**
+     * ID of the {@link Role}.
+     */
     @JacksonXmlProperty(isAttribute = true, localName = "RolleId")
     private String id;
 
+    /**
+     * List of  {@link Privilege}.
+     */
     @JacksonXmlProperty(namespace = "tns", localName = "rechtId")
     @JacksonXmlElementWrapper(useWrapping = false)
     private List<Privilege> privileges;

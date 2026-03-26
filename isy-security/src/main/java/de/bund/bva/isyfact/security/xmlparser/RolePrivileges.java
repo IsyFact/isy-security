@@ -14,13 +14,22 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName = "Anwendung")
 public class RolePrivileges {
 
+    /**
+     * ID of the Anwendung.
+     */
     @JacksonXmlProperty(localName = "AnwendungsId")
     private String applicationId;
 
+    /**
+     * List of  {@link PrivilegeContainer} containing privileges.
+     */
     @JacksonXmlProperty(namespace = "tns", localName = "rechte")
     @JacksonXmlElementWrapper(useWrapping = false)
     private List<PrivilegeContainer> privileges;
 
+    /**
+     * List of  {@link Role}.
+     */
     @JacksonXmlProperty(namespace = "tns", localName = "rollen")
     @JacksonXmlElementWrapper(useWrapping = false)
     private List<Role> roles;

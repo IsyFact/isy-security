@@ -1,17 +1,21 @@
 package de.bund.bva.isyfact.security.oauth2.client;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import de.bund.bva.isyfact.security.AbstractOidcProviderTest;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsClientRegistrationAuthenticationProvider;
@@ -25,7 +29,7 @@ import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentia
 })
 public class AuthentifizierungsmanagerWithDisabledCacheTest extends AbstractOidcProviderTest {
 
-    @MockBean
+    @MockitoBean
     private ClientCredentialsClientRegistrationAuthenticationProvider clientCredentialsProvider;
 
     @Autowired

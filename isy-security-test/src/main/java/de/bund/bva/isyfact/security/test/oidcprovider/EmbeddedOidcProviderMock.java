@@ -14,6 +14,9 @@ import com.github.tomakehurst.wiremock.client.WireMock;
  */
 public class EmbeddedOidcProviderMock extends OidcProviderMockBase implements AfterAllCallback, BeforeAllCallback {
 
+    /**
+     * Mocked OIDC-Server.
+     */
     private WireMockServer oidcServerStub;
 
     public EmbeddedOidcProviderMock(String host, int port, String issuerPath) {

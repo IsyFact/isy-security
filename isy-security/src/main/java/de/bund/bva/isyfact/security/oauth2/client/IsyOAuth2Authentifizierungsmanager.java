@@ -14,7 +14,6 @@ import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -31,22 +30,20 @@ import de.bund.bva.isyfact.security.config.IsySecurityConfigurationProperties;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.token.AbstractIsyAuthenticationToken;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.token.ClientCredentialsClientRegistrationAuthenticationToken;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.token.ClientCredentialsRegistrationIdAuthenticationToken;
-import de.bund.bva.isyfact.security.oauth2.client.authentication.token.PasswordClientRegistrationAuthenticationToken;
 import de.bund.bva.isyfact.security.oauth2.util.IsySecurityTokenUtil;
 
 /**
  * Default implementation of the {@link Authentifizierungsmanager} that should suffice for most use cases.
  * <p>
- * It provides different ways to authorize OAuth 2.0 Clients (via the Client Credentials flow) and
- * System users (representing resource owners) via the Resource Owner Password Credentials flow.
+ * It provides different ways to authorize OAuth 2.0 Clients via the Client Credentials flow.
  * <p>
  * The primary way for authentication is {@link #authentifiziere(String)}, which depends on OAuth 2.0 Client Registrations
  * to be configured in the application properties.
  * The other {@link #authentifiziere(ClientRegistration) method takes a Client Registration
  * with the provided credentials and thus do not depend on any Registration to be configured in the application properties.
  * Both {@link #authentifiziere(String, AdditionalCredentials) and
- * {@link #authentifiziere(ClientRegistration, AdditionalCredentials) offer the option of overwriting
- * credentials like username, password and bhknz.
+ * {@link #authentifiziere(ClientRegistration, AdditionalCredentials) offer the option of providing
+ * bhknz via {@link AdditionalCredentials}.
  */
 public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsmanager, DisposableBean {
 
@@ -192,24 +189,13 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
         AdditionalRegistrationProperties props = isyOAuth2ClientProps.getRegistration().get(clientRegistration.getRegistrationId());
         String bhknz = null;
         if (props != null) {
-            // the BHKNZ is optional but can be set for CC or ROPC
+            // the BHKNZ is optional but can be set for CC
             bhknz = props.getBhknz();
         }
 
         AuthorizationGrantType grantType = clientRegistration.getAuthorizationGrantType();
         if (AuthorizationGrantType.CLIENT_CREDENTIALS.equals(grantType)) {
             return new ClientCredentialsRegistrationIdAuthenticationToken(oauth2ClientRegistrationId, bhknz);
-        } else if (AuthorizationGrantType.PASSWORD.equals(grantType)) {
-            // ROPC requires the username and password to be set in the additional properties
-            if (props != null && props.getUsername() != null && props.getPassword() != null) {
-                return new PasswordClientRegistrationAuthenticationToken(clientRegistration, props.getUsername(), props.getPassword(), bhknz);
-            } else {
-                throw new BadCredentialsException(
-                        "No configured credentials (username, password) found for client with registrationId: %s.".formatted(
-                                clientRegistration.getRegistrationId()));
-            }
-
-
         } else {
             throw new IllegalArgumentException("The AuthorizationGrantType '" + grantType.getValue() + "' is not supported.");
         }
@@ -239,20 +225,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
         AuthorizationGrantType grantType = clientRegistration.getAuthorizationGrantType();
 
         if (AuthorizationGrantType.CLIENT_CREDENTIALS.equals(grantType)) {
-            if (credentials.hasUsernamePassword()) {
-                throw new IllegalArgumentException("The AuthorizationGrantType '" + grantType.getValue() + "' incorrectly contains credentials.");
-            } else {
-                return new ClientCredentialsRegistrationIdAuthenticationToken(oauth2ClientRegistrationId, credentials.getBhknz());
-            }
-        } else if (AuthorizationGrantType.PASSWORD.equals(grantType)) {
-            if (!credentials.hasUsernamePassword()) {
-                throw new BadCredentialsException(
-                        "No configured credentials (username, password) found for client with registrationId: %s.".formatted(
-                                clientRegistration.getRegistrationId()));
-            } else {
-                return new PasswordClientRegistrationAuthenticationToken(clientRegistration,
-                        credentials.getUsername(), credentials.getPassword(), credentials.getBhknz());
-            }
+            return new ClientCredentialsRegistrationIdAuthenticationToken(oauth2ClientRegistrationId, credentials.getBhknz());
         } else {
             throw new IllegalArgumentException("The AuthorizationGrantType '" + grantType.getValue() + "' is not supported.");
         }
@@ -329,14 +302,6 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
 
         if (AuthorizationGrantType.CLIENT_CREDENTIALS.equals(grantType)) {
             unauthenticatedToken = new ClientCredentialsClientRegistrationAuthenticationToken(clientRegistration, credentials.getBhknz());
-        } else if (AuthorizationGrantType.PASSWORD.equals(grantType)) {
-            if (credentials.hasUsernamePassword()) {
-                unauthenticatedToken = new PasswordClientRegistrationAuthenticationToken(clientRegistration,
-                        credentials.getUsername(), credentials.getPassword(), credentials.getBhknz());
-            } else {
-                throw new BadCredentialsException(
-                        "No credentials (username, password) provided for client with password grant type.");
-            }
         } else {
             throw new IllegalArgumentException("The AuthorizationGrantType '" + grantType.getValue() + "' is not supported.");
         }
