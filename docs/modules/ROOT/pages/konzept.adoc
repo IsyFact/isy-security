@@ -125,35 +125,28 @@ Außerdem kann die Geschäftsanwendung über die Methode `getAlleRollen` eine Li
 Der `Authentifizierungsmanager` übernimmt die programmatische Authentifizierung und Autorisierung interner und externer Anwendungen durch das IAM für den Zugang zu IsyFact-Nachbaranwendungen.
 Er bietet verschiedene Methoden für die Authentifizierung, sowohl über Registration-IDs als auch über direkte ClientRegistration-Objekte.
 
-Batches und Tasks sind als Confidential Client eingestuft und verwahren ihre Authentifizierungsdaten (entweder Client-ID u. Client-Secret oder Nutzername u. Passwort) in ihrer Konfiguration (mit einer `oauth2ClientRegistrationId` als Schlüssel).
+Batches und Tasks sind als Confidential Client eingestuft und verwahren ihre Authentifizierungsdaten (Client-ID u. Client-Secret) in ihrer Konfiguration (mit einer `oauth2ClientRegistrationId` als Schlüssel).
 Die Methode `authentifiziere(String oauth2ClientRegistrationId)` im Authentifizierungsmanager liest diese Authentifizierungsdaten aus der betrieblichen Konfiguration und führt damit eine OAuth2.0-konforme Authentifizierung und Autorisierung der Anwendung gegenüber dem IAM-System durch.
 Dabei wird anhand des Typs der Authentifizierungsdaten der passende Authentication-Flow mit den konfigurierten Authentifizierungsdaten verwendet.
 Mit der Methode `authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)` können die zur `oauth2ClientRegistrationId` gehörenden Benutzerdaten mit den `AdditionalCredentials` überschrieben werden.
 
-xref:glossary::terms-definitions.adoc#externes-system[Externe Systeme] übermitteln ihre Authentifizierungsdaten (entweder Client-ID u. Client-Secret oder Nutzername u. Passwort) mit im Header der HTTP-Anfrage an das Service-Gateway bzw. Authentication-Gateway.
+xref:glossary::terms-definitions.adoc#externes-system[Externe Systeme] übermitteln ihre Authentifizierungsdaten (Client-ID u. Client-Secret) mit im Header der HTTP-Anfrage an das Service-Gateway bzw. Authentication-Gateway.
 Das Gateway führt damit eine OAuth2.0-konforme Authentifizierung und Autorisierung des Systems gegenüber dem IAM-System durch.
-Dabei wird anhand des Typs der Authentifizierungsdaten der passende Authentication-Flow verwendet:
+Dabei wird anhand des Typs der Authentifizierungsdaten der _Credential_-Flow xref:client-credential-flow[] verwendet:
 
-- Für den Credential-Typ bzw. _Credential_-Flow xref:client-credential-flow[] sind folgende Methoden verfügbar:
+- Dafür sind folgende Methoden verfügbar:
 * `authentifiziere(String oauth2ClientRegistrationId)`: Nutzt die in der Anwendungskonfiguration hinterlegte Client-Registration mit der angegebenen ID. Die Client-ID und das Client-Secret werden aus der Konfiguration gelesen.
 * `authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)`: Wie oben, ermöglicht jedoch die Angabe eines BHKNZ über die AdditionalCredentials.
 * `authentifiziere(ClientRegistration clientRegistration)`: Erlaubt die direkte Verwendung eines ClientRegistration-Objekts mit Token-URI und JWKS-URI.
 * `authentifiziere(ClientRegistration clientRegistration, AdditionalCredentials credentials)`: Wie oben, ergänzt um die Möglichkeit, ein BHKNZ über die AdditionalCredentials anzugeben.
 
-- Für den Credential-Typ bzw. _Credential_-Flow xref:resource-owner-password-credential-flow[] sind folgende Methoden verfügbar:
-* `authentifiziere(String oauth2ClientRegistrationId)`: Nutzt die in der Anwendungskonfiguration hinterlegte Client-Registration mit der angegebenen ID. Benutzername und Passwort müssen in der Konfiguration konfiguriert sein.
-* `authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)`: Ermöglicht die Verwendung dynamischer Benutzeranmeldedaten zur Laufzeit. Die AdditionalCredentials müssen Benutzername und Passwort enthalten und überschreiben ggf. in der Konfiguration hinterlegte Werte.
-* `authentifiziere(ClientRegistration clientRegistration, AdditionalCredentials credentials)`: Erlaubt die vollständig dynamische Authentifizierung mit einem selbst erstellten ClientRegistration-Objekt und Benutzerdaten. Die AdditionalCredentials müssen Benutzername und Passwort enthalten.
+Die Klasse `AdditionalCredentials` dient zur Kapselung eines BHKNZ (Behördenkennzeichen) als zusätzliches Authentifizierungsmerkmal bei der Authentifizierung mit ClientRegistration-Objekten.
+Eine Instanz wird über die statische Factory-Methode `createWithBhknz` erstellt, die ein BHKNZ als Parameter erwartet.
 
-Die Klasse `AdditionalCredentials` dient zur Kapselung zusätzlicher Authentifizierungsdaten bei der Authentifizierung mit ClientRegistration-Objekten.
+zusätzlicher Authentifizierungsdaten
 Sie ermöglicht die flexible Kombination verschiedener Credentials wie Benutzername, Passwort und BHKNZ.
-Über statische Builder-Methoden können Instanzen mit den gewünschten Kombinationen erstellt werden:
 
-- `createWithUsernamePassword` für Benutzername und Passwort,
-- `createWithUsernamePasswordBhknz` für Benutzername, Passwort und BHKNZ, sowie
-- `createWithBhknz` nur für das BHKNZ.
-
-Die Klasse bietet zudem Prüfmethoden wie `hasUsernamePassword` und `hasBhknz`, um die Verfügbarkeit bestimmter Credentials zu ermitteln.
+Die Klasse bietet zudem die Prüfmethoden `hasBhknz`, um die Verfügbarkeit des BHKNZ zu ermitteln.
 
 Der `Berechtigungsmanager` gibt Auskunft über die Rollen und Rechte des Anwenders.
 Die in der Benutzeradministration dem Anwender zugewiesenen Rollen werden mithilfe einer anwendungsspezifischen Rollen-Rechte-Datei in konkrete Rechte des Anwenders für diese Anwendung umgewandelt.
@@ -334,8 +327,8 @@ image::konzept/authorization-code-flow.dn.svg[align="center"]
 
 Anfragen von _externen IT-Systemen_ an ein IsyFact-IT-System, müssen über den IAM-Service authentifiziert und zur Nutzung des aufgerufenen IsyFact-Service autorisiert werden.
 Um das zu gewährleisten, ist in der Informations- und Dienstezone ein _Service-Gateway (SGW)_ zwischen der externen Anwendung und dem internen IsyFact-Service geschaltet.
-Das Service-Gateway nimmt diese fachliche Anfrage von außen entgegen, 
-leitet diese zur Authentifizierung an den IAM-Service und bei Erfolg wird die fachliche Anfrage inklusive der Rollen und Rechte an den internen IsyFact-Service weitergeleitet, 
+Das Service-Gateway nimmt diese fachliche Anfrage von außen entgegen,
+leitet diese zur Authentifizierung an den IAM-Service und bei Erfolg wird die fachliche Anfrage inklusive der Rollen und Rechte an den internen IsyFact-Service weitergeleitet,
 der dann die noch ausstehende Autorisierung auf Basis der Rollen und Rechte selbst initiiert, bevor er mit der eigentlichen fachlichen Bearbeitung beginnen kann.
 
 [[aufruf-service-gateway-ohne-authentication-gateway]]
@@ -356,14 +349,11 @@ Im IAM-Service erfolgt dann die eigentliche Authentifizierung.
 . Mit Erhalt eines gültigen Access-Tokens leitet das Service-Gateway die fachliche Anfrage zusammen mit dem Token an das eigentliche IT-System weiter.
 In der Anwendung kann anschließend die Ausführungsberechtigung des Benutzers verifiziert werden.
 
-Dabei muss die Authentifizierung der externen Anwendung noch nicht gemäß _SpringSecurity (OAuth2.0)_ auf einen _OAuth2.0 Client_ (mit Client-ID u. Client-Secret) migriert worden sein, 
-sondern es kann nach wie vor ein technischer Nutzer (mit Username u. Passwort) zur Authentifizierung verwendet werden.
-
 Zu beachten ist, dass die externe Anwendung die Authentifizierungsdaten bei jeder fachlichen Anfrage an das Service-Gateway sendet.
 Das Service-Gateway initiiert die Authentifizierung über den Baustein `isy-security`, erhält ein gültiges Access-Token vom IAM-Service und leitet dieses dann in Verbindung mit der fachlichen Anfrage an die Geschäftsanwendung weiter.
 Das Access-Token wird dabei nicht an die externe Anwendung ausgeliefert, daher muss jede fachliche Anfrage der externen Anwendung erneut authentifiziert werden, obwohl das vorherige Access-Token noch gültig wäre.
 
-Im nachfolgenden Sequenzdiagramm sieht man den logischen Ablauf von Authentifizierung und Autorisierung im Zusammenspiel der System-Komponenten mit dem _Service-Gateway_ 
+Im nachfolgenden Sequenzdiagramm sieht man den logischen Ablauf von Authentifizierung und Autorisierung im Zusammenspiel der System-Komponenten mit dem _Service-Gateway_
 aber ohne _Authentication-Gateway_ noch einmal verdeutlicht:
 
 .Sequenzdiagramm Authentifizierung ohne Authentication-Gateway
@@ -406,7 +396,7 @@ Dort werden von der externen Anwendung die Authentifizierungsdaten übergeben.
 Im aufgerufenen IT-System wird anschließend das jeweils mitgelieferte Access-Token validiert.
 Hierzu werden aus dem Access-Token dessen Signatur, dessen Ablaufdatum und die dort hinterlegten Berechtigungen entnommen und überprüft.
 
-Die neue System-Architektur hat den Vorteil, dass in der externen Anwendung eine Wiederverwendung des Access-Tokens ermöglicht, 
+Die neue System-Architektur hat den Vorteil, dass in der externen Anwendung eine Wiederverwendung des Access-Tokens ermöglicht,
 was zu einer starken Verringerung der Authentifizierungs-Anfragen an das IAM führt.
 
 Dabei wird (wie in der bisherigen Systemarchitektur) neben der neuen Authentifizierungslogik des _Client-Credential-Flows_ auch die bisherige Authentifizierungslogik des _Resource-Owner-Password-Credentials-Flows_ unterstützt.
@@ -434,7 +424,7 @@ image::isyfact-standards-doku:referenzarchitektur:software-technisch/batch/archi
 Ein Batch wird über einen Batch-Client oder ein Startprogramm – meist ein Shellscript, UC4, JobNetz, CronJob, oder ähnliches – initialisiert und gestartet.
 Diese Batch-Clients sind systemseitig dazu berechtigt, den dedizierten Batch auszuführen und damit zu starten.
 Somit ruft der Batch-Client die Komponente _Batch-Logik_ des Batches auf, welche die notwendigen Initialisierungen vornimmt.
-Genau hier erfolgt frühzeitig die Unterscheidung welcher _Credential_-Flow (xref:resource-owner-password-credential-flow[] oder xref:client-credential-flow[]) zur Authentifizierung und Autorisierung des Batch verwendet werden soll.
+Für die Authentifizierung und Autorisierung des Batch wird der _Credential_-Flow xref:client-credential-flow[] genutzt.
 
 Die Abbildung xref:image-sequenzdiagramm-absicherung-batch[Absicherung eines Batch] stellt den logischen Ablauf zur Absicherung eines Batches skizzenhaft dar.
 
@@ -442,9 +432,9 @@ Die Abbildung xref:image-sequenzdiagramm-absicherung-batch[Absicherung eines Bat
 [id="image-sequenzdiagramm-absicherung-batch",reftext="{figure-caption} {counter:figures}"]
 image::konzept/Sequenzdiagramm_AbsicherungBatch.dn.svg[align="center"]
 
-Über die Batch-Konfiguration wird gesteuert, ob der Batch mit einem _Technischen Nutzer_ und den zugehörigen Authentifizierungsdaten `Benutzer` und `Passwort` über den xref:resource-owner-password-credential-flow[] authentifiziert und autorisiert wird oder mit einem _Client_ und den zugehörigen Authentifizierungsdaten `Client-ID` und `Client-Secret` über den xref:client-credential-flow[].
+Über die Batch-Konfiguration wird gesteuert, wie der Batch mit einem _Client_ und den zugehörigen Authentifizierungsdaten `Client-ID` und `Client-Secret` über den xref:client-credential-flow[] authentifiziert und autorisiert wird.
 
-Je nach verwendetem _Credential_-Flow erfolgt mit den jeweiligen erhaltenen Authentifizierungsdaten des Batch-Nutzers dann die eigentliche Authentifizierung durch den IAM-Service der Plattform.
+Die eigentliche Authentifizierung erfolgt dann mit den erhaltenen Authentifizierungsdaten des Batch-Nutzers durch den IAM-Service der Plattform.
 Dazu werden die im Baustein `isy-security` bereitgestellten <<aussensicht-der-komponente-security,Schnittstellen>> genutzt.
 
 Im IAM-Service wird zu den übergebenen _Authentifizierungsdaten_ der dort verwaltete Benutzer ermittelt und validiert.
@@ -467,12 +457,11 @@ Sie besitzen in der Regel einen kleineren Umfang als _Batches_ und werden nicht 
 Stattdessen werden sie durch die Anwendung selbst konfiguriert, zeitlich geplant und selbstständig ausgeführt.
 Daher müssen _Aufgaben_, als Teil einer Komponente des Anwendungskerns, über andere Mechanismen abgesichert werden.
 
-Mit Einführung des Bausteins `isy-security` werden auch für die Absicherung von _Aufgaben_ beide _Credential_-Flows xref:client-credential-flow[] und xref:resource-owner-password-credential-flow[] unterstützt.
-Das bedeutet, dass die für die _Aufgaben_-Authentifizierung verwendete Parametrisierung per Konfiguration in _isy_task_ einerseits wie bisher als _NatürlicherNutzer_ zu `Benutzer` und `Passwort` und neu als _TechnischerNutzer_ (Client) zu `Client-ID` und `Client-Secret` aufgelöst werden kann.
+Für die Absicherung von _Aufgaben_ wird der _Credential_-Flow xref:client-credential-flow[] verwendet.
+Die für die _Aufgaben_-Authentifizierung verwendete Parametrisierung per Konfiguration in _isy_task_ wird als _TechnischerNutzer_ (Client) zu `Client-ID` und `Client-Secret` aufgelöst werden muss.
 
-Mit `IsyFact-3` soll bevorzugt der xref:client-credential-flow[] und den Properties `Client-ID` und `Client-Secret` verwendet werden.
+Mit `IsyFact-5` wird der zuvor verfügbare Resource Owner Password Credential Flow mit `Benutzer` und `Passwort` nicht mehr unterstützt.
 
-Zur Unterstützung einer weichen Migration wird mit `IsyFact-3` der xref:resource-owner-password-credential-flow[] mit `Benutzer` und `Passwort` weiterhin möglich sein.
 
 Für jede _Aufgabe_ wird per `Task-ID` die Definition der Authentifizierungsdaten in der Betriebskonfiguration erstellt.
 In Abbildung xref:image-sequenzdiagramm-absicherung-task[Absicherung von Aufgaben (Tasks)] wird der logische Ablauf zur Absicherung einer _Aufgabe_ mit dem neuen Security-Baustein `isy-security` im Zusammenspiel mit der Bibliothek `isy-task` skizziert.
@@ -484,8 +473,6 @@ image::konzept/Sequenzdiagramm_AbsicherungTask.dn.svg[align="center"]
 Sobald eine Anwendungskomponente einen fachlichen Ablauf als abgekoppelten Hintergrundprozess und somit als _Aufgabe_ ausführen möchte, startet diese eine Initialisierung der _Aufgabe_ mit der `TaskID` als Parameter.
 In `isy-task` wird die übergebene `TaskID` verwendet, um in der Betriebskonfiguration gemäß den xref:task::nutzungsvorgaben.adoc#konfigurationsschluessel[Task-Konfigurations-Konventionen] nach den entsprechenden Konfigurationswerten aufzulösen.
 
-Der gestartete _Aufgaben_-Prozess von `isy-task` ermittelt dann anhand der übergebenen `TaskID` den _Credential-Flow_-Typ und entscheidet durch diese die entsprechende Authentifizierungsmethode in `isy-security` aufzurufen.
-
 Der Baustein `isy-security` gibt die Authentifizierungsdaten an das IAM-System weiter und erhält von diesem bei erfolgreicher Authentifizierung ein gültiges _Access-Token_ zurück.
 Dieses erhaltene _Access-Token_ wird interpretiert und zur weiteren Verwendung ein `SecurityContext` initialisiert und aufbereitet.
 Der _Aufgaben_-Prozess erhält dann den initialisierten `SecurityContext` zurück.
@@ -493,43 +480,9 @@ Der _Aufgaben_-Prozess erhält dann den initialisierten `SecurityContext` zurüc
 [[autorization-grant]]
 ==== Autorisierungsverfahren
 
-Mit SpringSecurity (OAuth2.0) werden die vier Berechtigungszuteilungsverfahren (Credential Flows) _Authorization-Code-Credentials_, _Implicit-Credentials_, _Resource-Owner-Password-Credentials_ und _Client-Credentials_ spezifiziert.
-Innerhalb der IsyFact werden bei der Autorisierung von Anwendungsaufrufen (von intern oder extern) die beiden Verfahren _Resource-Owner-Password-Credential_ und _Client-Credential_ angewendet, da es sich hierbei ausschließlich um die Berechtigungszuteilung für _Confidential-Clients_ dreht.
-
-[[resource-owner-password-credential-flow]]
-===== Resource-Owner-Password-Credential Flow
-
-:linkaktuell: xref:client-credential-flow[]
-include::glossary:miscellaneous:partial$deprecated-abschnitt.adoc[]
-
-****
-*Anmerkung zur Deprecation*
-
-Dieser Flow soll gemäß OAuth2.0 Vorgaben nicht mehr verwendet werden und wird in zukünftigen Versionen aus dem OAuth-Standard entfernt.
-****
-
-Der _Resource-Owner-Password-Credential_-Flow, der als Authentifizierungsdaten die Attribute `Username` und `Passwort` verwendet, sollte nur eingesetzt werden, wenn die involvierte Client-Anwendung ein hohes Vertrauen zur Wahrung der Authentifizierungsdaten sicherstellt oder wenn keine andere Art der Berechtigungszuteilung verfügbar ist, da hierbei die Authentifizierungsdaten des Benutzers durch die Client-Anwendung gehen bzw. direkt in ihr gespeichert sind.
-In IsyFact wird dieses Verfahren eingesetzt, um eine selbständig laufende Anwendung (z.B. Batch, Task) als technischen Benutzer zu authentifizieren, der mit seinen ihm zugeteilten Rollen im an das IAM-System angeschlossene Benutzerverzeichnis verwaltet wird.
-So wird die Authentifizierung für einen technischen Benutzer über diesen Authorization-Flow abgebildet.
-
-.OAuth2.0 Resource-Owner-Password-Credential Flow
-[id="image-resourceowner-password-credential-flow",reftext="{figure-caption} {counter:figures}"]
-image::konzept/Resource-Owner-Passwort-Credential-Flow.dn.svg[align="center"]
-
-Im vorherigen Bild wird der logische Ablauf des _Resource-Owner-Password-Credential_-Flows dargestellt.
-Hierbei wird die Konfiguration des technischen Benutzers als der _Resource-Owner_ dargestellt.
-
-Einem _Confidential Client_ wird die Konfiguration (1.) eines technischen Benutzers mit den Authentifizierungsdaten `Username` und `Passwort` zugeordnet.
-Dieser technische Benutzer muss mit seinen Rollen im Benutzerverzeichnis vorhanden und gepflegt sein.
-Zusätzlich verlangt der _Resource-Owner-Password-Credential_-Flow eine Authentifizierung des _Confidential Client_ selbst.
-Die dafür verwendeten Authentifizierungsdaten `Client-ID` und `Client-Secret` müssen vor der Nutzung für die Client-Anwendung definiert und mit dem IAM-System abgestimmt sein.
-
-Die so konfigurierte (Confidential-Client)-Anwendung schickt (2.) dann im Access Token Request diese beiden Authentifizierungsdaten an den IAM-Service.
-Im IAM erfolgt mit den so übergebenen Authentifizierungsdaten die Authentifizierung sowohl des _Confidential Client_, als auch des technischen Benutzers als _Resource-Owner_, die im Ergebnis ein gültiges Access-Token mit den Rollen des technischen Benutzers als Antwort (3.) zurückgeliefert.
-
-Die Client-Anwendung kann dann, mit dem so erhaltenen Access-Token und in den Rollen des technischen Benutzers, ihre Fachanwendungen aufrufen.
-Das Access-Token enthält alle notwendigen Daten, um zu verifizieren, ob die aufrufende Anwendung ordnungsgemäß authentifiziert und autorisiert ist.
-
+Mit SpringSecurity (OAuth2.0) werden die Berechtigungszuteilungsverfahren (Credential Flows) _Authorization-Code-Credentials_, _Implicit-Credentials_
+und _Client-Credentials_ spezifiziert.
+Innerhalb der IsyFact wird bei der Autorisierung von Anwendungsaufrufen (von intern oder extern) das Verfahren  _Client-Credential_ angewendet, da es sich hierbei ausschließlich um die Berechtigungszuteilung für _Confidential-Clients_ dreht.
 
 [[client-credential-flow]]
 ===== Client-Credential Flow
@@ -654,7 +607,7 @@ Als optional mögliche 2-Faktor-Authentifizierung ist im IAM-Service die Übermi
 Die Implementierung des IAM-Service muss für die 2-Faktor-Authentifizierung dieses Feature unterstützen, andernfalls wird das BHKNZ als optionales Attribut betrachtet.
 Wenn die IAM-Service-Implementierung dieses Feature unterstützt, dann wird ein mit den Authentifizierungsdaten gemeinsam übergebenes Behördenkennzeichen gegen das Behördenkennzeichen aus dem zu authentifizierenden Nutzerprofil geprüft.
 
-Wie in <<aussensicht-der-komponente-security>> beschrieben, wird bei der Authentifizierungsmethode `authentifiziere()` das Behördenkennzeichen, sowie Username und Password in den `AdditionalCredentials` als optionaler Parameter an den `Authentifizierungsmanager` übergeben, der es mit den anderen Authentifizierungsdaten zusammen an den IAM-Service weiterleitet.
+Wie in <<aussensicht-der-komponente-security>> beschrieben, wird bei der Authentifizierungsmethode `authentifiziere()` das Behördenkennzeichen in den `AdditionalCredentials` als optionaler Parameter an den `Authentifizierungsmanager` übergeben, der es mit den anderen Authentifizierungsdaten zusammen an den IAM-Service weiterleitet.
 
 
 [[multiple-uris]]

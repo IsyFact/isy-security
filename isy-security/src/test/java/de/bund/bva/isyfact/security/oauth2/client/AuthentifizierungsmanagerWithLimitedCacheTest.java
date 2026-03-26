@@ -1,0 +1,176 @@
+package de.bund.bva.isyfact.security.oauth2.client;
+
+import java.lang.reflect.Field;
+import java.time.Instant;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.AbstractOAuth2TokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
+import de.bund.bva.isyfact.security.AbstractOidcProviderTest;
+import de.bund.bva.isyfact.security.config.AdditionalCredentials;
+import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsClientRegistrationAuthenticationProvider;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * Tests the caching of the Authentifizierungsmanager with more authentication attempts than max. cached elements.
+ */
+@SpringBootTest
+@TestPropertySource(properties = {
+    "isy.security.cache.ttl=300",
+    "isy.security.cache.maxelements=2",
+    "isy.security.cache.token-expiration-time-offset=10",
+    "isy.security.cache.salt-bytes=64",
+    "isy.security.cache.hash-algorithm=SHA-512"
+})
+public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcProviderTest {
+
+    @MockitoBean
+    private ClientCredentialsClientRegistrationAuthenticationProvider clientCredentialsClientRegistrationAuthenticationProvider;
+
+    @Autowired
+    private Authentifizierungsmanager authentifizierungsmanager;
+
+    private JwtAuthenticationToken mockJwt;
+
+    private Jwt mockToken;
+
+    @BeforeEach
+    public void configureMocks() throws NoSuchFieldException, IllegalAccessException {
+        // clear authenticated principal
+        SecurityContextHolder.getContext().setAuthentication(null);
+        mockJwt = mock(JwtAuthenticationToken.class);
+        mockToken = mock(Jwt.class);
+        Field field = AbstractOAuth2TokenAuthenticationToken.class.getDeclaredField("token");
+        field.setAccessible(true);
+        field.set(mockJwt, mockToken);
+        when(mockJwt.getToken()).thenCallRealMethod();
+        when(mockToken.getExpiresAt()).thenReturn(Instant.now().plusSeconds(300));
+
+        when(clientCredentialsClientRegistrationAuthenticationProvider.supports(any())).thenCallRealMethod();
+        when(clientCredentialsClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt);
+    }
+
+    @Test
+    public void testCacheWithMoreAuthenticationAttemptsThanCachedElements() {
+
+        // Override value from @BeforeEach otherwise the authentication.isAuthenticated returns always false
+        when(mockJwt.isAuthenticated()).thenReturn(true);
+
+        // First authentication attempt with credentials from testid1
+        // Provider is called
+        authentiziere("testId1", "testsecret1", "900601");
+
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        SecurityContextHolder.clearContext();
+        clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
+
+        // Second authentication attempt with credentials from testid1
+        // provider is not called, authentication data is taken from cache
+        authentiziere("testId1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
+        SecurityContextHolder.clearContext();
+
+        // First authentication attempt with credentials from testid2
+        // Provider is called
+        authentiziere("testId2", "testsecret2", "900602");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        SecurityContextHolder.clearContext();
+        clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
+
+        // Second authentication attempt with credentials from testid2
+        // provider is not called, authentication data is taken from cache
+        authentiziere("testId2", "testsecret2", "900602");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
+        SecurityContextHolder.clearContext();
+
+        // First authentication attempt with credentials from testid3
+        // Provider is called
+        authentiziere("testId3", "testsecret3", "900603");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        SecurityContextHolder.clearContext();
+        clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
+
+        // Now third authentication attempt with credentials from testid1
+        // Provider is called because there is no more cached data for testid1 due to the maxelements specification
+        authentiziere("testId1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    public void testCacheWithExpiredToken() throws InterruptedException {
+        // set expiry time of token in 20 seconds
+        when(mockToken.getExpiresAt()).thenReturn(Instant.now().plusSeconds(20));
+
+        when(mockJwt.isAuthenticated()).thenReturn(true);
+
+        // First authentication attempt with credentials from testid1
+        // Provider is called
+        authentiziere("testid1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        SecurityContextHolder.clearContext();
+        clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
+
+        // Second authentication attempt with credentials from testid1
+        // provider is not called, authentication data is taken from cache
+        authentiziere("testid1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
+        SecurityContextHolder.clearContext();
+
+        // wait for 10 seconds to ensure we don't have enough time left for the token
+        Thread.sleep(10000);
+
+        // Now third authentication attempt with credentials from testid1
+        // Provider is called because the cached token is expired
+        authentiziere("testid1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
+
+        // refresh token expiry
+        when(mockToken.getExpiresAt()).thenReturn(Instant.now().plusSeconds(20));
+        // fourth authentication attempt with credentials from testid1
+        // provider is not called, authentication data is taken from cache
+        authentiziere("testid1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
+        SecurityContextHolder.clearContext();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        authentifizierungsmanager.clearCache();
+        SecurityContextHolder.clearContext();
+    }
+
+    private void authentiziere(String clientId, String clientSecret, String bhknz) {
+
+        ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("testid")
+                .tokenUri(getIssuer())
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .build();
+        AdditionalCredentials additionalCredentials = AdditionalCredentials.createWithBhknz(bhknz);
+
+        authentifizierungsmanager.authentifiziere(clientRegistration, additionalCredentials);
+    }
+
+}
