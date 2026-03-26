@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
 
 import java.util.UUID;
 
@@ -15,12 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import de.bund.bva.isyfact.security.example.service.ExampleMethodAuthentication;
 import de.bund.bva.isyfact.security.oauth2.client.Authentifizierungsmanager;
@@ -41,7 +41,7 @@ public class MethodAuthenticationTest {
 
     private static final String CLIENT_ID = "my-auth-client";
 
-    @MockBean
+    @MockitoBean
     private Authentifizierungsmanager authentifizierungsmanager;
 
     @Autowired

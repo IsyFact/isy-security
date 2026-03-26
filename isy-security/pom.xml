@@ -48,16 +48,6 @@
             <artifactId>spring-boot</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.bund.bva.isyfact</groupId>
-            <artifactId>isy-logging</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-web</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
@@ -98,8 +88,8 @@
             <artifactId>spring-security-oauth2-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-oauth2-client</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-security-oauth2-client</artifactId>
             <!-- only required if the application wants to authenticate clients -->
             <optional>true</optional>
         </dependency>
@@ -125,6 +115,11 @@
             <artifactId>ehcache</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-security-oauth2-resource-server</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>de.bund.bva.isyfact</groupId>
             <artifactId>isy-security-test</artifactId>
@@ -159,6 +154,10 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
@@ -172,6 +171,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

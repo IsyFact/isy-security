@@ -61,7 +61,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <spring.boot.version>3.5.9</spring.boot.version>
+        <spring.boot.version>4.0.2</spring.boot.version>
         <logback.json.version>0.1.5</logback.json.version>
         <logback.jackson.version>0.1.5</logback.jackson.version>
         <logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
@@ -72,20 +72,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>de.bund.bva.isyfact</groupId>
-                <artifactId>isyfact-products-bom</artifactId>
-                <version>${isyfact-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>de.bund.bva.isyfact</groupId>
-                <artifactId>isyfact-standards-bom</artifactId>
-                <version>${isyfact-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>

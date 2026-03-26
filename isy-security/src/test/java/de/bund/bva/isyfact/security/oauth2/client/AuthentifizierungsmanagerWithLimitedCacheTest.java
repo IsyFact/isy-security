@@ -1,8 +1,5 @@
 package de.bund.bva.isyfact.security.oauth2.client;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 import java.lang.reflect.Field;
 import java.time.Instant;
 
@@ -23,7 +20,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import de.bund.bva.isyfact.security.AbstractOidcProviderTest;
 import de.bund.bva.isyfact.security.config.AdditionalCredentials;
-import de.bund.bva.isyfact.security.oauth2.client.authentication.PasswordClientRegistrationAuthenticationProvider;
+import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsClientRegistrationAuthenticationProvider;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests the caching of the Authentifizierungsmanager with more authentication attempts than max. cached elements.
@@ -39,7 +44,7 @@ import de.bund.bva.isyfact.security.oauth2.client.authentication.PasswordClientR
 public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcProviderTest {
 
     @MockitoBean
-    private PasswordClientRegistrationAuthenticationProvider passwordClientRegistrationAuthenticationProvider;
+    private ClientCredentialsClientRegistrationAuthenticationProvider clientCredentialsClientRegistrationAuthenticationProvider;
 
     @Autowired
     private Authentifizierungsmanager authentifizierungsmanager;
@@ -60,8 +65,8 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
         when(mockJwt.getToken()).thenCallRealMethod();
         when(mockToken.getExpiresAt()).thenReturn(Instant.now().plusSeconds(300));
 
-        when(passwordClientRegistrationAuthenticationProvider.supports(any())).thenCallRealMethod();
-        when(passwordClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt);
+        when(clientCredentialsClientRegistrationAuthenticationProvider.supports(any())).thenCallRealMethod();
+        when(clientCredentialsClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt);
     }
 
     @Test
@@ -72,42 +77,42 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
 
         // First authentication attempt with credentials from testid1
         // Provider is called
-        authentiziere("testId1", "testsecret1", "testuser1", "testpw1");
+        authentiziere("testId1", "testsecret1", "900601");
 
-        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
         SecurityContextHolder.clearContext();
-        clearInvocations(passwordClientRegistrationAuthenticationProvider);
+        clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
 
         // Second authentication attempt with credentials from testid1
         // provider is not called, authentication data is taken from cache
-        authentiziere("testId1", "testsecret1", "testuser1", "testpw1");
-        verify(passwordClientRegistrationAuthenticationProvider, never()).authenticate(any());
+        authentiziere("testId1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
         SecurityContextHolder.clearContext();
 
         // First authentication attempt with credentials from testid2
         // Provider is called
-        authentiziere("testId2", "testsecret2", "testuser2", "testpw2");
-        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        authentiziere("testId2", "testsecret2", "900602");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
         SecurityContextHolder.clearContext();
-        clearInvocations(passwordClientRegistrationAuthenticationProvider);
+        clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
 
         // Second authentication attempt with credentials from testid2
         // provider is not called, authentication data is taken from cache
-        authentiziere("testId2", "testsecret2", "testuser2", "testpw2");
-        verify(passwordClientRegistrationAuthenticationProvider, never()).authenticate(any());
+        authentiziere("testId2", "testsecret2", "900602");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
         SecurityContextHolder.clearContext();
 
         // First authentication attempt with credentials from testid3
         // Provider is called
-        authentiziere("testId3", "testsecret3", "testuser3", "testpw3");
-        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        authentiziere("testId3", "testsecret3", "900603");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
         SecurityContextHolder.clearContext();
-        clearInvocations(passwordClientRegistrationAuthenticationProvider);
+        clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
 
         // Now third authentication attempt with credentials from testid1
         // Provider is called because there is no more cached data for testid1 due to the maxelements specification
-        authentiziere("testId1", "testsecret1", "testuser1", "testpw1");
-        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        authentiziere("testId1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
         SecurityContextHolder.clearContext();
     }
 
@@ -120,15 +125,15 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
 
         // First authentication attempt with credentials from testid1
         // Provider is called
-        authentiziere("testid1", "testsecret1", "testuser1", "testpw1");
-        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        authentiziere("testid1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
         SecurityContextHolder.clearContext();
-        clearInvocations(passwordClientRegistrationAuthenticationProvider);
+        clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
 
         // Second authentication attempt with credentials from testid1
         // provider is not called, authentication data is taken from cache
-        authentiziere("testid1", "testsecret1", "testuser1", "testpw1");
-        verify(passwordClientRegistrationAuthenticationProvider, never()).authenticate(any());
+        authentiziere("testid1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
         SecurityContextHolder.clearContext();
 
         // wait for 10 seconds to ensure we don't have enough time left for the token
@@ -136,16 +141,16 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
 
         // Now third authentication attempt with credentials from testid1
         // Provider is called because the cached token is expired
-        authentiziere("testid1", "testsecret1", "testuser1", "testpw1");
-        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
-        clearInvocations(passwordClientRegistrationAuthenticationProvider);
+        authentiziere("testid1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+        clearInvocations(clientCredentialsClientRegistrationAuthenticationProvider);
 
         // refresh token expiry
         when(mockToken.getExpiresAt()).thenReturn(Instant.now().plusSeconds(20));
         // fourth authentication attempt with credentials from testid1
         // provider is not called, authentication data is taken from cache
-        authentiziere("testid1", "testsecret1", "testuser1", "testpw1");
-        verify(passwordClientRegistrationAuthenticationProvider, never()).authenticate(any());
+        authentiziere("testid1", "testsecret1", "900601");
+        verify(clientCredentialsClientRegistrationAuthenticationProvider, never()).authenticate(any());
         SecurityContextHolder.clearContext();
     }
 
@@ -155,18 +160,15 @@ public class AuthentifizierungsmanagerWithLimitedCacheTest extends AbstractOidcP
         SecurityContextHolder.clearContext();
     }
 
-    private void authentiziere(String clientId, String clientSecret, String username, String password) {
+    private void authentiziere(String clientId, String clientSecret, String bhknz) {
 
         ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("testid")
                 .tokenUri(getIssuer())
                 .clientId(clientId)
                 .clientSecret(clientSecret)
-                .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .build();
-        AdditionalCredentials additionalCredentials = AdditionalCredentials.createWithUsernamePassword(
-                username,
-                password
-        );
+        AdditionalCredentials additionalCredentials = AdditionalCredentials.createWithBhknz(bhknz);
 
         authentifizierungsmanager.authentifiziere(clientRegistration, additionalCredentials);
     }

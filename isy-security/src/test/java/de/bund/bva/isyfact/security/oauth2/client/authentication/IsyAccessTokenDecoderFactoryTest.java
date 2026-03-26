@@ -57,7 +57,7 @@ public class IsyAccessTokenDecoderFactoryTest {
         List<?> newValidators = extractTokenValidators(decoder);
 
         assertThat(newValidators.size())
-                .isEqualTo(2);
+                .isEqualTo(3);
     }
 
     private ClientRegistration createClientRegistration(String clientId) {

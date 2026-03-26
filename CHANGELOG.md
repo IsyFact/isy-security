@@ -12,15 +12,21 @@
 - `IFS-4583`: Wiedereinführung der Quality-Gates
 - `IFS-4579`: Wiederherstellung von isy-security-test
 - `IFS-5004`: Vorbereitung von isy-security für Update auf Spring Boot 4
+- `IFS-5218`: Wiederherstellung Tests nach Spring Boot Update
 
 ### BREAKING CHANGE
 - `IFS-4812`: Verwendung sicherer Hashfunktion mit SHA-512 für Caching
     * Rückgabe eines Byte-Arrays statt eines Integers in der Methode `generateCacheKey` der Klasse `AbstractClientRegistrationAuthenticationToken`
     * Konfigurierbare Properties für Hashfunktion und Bytegröße des Salts
 - `IFS-4922`: Aktualisierung von Java 17 auf 25
+- `IFS-4858`: Umstellung von isy-security auf Spring Boot 4 (inkludiert Update auf Spring Security 7)
+    * Nutzer von isy-security sollten ebenfalls auf Spring Boot 4 updaten, um Kompatibilitätsprobleme zu vermeiden
+    * Der Resource Owner Password Credential Flow wird mit dieser Version nicht mehr unterstützt. Anwendungen müssen zwingend auf den Client Credentials Flow umsteigen.
 
 ### DEPENDENCY UPGRADES
 - Update IsyFact/isy-github-actions-templates/.github/workflows/maven_create_release_template.yml von Version 2.1.1 auf 2.2.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/dependabot_auto_merge_template.yml von Version 2.1.0 auf 2.2.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/docs_build_template.yml von Version 2.1.0 auf 2.2.0
 - Update com.github.spotbugs:spotbugs-maven-plugin von Version 4.9.8.1 auf 4.9.8.2
 - Update org.apache.maven.plugins:maven-source-plugin von Version 3.2.1 auf 3.4.0
 - Update org.apache.maven.plugins:maven-gpg-plugin von Version 3.0.1 auf 3.2.8
@@ -48,3 +54,6 @@
 - `IFS-4531`: Update von Flatten Maven Plugin auf Version 1.7.1
     * Hinzufügen von Maven Enforcer Plugin auf Version 3.6.0
     * Setzen der Maven Version auf 3.6.3
+- `IFS-5205`: 
+    * Entfernen von isy-logging
+    * Hinzufügen von org.springframework.boot:spring-boot-starter-aspectj
