@@ -42,7 +42,7 @@
         <isyfact-bom.version>5.0.0-SNAPSHOT</isyfact-bom.version>
         <maven.compiler.release>25</maven.compiler.release>
         <maven.compiler.version>3.14.1</maven.compiler.version>
-        <maven.dependency.version>3.9.0</maven.dependency.version>
+        <maven.dependency.version>3.10.0</maven.dependency.version>
         <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
         <enforced.jdk.version>[25,26)</enforced.jdk.version>
         <enforced.maven.version>[3.6.3,4)</enforced.maven.version>
