@@ -24,6 +24,7 @@
     * Der Resource Owner Password Credential Flow wird mit dieser Version nicht mehr unterstützt. Anwendungen müssen zwingend auf den Client Credentials Flow umsteigen.
 
 ### DEPENDENCY UPGRADES
+- Update org.springframework.boot:spring-boot-dependencies von Version 4.0.2 auf 4.0.5
 - Update org.apache.maven.plugins:maven-dependency-plugin von Version 3.9.0 auf 3.10.0
 - Update org.cyclonedx:cyclonedx-maven-plugin von Version 2.7.9 auf 2.9.1
 - Update org.apache.maven.plugins:maven-javadoc-plugin von Version 3.3.2 auf 3.12.0
