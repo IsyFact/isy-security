@@ -25,6 +25,9 @@
 
 ### DEPENDENCY UPGRADES
 - Update IsyFact/isy-github-actions-templates/.github/workflows/next_version.yml von Version 2.1.1 auf 2.3.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/maven_dependency_scan_template.yml von Version 2.1.1 auf 2.3.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/dependabot_auto_changelog_template.yml von Version 2.1.1 auf 2.3.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/maven_create_release_template.yml von Version 2.2.0 auf 2.3.0
 - Update org.apache.maven.plugins:maven-compiler-plugin von Version 3.14.1 auf 3.15.0
 - Update org.springframework.boot:spring-boot-dependencies von Version 4.0.2 auf 4.0.5
 - Update org.apache.maven.plugins:maven-dependency-plugin von Version 3.9.0 auf 3.10.0
