@@ -24,6 +24,7 @@
     * Der Resource Owner Password Credential Flow wird mit dieser Version nicht mehr unterstützt. Anwendungen müssen zwingend auf den Client Credentials Flow umsteigen.
 
 ### DEPENDENCY UPGRADES
+- Update IsyFact/isy-github-actions-templates/.github/workflows/maven_dependency_scan_template.yml von Version 2.1.1 auf 2.3.0
 - Update IsyFact/isy-github-actions-templates/.github/workflows/dependabot_auto_changelog_template.yml von Version 2.1.1 auf 2.3.0
 - Update IsyFact/isy-github-actions-templates/.github/workflows/maven_create_release_template.yml von Version 2.2.0 auf 2.3.0
 - Update org.apache.maven.plugins:maven-compiler-plugin von Version 3.14.1 auf 3.15.0
