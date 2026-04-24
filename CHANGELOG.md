@@ -24,6 +24,7 @@
     * Der Resource Owner Password Credential Flow wird mit dieser Version nicht mehr unterstützt. Anwendungen müssen zwingend auf den Client Credentials Flow umsteigen.
 
 ### DEPENDENCY UPGRADES
+- Update org.springframework.boot:spring-boot-dependencies von Version 4.0.5 auf 4.0.6
 - Update IsyFact/isy-github-actions-templates/.github/workflows/maven_deploy_template.yml von Version 2.1.1 auf 2.3.0
 - Update IsyFact/isy-github-actions-templates/.github/workflows/maven_build_template.yml von Version 2.1.1 auf 2.3.0
 - Update com.github.spotbugs:spotbugs-maven-plugin von Version 4.9.8.2 auf 4.9.8.3
