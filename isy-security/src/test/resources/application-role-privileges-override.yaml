@@ -1,0 +1,9 @@
+---
+spring:
+  config:
+    activate:
+      on-profile: role-privileges-override
+
+isy:
+  security:
+    role-privileges-mapping-file: classpath:/secure-resources/sicherheit/rollenrechte.xml
