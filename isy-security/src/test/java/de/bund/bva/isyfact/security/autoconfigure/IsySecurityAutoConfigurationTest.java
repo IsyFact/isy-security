@@ -315,4 +315,32 @@ public class IsySecurityAutoConfigurationTest extends AbstractOidcProviderTest {
                         }
                 );
     }
+
+    @Test
+    void isySecurityAutoConfigurationUsesConfiguredRolePrivilegesMappingFile() {
+        contextRunner
+                .withPropertyValues(
+                        "isy.security.role-privileges-mapping-file=classpath:/secure-resources/sicherheit/rollenrechte.xml"
+                )
+                .run(context -> {
+                    assertThat(context)
+                            .hasNotFailed()
+                            .hasSingleBean(IsySecurityConfigurationProperties.class)
+                            .hasSingleBean(RolePrivilegesMapper.class);
+
+                    IsySecurityConfigurationProperties properties =
+                            context.getBean(IsySecurityConfigurationProperties.class);
+
+                    assertThat(properties.getRolePrivilegesMappingFile())
+                            .isNotNull();
+                    assertThat(properties.getRolePrivilegesMappingFile().getDescription())
+                            .contains("secure-resources/sicherheit/rollenrechte.xml");
+
+                    RolePrivilegesMapper mapper = context.getBean(RolePrivilegesMapper.class);
+
+                    assertThat(mapper.getApplicationId()).isEqualTo("SECURE_TEST");
+                    assertThat(mapper.getPrivilegesByRoles(java.util.List.of("Rolle_SECURE_TEST")))
+                            .containsExactly("Recht_SECURE_TEST");
+                });
+    }
 }

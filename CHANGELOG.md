@@ -13,6 +13,7 @@
 - `IFS-4579`: Wiederherstellung von isy-security-test
 - `IFS-5004`: Vorbereitung von isy-security für Update auf Spring Boot 4
 - `IFS-5218`: Wiederherstellung Tests nach Spring Boot Update
+- `IFS-5437`: Verlegung statischer Ressourcen
 
 ### BREAKING CHANGE
 - `IFS-4812`: Verwendung sicherer Hashfunktion mit SHA-512 für Caching
