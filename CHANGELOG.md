@@ -26,6 +26,7 @@
 
 ### BUG FIXES
 - `IFS-4793`: Anpassung von Spring Security Context, um die ThreadLocals richtig abzuräumen
+- `IFS-5438`: Maven-Dependency ehcache verwendet classifier `jakarta`
 
 ### DEPENDENCY UPGRADES
 - Update IsyFact/isy-github-actions-templates/.github/workflows/maven_deploy_template.yml von Version 2.1.1 auf 2.3.0
