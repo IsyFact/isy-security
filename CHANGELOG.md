@@ -26,6 +26,7 @@
 
 ### BUG FIXES
 - `IFS-4793`: Anpassung von Spring Security Context, um die ThreadLocals richtig abzuräumen
+- `IFS-5438`: Maven-Dependency ehcache verwendet classifier `jakarta`
 
 ### DEPENDENCY UPGRADES
 - Update org.springframework.boot:spring-boot-dependencies von Version 4.0.5 auf 4.0.6
