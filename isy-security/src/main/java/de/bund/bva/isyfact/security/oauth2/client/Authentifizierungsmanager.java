@@ -1,0 +1,123 @@
+package de.bund.bva.isyfact.security.oauth2.client;
+
+import java.time.Duration;
+
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.server.resource.authentication.AbstractOAuth2TokenAuthenticationToken;
+
+import de.bund.bva.isyfact.security.config.AdditionalCredentials;
+
+/**
+ * Provides methods for performing authentication via OAuth 2.0 clients outside of the context of a {@code HttpServletRequest},
+ * for example in a scheduled/background thread and/or in the service-tier.
+ * <p>
+ * The preferred way is to use {@link #authentifiziere(String)} with the client registration ID of an
+ * OAuth 2.0 Client Registration configured in the application properties.
+ */
+public interface Authentifizierungsmanager {
+
+    /**
+     * Attempts to authorize the client for the given {@code oauth2ClientRegistrationId} via its configured OAuth 2.0 Flow.
+     * After successful authentication the authenticated principal in the {@link SecurityContext} will be updated.
+     * <p>
+     * The chosen OAuth 2.0 Flow will depend on the authorization grant type configured in the application properties.
+     * The currently supported flow is: Client Credentials (grant type: client_credentials)
+     *
+     * @param oauth2ClientRegistrationId
+     *         registration ID of the OAuth 2.0 Client to authorize
+     * @throws AuthenticationException
+     *         if authentication fails
+     */
+    void authentifiziere(String oauth2ClientRegistrationId) throws AuthenticationException;
+
+    /**
+     * Attempts to authorize the client for the given {@code oauth2ClientRegistrationId} via its configured OAuth 2.0 Flow
+     * using the provided additional credentials.
+     * After successful authentication the authenticated principal in the {@link SecurityContext} will be updated.
+     * <p>
+     * The chosen OAuth 2.0 Flow will depend on the authorization grant type configured in the application properties.
+     * The currently supported flow is: Client Credentials (grant type: client_credentials).
+     * @param oauth2ClientRegistrationId
+     *         registration ID of the OAuth 2.0 Client to authorize
+     * @param credentials
+     *         additional credentials to use for authentication, such as bhknz
+     * @throws AuthenticationException
+     *         if authentication fails
+     * @see AdditionalCredentials
+     */
+    void authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials) throws AuthenticationException;
+
+    /**
+     * Performs authentication for the given {@code oauth2ClientRegistrationId} as described in
+     * {@link Authentifizierungsmanager#authentifiziere(String)} if the SecurityContext does not contain
+     * an Authentication of type {@link AbstractOAuth2TokenAuthenticationToken} or the token received from the
+     * SecurityContext is considered as expired with regard to the {@code expirationTimeOffset}.
+     * The {@code expirationTimeOffset} provides a time frame before token expiry during which the token is considered as already expired.
+     * <p>
+     * For clients configured to use the Client Credentials Flow (grant type: client_credentials), authentication will only reliably
+     * occur for an {@code expirationTimeOffset} less than 60 seconds, because Spring will by default skip authentication in the
+     * {@link org.springframework.security.oauth2.client.ClientCredentialsOAuth2AuthorizedClientProvider ClientCredentialsOAuth2AuthorizedClientProvider}
+     * if the access token provided by the corresponding {@link org.springframework.security.oauth2.client.OAuth2AuthorizedClient OAuth2AuthorizedClient}
+     * does not expire within 60 seconds from current time.
+     * When using this method for re-authentication with the Client Credentials Flow, this means that a time longer
+     * than 60 seconds before the next call of this method could lead to token expiration.
+     *
+     * @param oauth2ClientRegistrationId
+     *         registration ID of the OAuth 2.0 Client to authorize
+     * @param expirationTimeOffset
+     *         the time frame before expiry during which the token is considered as already expired
+     * @throws AuthenticationException
+     *         if authentication fails
+     * @see Authentifizierungsmanager#authentifiziere(String)
+     */
+    void authentifiziere(String oauth2ClientRegistrationId, Duration expirationTimeOffset) throws AuthenticationException;
+
+    /**
+     * Attempts to authorize a client using the provided {@link ClientRegistration} object via the OAuth 2.0 Client Credentials Flow.
+     * After successful authentication the authenticated principal in the {@link SecurityContext} will be updated.
+     * <p>
+     * This method allows authentication with a manually created {@link ClientRegistration} when no registration ID
+     * is configured.
+     * <p>
+     * This method only supports the Client Credentials flow (grant type: client_credentials)
+     * The registration ID from {@link ClientRegistration} must be unique.
+     *
+     * @param clientRegistration
+     *         the client registration containing all necessary information for authentication
+     * @throws AuthenticationException
+     *         if authentication fails
+     */
+    void authentifiziere(ClientRegistration clientRegistration) throws AuthenticationException;
+
+    /**
+     * Attempts to authorize a client using the provided {@link ClientRegistration} object and additional credentials
+     * via the configured OAuth 2.0 Flow. After successful authentication the authenticated principal in the
+     * {@link SecurityContext} will be updated.
+     * <p>
+     * This method allows authentication with a manually created {@link ClientRegistration} when no registration ID
+     * is configured.
+     * <p>
+     * The chosen OAuth 2.0 Flow will depend on the authorization grant type in the provided client registration.
+     * The currently supported flows are:
+     * <ul>
+     *     <li>Client Credentials (grant type: client_credentials)</li>
+     * </ul>
+     * The registration ID from {@link ClientRegistration} must be unique.
+     *
+     * @param clientRegistration
+     *         the client registration containing all necessary information for authentication
+     * @param credentials
+     *         additional credentials to use for authentication, such as bhknz
+     * @throws AuthenticationException
+     *         if authentication fails
+     * @see AdditionalCredentials
+     */
+    void authentifiziere(ClientRegistration clientRegistration, AdditionalCredentials credentials) throws AuthenticationException;
+
+    /**
+     * Clears the cache from isy-security. Authentication data is deleted after the method is called.
+     */
+    void clearCache();
+}
