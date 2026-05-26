@@ -1,4 +1,4 @@
-# 5.0.0
+# 5.0.1
 
 ### FEATURES
 - `IFS-4734`: Verwendungen des Begriffs "Service" und damit verwandter Begriffe korrigieren
