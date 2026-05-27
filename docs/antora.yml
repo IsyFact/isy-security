@@ -1,6 +1,6 @@
 name: security
 title: Baustein Security
-prerelease: false
+prerelease: '(DEV)'
 start_page: ROOT:konzept.adoc
 nav:
 - modules/ROOT/nav.adoc
