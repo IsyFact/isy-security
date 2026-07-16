@@ -2,7 +2,6 @@ package de.bund.bva.isyfact.security.test.oidcprovider;
 
 import java.text.ParseException;
 import java.util.Collections;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -45,23 +44,14 @@ class EmbeddedOidcProviderMockTest {
 
     public static final String CC_ID = "client-client";
     public static final String CC_SECRET = "cc-secret";
-    public static final String UC_ID = "user-client";
-    public static final String UC_SECRET = "uc-secret";
     public static final String USER_WITHOUT_BHKNZ = "user-without-bhknz";
-    public static final String USER_WITH_BHKNZ = "user-with-bhknz";
     public static final String USER_PASSWORD = "test";
-    public static final String USER_BHKNZ = "123456";
-    public static final String USER_OU = "USEROU";
-    public static final String INVALID_BHKNZ = "999999";
 
     private static WebClient webClient;
 
     @BeforeAll
     public static void setupWebClient() {
         webClient = WebClient.builder().baseUrl("http://" + host + ":" + port + issuerPath).build();
-        mock.setSecondOu(USER_OU);
-        mock.addUser(UC_ID, UC_SECRET, USER_WITHOUT_BHKNZ, USER_PASSWORD, Optional.empty(), Collections.emptySet());
-        mock.addUser(UC_ID, UC_SECRET, USER_WITH_BHKNZ, USER_PASSWORD, Optional.of(USER_BHKNZ), Collections.emptySet());
         mock.addClient(CC_ID, CC_SECRET, Collections.emptySet());
     }
 

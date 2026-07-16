@@ -60,16 +60,6 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
     private static final String DEFAULT_SECOND_OU = "TESTOU";
 
     /**
-     * Current value of the second OU used for validation during login.
-     */
-    private String secondOu = DEFAULT_SECOND_OU;
-
-    /**
-     * Stores all user-related stub mappings keyed by username.
-     */
-    private final Map<String, Set<StubMapping>> userMappings = new HashMap<>();
-
-    /**
      * Stores all client-related stub mappings keyed by client ID.
      */
     private final Map<String, Set<StubMapping>> clientMappings = new HashMap<>();
@@ -91,20 +81,6 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
         super(host, port, issuerPath, publicKey, privateKey, tokenLifespan);
     }
 
-    public String getSecondOu() {
-        return secondOu;
-    }
-
-    /**
-     * Sets the second OU value which is checked on login. The default is {@link #DEFAULT_SECOND_OU}. The value
-     * <em>must</em> be set before the first call to {@link #addUser(String, String, String, String, Optional, Set)}!
-     *
-     * @param secondOu second OU to check during login
-     */
-    public void setSecondOu(String secondOu) {
-        this.secondOu = secondOu;
-    }
-
     protected void init(String host, int port) {
         WireMock.configureFor(host, port);
         WireMock.reset();
@@ -113,29 +89,9 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
         setupJwksEndpoint();
     }
 
-    public void addUser(String clientId, String secret, String username, String password, Optional<String> bhknz, Set<String> roles) {
-        final String accessTokenResponse = getAccessTokenResponse(clientId, username, bhknz, roles);
-        userMappings.put(username, generateUserMapping(clientId, secret, username, password, bhknz, accessTokenResponse));
-    }
-
     public void addClient(String clientId, String secret, Set<String> roles) {
         final String accessTokenResponse = getAccessTokenResponse(clientId, "service-account-" + clientId, Optional.empty(), roles);
         clientMappings.put(clientId, generateClientMapping(clientId, secret, accessTokenResponse));
-    }
-
-    public void removeUser(String username) {
-        final Set<StubMapping> userMapping = userMappings.remove(username);
-        if (userMapping != null) {
-            for (StubMapping mapping : userMapping) {
-                WireMock.removeStub(mapping);
-            }
-        }
-    }
-
-    public void removeAllUsers() {
-        for (String user : userMappings.keySet()) {
-            removeUser(user);
-        }
     }
 
     public void removeClient(String clientId) {
