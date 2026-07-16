@@ -1,7 +1,6 @@
 package de.bund.bva.isyfact.security;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -26,11 +25,6 @@ public abstract class AbstractOidcProviderTest {
     public static final EmbeddedOidcProviderMock embeddedOidcProvider = new EmbeddedOidcProviderMock(HOST, PORT, ISSUER_PATH, 300);
 
     protected static void registerTestClients() {
-        // client with authorization-grant-type=password
-        embeddedOidcProvider.addUser("resource-owner-password-credentials-test-client", "hypersecretpassword",
-                "testuser", "pw1234", Optional.empty(), Collections.singleton("Rolle_A"));
-        embeddedOidcProvider.addUser("resource-owner-password-credentials-test-client", "hypersecretpassword",
-                "testuser-with-bhknz", "pw1234", Optional.of("123456"), Collections.singleton("Rolle_B"));
         // client with authorization-grant-type=client_credentials
         embeddedOidcProvider.addClient("client-credentials-test-client", "supersecretpassword", Collections.singleton("Rolle_A"));
     }
