@@ -786,7 +786,6 @@ Der OpenId Connect Provider Mock wurde mithilfe von WireMock realisiert.
 Es werden die folgenden OAuth2 und OpenID Connect Verfahren unterstützt.
 
 * Client Credentials Flow
-* Resource Owner Password Credentials Flow
 
 Das folgende Beispiel zeigt die Initialisierung des `EmbeddedOidcProviderMock` mit einem Client mit genau einer Rolle und mit einem User mit derselben Rolle:
 
@@ -799,9 +798,6 @@ public EmbeddedOidcProviderMock createMock() {
             new EmbeddedOidcProviderMock("localhost", 9095, "/auth/realms/testrealm");
 
     mock.addClient("client-credentials-client", "supersecretpassword",
-            Collections.singleton("Test_Role"));
-    mock.addUser("ressource-owner-password-credentials-client", "hypersecretpassword",
-            "admin", "adminpassword", Optional.of("123456"),
             Collections.singleton("Test_Role"));
 
     return mock;
