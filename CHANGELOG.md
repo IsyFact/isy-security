@@ -32,6 +32,7 @@
 - keine
 
 ### DEPENDENCY UPGRADES
+- Update org.springframework.boot:spring-boot-dependencies von Version 4.0.6 auf 4.1.0
 - Update org.apache.maven.plugins:maven-surefire-plugin von Version 3.5.5 auf 3.5.6
 - Update org.apache.maven.plugins:maven-dependency-plugin von Version 3.10.0 auf 3.11.0
 - Update org.jacoco:jacoco-maven-plugin von Version 0.8.14 auf 0.8.15
