@@ -30,3 +30,7 @@
 ### Durchzuführende Aktionen vor dem ersten Einsatz
 
 - keine
+
+### DEPENDENCY UPGRADES
+- Update IsyFact/isy-github-actions-templates/.github/workflows/next_version.yml von Version 2.3.0 auf 3.0.0
+
