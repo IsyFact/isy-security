@@ -32,6 +32,7 @@
 - keine
 
 ### DEPENDENCY UPGRADES
+- Update IsyFact/isy-github-actions-templates/.github/workflows/maven_dependency_scan_template.yml von Version 2.3.0 auf 3.0.0
 - Update IsyFact/isy-github-actions-templates/.github/workflows/maven_build_template.yml von Version 2.3.0 auf 3.0.0
 - Update IsyFact/isy-github-actions-templates/.github/workflows/semgrep.yml von Version 2.5.0 auf 3.0.0
 - Update org.sonatype.central:central-publishing-maven-plugin von Version 0.10.0 auf 0.11.0
