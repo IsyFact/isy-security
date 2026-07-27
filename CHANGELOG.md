@@ -32,6 +32,7 @@
 - keine
 
 ### DEPENDENCY UPGRADES
+- Update org.codehaus.mojo:flatten-maven-plugin von Version 1.7.3 auf 1.8.0
 - Update org.sonatype.central:central-publishing-maven-plugin von Version 0.10.0 auf 0.11.0
 - Update org.cyclonedx:cyclonedx-maven-plugin von Version 2.9.1 auf 2.9.2
 - Update org.apache.maven.plugins:maven-surefire-plugin von Version 3.5.5 auf 3.5.6
