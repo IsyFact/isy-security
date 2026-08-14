@@ -18,6 +18,7 @@
     - BREAKING CHANGE:
         - Wegfall der Unterstützung für `password`-basierte OAuth2-Authentifizierung
         - Entfernen des entsprechenden Codes für `password`-basierte OAuth2-Authentifizierung
+- `IFS-5733` Update von isy-security auf Spring Boot 4.1.0
 
 #### Bug-Fixes
 
