@@ -108,6 +108,8 @@ Der Service wird dann im Namen und mit den Rechten des Ressourcenbesitzers ausge
 
 Hinweis: Die Annotation `@Authenticate` löst die Annotation `@Nutzerauthentifizierung` ab und erweitert sie um die Funktion, auch hinterlegte OAuth-2-Clients authentifizieren zu können.
 
+Hinweis: Die durch Spring Boot 4.1.0 eingeführten Properties authorities-claim-expressions, sowie die bestehenden Properties authorities-claim-name, authorities-claim-delimiter und authority-prefix, greifen nicht, da durch den RolePrivilegeGrantedAuthoritiesConverter eine eigene JwtAuthenticationConverter-Bean instanziiert wird.
+
 [[aussensicht-der-komponente-security]]
 === Schnittstelle des Bausteins Security
 
