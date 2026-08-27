@@ -40,6 +40,7 @@ import de.bund.bva.isyfact.security.autoconfigure.IsySecurityAutoConfigurationTe
 import de.bund.bva.isyfact.security.config.AdditionalCredentials;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsAuthorizedClientAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsClientRegistrationAuthenticationProvider;
+import de.bund.bva.isyfact.security.oauth2.client.authentication.PasswordClientRegistrationAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.token.ClientCredentialsClientRegistrationAuthenticationToken;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.token.ClientCredentialsRegistrationIdAuthenticationToken;
 
@@ -63,6 +64,9 @@ public class AuthentifizierungsmanagerTest extends AbstractOidcProviderTest {
 
     @MockitoBean
     private ClientCredentialsClientRegistrationAuthenticationProvider clientCredentialsClientRegistrationAuthenticationProvider;
+
+    @MockitoBean
+    private PasswordClientRegistrationAuthenticationProvider passwordClientRegistrationAuthenticationProvider;
 
     @Autowired
     private Authentifizierungsmanager authentifizierungsmanager;
@@ -95,13 +99,17 @@ public class AuthentifizierungsmanagerTest extends AbstractOidcProviderTest {
 
         when(clientCredentialsClientRegistrationAuthenticationProvider.supports(any())).thenCallRealMethod();
         when(clientCredentialsClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt);
+
+        when(passwordClientRegistrationAuthenticationProvider.supports(any())).thenCallRealMethod();
+        when(passwordClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class))).thenReturn(mockJwt);
     }
 
     @Test
     public void testHasAllProviders() {
         assertThat(isyOAuth2AuthenticationProviderManager.getProviders()).containsExactlyInAnyOrder(
                 clientCredentialsAuthorizedClientAuthenticationProvider,
-                clientCredentialsClientRegistrationAuthenticationProvider
+                clientCredentialsClientRegistrationAuthenticationProvider,
+                passwordClientRegistrationAuthenticationProvider
         );
     }
 

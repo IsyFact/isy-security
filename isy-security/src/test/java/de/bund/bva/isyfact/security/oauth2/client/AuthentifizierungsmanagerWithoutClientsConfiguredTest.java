@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -85,7 +86,7 @@ public class AuthentifizierungsmanagerWithoutClientsConfiguredTest extends Abstr
     }
 
     @Test
-    public void testAuthWithGranttypePasswordNotSupported() {
+    public void testAuthWithGrantTypePasswordWithoutUsernamePasswordThrowsBadCredentials() {
         ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("custom-ropc-client")
                 .tokenUri("http://localhost:9095/auth/realms/testrealm/protocol/openid-connect/token")
                 .jwkSetUri("http://localhost:9095/auth/realms/testrealm/protocol/openid-connect/certs")
@@ -96,8 +97,10 @@ public class AuthentifizierungsmanagerWithoutClientsConfiguredTest extends Abstr
 
         AdditionalCredentials additionalCredentials = AdditionalCredentials.createWithBhknz("900600");
 
-        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> authentifizierungsmanager.authentifiziere(clientRegistration, additionalCredentials));
+        BadCredentialsException badCredentialsException = assertThrows(BadCredentialsException.class,
+                () -> authentifizierungsmanager.authentifiziere(clientRegistration, additionalCredentials));
 
-        assertEquals(illegalArgumentException.getMessage(), "The AuthorizationGrantType 'password' is not supported.");
+        assertEquals("No credentials (username, password) provided for client with password grant type.",
+                badCredentialsException.getMessage());
     }
 }
