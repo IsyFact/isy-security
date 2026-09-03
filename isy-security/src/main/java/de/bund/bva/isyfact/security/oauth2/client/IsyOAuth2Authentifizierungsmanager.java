@@ -18,6 +18,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -359,12 +360,27 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
     private void authenticateAndChangeAuthenticatedPrincipal(Authentication unauthenticatedToken) throws AuthenticationException {
         Authentication authentication;
 
-        if (cacheEnabled) {
-            authentication = authenticateWithCache(unauthenticatedToken);
-        } else {
-            authentication = performAuthentication(unauthenticatedToken);
+        try {
+            if (cacheEnabled) {
+                authentication = authenticateWithCache(unauthenticatedToken);
+            } else {
+                authentication = performAuthentication(unauthenticatedToken);
+            }
+        } finally {
+            eraseCredentials(unauthenticatedToken);
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    /**
+     * Erases the credentials of the authentication request, so that they are not retained in memory longer than necessary.
+     *
+     * @param unauthenticatedToken the authentication request object whose credentials should be erased
+     */
+    private static void eraseCredentials(Authentication unauthenticatedToken) {
+        if (unauthenticatedToken instanceof CredentialsContainer credentialsContainer) {
+            credentialsContainer.eraseCredentials();
+        }
     }
 
     /**

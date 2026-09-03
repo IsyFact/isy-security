@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.util.SerializationUtils;
 
 /**
  * AuthenticationToken holding parameters required for creating a Client to use with Resource Owner Password Credentials Flow authentication.
@@ -18,7 +17,11 @@ public class PasswordClientRegistrationAuthenticationToken extends AbstractClien
     private final String username;
 
     /** The resource owner's password. */
-    private final String password;
+    @Nullable
+    private String password;
+
+    /** Indicates whether {@link #eraseCredentials()} has already been called. */
+    private boolean credentialsErased;
 
     public PasswordClientRegistrationAuthenticationToken(ClientRegistration clientRegistration, String username, String password, @Nullable String bhknz) {
         super(username, clientRegistration, bhknz);
@@ -31,8 +34,28 @@ public class PasswordClientRegistrationAuthenticationToken extends AbstractClien
         return username;
     }
 
+    /**
+     * Returns the resource owner password.
+     *
+     * @return the resource owner password.
+     * @throws IllegalStateException if the credentials of this token have already been erased
+     */
     public String getPassword() {
+        if (credentialsErased) {
+            throw new IllegalStateException(
+                    "The credentials of this token have already been erased. A token can only be used for a single authentication.");
+        }
         return password;
+    }
+
+    /**
+     * Removes the reference to the resource owner's password, so that it is no longer reachable through this token.
+     */
+    @Override
+    public void eraseCredentials() {
+        super.eraseCredentials();
+        this.password = null;
+        this.credentialsErased = true;
     }
 
     /**
@@ -58,11 +81,10 @@ public class PasswordClientRegistrationAuthenticationToken extends AbstractClien
             digest.update(super.generateCacheKey(hashAlgorithm, salt));
 
             List<String> additionalValues = Arrays.asList(
-                String.valueOf(getUsername()),
-                String.valueOf(getPassword())
+                getUsername(),
+                getPassword()
             );
-            byte[] additionalBytes = SerializationUtils.serialize(additionalValues);
-            digest.update(additionalBytes);
+            updateDigest(digest, additionalValues);
 
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {

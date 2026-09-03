@@ -1,5 +1,11 @@
 package de.bund.bva.isyfact.security.oauth2.client.authentication.token;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -48,6 +54,21 @@ public abstract class AbstractIsyAuthenticationToken extends AbstractAuthenticat
     @Nullable
     public String getBhknz() {
         return bhknz;
+    }
+
+    /**
+     * Adds the given values to the digest used for generating a cache key.
+     *
+     * @param digest the digest to update
+     * @param values the values to add to the digest
+     */
+    protected static void updateDigest(MessageDigest digest, List<String> values) {
+        for (String value : values) {
+            byte[] valueBytes = String.valueOf(value).getBytes(StandardCharsets.UTF_8);
+            digest.update(ByteBuffer.allocate(Integer.BYTES).putInt(valueBytes.length).array());
+            digest.update(valueBytes);
+            Arrays.fill(valueBytes, (byte) 0);
+        }
     }
 
     @Nullable
