@@ -14,6 +14,9 @@
 
 #### Features
 
+- `IFS-5745` Wiederherstellung der ROPC-Infrastruktur
+    - BREAKING CHANGE:
+        - Einführung der Unterstützung des ROPC-flows auf Basis einer eigenen Implementierung.
 - `IFS-5582` Anpassung des Moduls `isy-security-test` an aktuelles Spring-Framework
     - BREAKING CHANGE:
         - Wegfall der Unterstützung für `password`-basierte OAuth2-Authentifizierung
