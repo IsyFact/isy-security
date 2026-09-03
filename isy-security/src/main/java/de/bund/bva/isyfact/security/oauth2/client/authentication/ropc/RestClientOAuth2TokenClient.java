@@ -233,6 +233,12 @@ public class RestClientOAuth2TokenClient implements OAuth2TokenClient {
 
     /**
      * Internal representation of the raw JSON token endpoint response.
+     *
+     * @param accessToken the access token issued by the authorization server.
+     * @param tokenType the type of the token issued.
+     * @param expiresIn the lifetime in seconds of the access token.
+     * @param scope the scope of the access token.
+     * @param refreshToken the refresh token, which can be used to obtain new access tokens.
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record TokenEndpointResponse(
