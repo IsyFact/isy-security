@@ -49,9 +49,10 @@ Die folgenden Methoden bieten Zugriff auf eine Liste von allen im System hinterl
 Zur Authentifizierung von OAuth 2.0 Clients stehen folgende Methoden zur Verfügung:
 
 `void authentifiziere(String oauth2ClientRegistrationId)`::
-Authentifiziert einen OAuth 2.0 Client anhand seiner Client-Registration-ID. Unterstützt den `client_credentials` (_Client Credentials_ Flow) GrantType.
+Authentifiziert einen OAuth 2.0 Client anhand seiner Client-Registration-ID. Unterstützt den `client_credentials` (_Client Credentials_ Flow) und `password` (_Resource Owner Password Credentials_ Flow) GrantType.
 Zusätzliche Authentifizierungsmerkmale werden aus den <<isyfact-specific-client-registration,IsyFact spezifischen Konfigurationsparametern>> mit der entsprechenden Client-Registration-ID abgefragt:
-* `bhknz`: Das BHKNZ kann als optionaler Parameter übergeben werden.
+* `bhknz`: Das BHKNZ kann als optionaler Parameter übergeben werden. Wird aktuell nur für den _Resource Owner-Password Credentials_ Flow ausgewertet.
+* `username` und `password`: Die Zugangsdaten des technischen Nutzers (Resource Owner), welche für den _Resource Owner Password Credentials_ Flow erforderlich sind.
 
 `void authentifiziere(String oauth2ClientRegistrationId, Duration expirationTimeOffset)`::
 Authentifiziert einen OAuth 2.0 Client anhand seiner Client-Registration-ID mittels der Methode `authentifiziere(String oauth2ClientRegistrationId)`, falls das im SecurityContext vorhandene `AbstractOAuth2TokenAuthenticationToken` abgelaufen ist.
@@ -67,6 +68,7 @@ Dieser Wert ist als Standardwert durch eine Implementierung in Spring Security v
 `void authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)`::
 Authentifiziert einen OAuth 2.0 Client anhand seiner Client-Registration-ID mit zusätzlichen dynamischen Authentifizierungsdaten. Unterstützt:
 * `client_credentials`-GrantType: Hier kann ein BHKNZ über die AdditionalCredentials übergeben werden.
+* `password`-GrantType: Hier können Benutzername und Passwort, sowie optional das BHKNZ übergeben werden. Diese Authentifizierungsdaten werden anstelle der eventuell in der Konfiguration hinterlegten Werte verwendet.
 
 `void authentifiziere(ClientRegistration clientRegistration)`::
 Authentifiziert einen OAuth 2.0 Client anhand des übergebenen ClientRegistration-Objektes. Unterstützt:
@@ -75,6 +77,7 @@ Authentifiziert einen OAuth 2.0 Client anhand des übergebenen ClientRegistratio
 `void authentifiziere(ClientRegistration clientRegistration, AdditionalCredentials credentials)`::
 Authentifiziert einen OAuth 2.0 Client anhand des übergebenen ClientRegistration-Objektes mit zusätzlichen dynamischen Authentifizierungsdaten. Unterstützt:
 * `client_credentials`-GrantType: Hier kann ein BHKNZ über die AdditionalCredentials übergeben werden.
+* `password`-GrantType: Hier *müssen* Benutzername und Passwort in den AdditionalCredentials enthalten sein, da sie nicht aus der Konfiguration geladen werden können.
 
 .Verwendung der Authentifizierungsverfahren
 [source,java]
@@ -92,9 +95,26 @@ ClientRegistration clientCredentialsRegistration = ClientRegistration.withRegist
 authentifizierungsmanager.authentifiziere(clientCredentialsRegistration);
 
 //Einfache Authentifizierung mit ClientRegistration inkl. BHKNZ
-AdditionalCredentials credentialsWithBhknz = AdditionalCredentials.withBhknz("123456");
+AdditionalCredentials credentialsWithBhknz = AdditionalCredentials.createWithBhknz("123456");
 authentifizierungsmanager.authentifiziere(clientCredentialsRegistration, credentialsWithBhknz);
 
+//Resource Owner Password Credentials Flow Beispiel
+ClientRegistration passwordFlowRegistration = ClientRegistration.withRegistrationId("sgw-service")
+.tokenUri("http://iam-provider/auth/realms/testrealm/protocol/openid-connect/token")
+.jwkSetUri("http://iam-provider/auth/realms/testrealm/protocol/openid-connect/certs")
+.clientId("sgw-client")
+.clientSecret("sgw-secret")
+.authorizationGrantType(new AuthorizationGrantType("password"))
+.build();
+
+//Authentifizierung mit AdditionalCredentials: username und password*
+AdditionalCredentials credentialsWithUsernamePassword = AdditionalCredentials.createWithUsernamePassword("user", "passwort");
+authentifizierungsmanager.authentifiziere(passwordFlowRegistration, credentialsWithUsernamePassword);
+
+//Authentifizierung mit AdditionalCredentials: username, password und BHKNZ*
+AdditionalCredentials credentialsWithUsernamePasswordBhknz = AdditionalCredentials.createWithUsernamePasswordBhknz(
+"user", "passwort", "123456");
+authentifizierungsmanager.authentifiziere(passwordFlowRegistration, credentialsWithUsernamePasswordBhknz);
 ----
 
 [[berechtigungsmanager]]
@@ -170,7 +190,7 @@ Das Präfix sämtlicher Konfigurationsparameter `spring.security.oauth2` wird zu
 |Parameter |Wertebereich |Beschreibung
 |client.registration._<registrationId>_.client-id |String |Identifier der Client-Applikation im Autorisierungsserver.
 |client.registration._<registrationId>_.client-secret |String |Secret, das nur der Anwendung und dem Autorisierungsserver bekannt ist.
-|client.registration._<registrationId>_.authorization-grant-type |String |Methode, durch welche die Anwendung ein Bearer-Token erhält. Für den Client Credentials Flow auf `client_credentials` zu setzen.
+|client.registration._<registrationId>_.authorization-grant-type |String |Methode, durch welche die Anwendung ein Bearer-Token erhält. Abhängig von dem zu verwendenden auf `client_credentials` (Client Credentials Flow) oder `password` (Resource Owner Password Credentials Flow) zu setzen.
 |client.registration._<registrationId>_.provider |String |(Optional) ID des zu verwendenden Client-Providers, falls diese nicht mit der Registration-ID übereinstimmt.
 |client.provider._<providerId>_.issuer-uri |String |Der OpenID Connect Issuer Identifier für die Konfiguration des Clients über den Discovery Endpoint, beispielsweise in der Form `http://<identity-provider>/auth/realms/<realm>`.
 |===
@@ -178,6 +198,23 @@ Das Präfix sämtlicher Konfigurationsparameter `spring.security.oauth2` wird zu
 [[isyfact-specific-client-registration]]
 ==== Isyfact spezifische Konfigurationsparameter
 
+:linkaktuell: xref:spring-oauth2-client-registration[Client-Credentials-Flow]
+
+Zugangsdaten für technische Nutzer zur Authentifizierung von Tasks und Batches mit dem _Resource-Owner-Password-Credential_ Flow können über die folgenden Parameter konfiguriert werden:
+
+[[table-isyfact-client-registration-extension]]
+.Isyfact spezifische Erweiterung der Spring ClientRegistration
+[cols="3m,2m,2m,8",options="header"]
+|===
+|Parameter |Wertebereich |Default |Beschreibung
+|isy.security.oauth2.client.registration._<registrationId>_.username |String | null | Benutzername für Grant-Type `password`.
+|isy.security.oauth2.client.registration._<registrationId>_.password |String | null | Benutzerpassword für Grant-Type `password`.
+|isy.security.oauth2.client.registration._<registrationId>_.bhknz |String | null | Behördenkennzeichen für Grant-Type `password`. (optional)
+|isy.security.oauth2.client.bhknz-header-name |String | x-client-cert-bhknz |Konfigurierbarer Headername für Zwei-Faktor-Authentifizierung.
+|isy.security.oauth2.client.default-certificate-ou |String | null | Organisational Unit, die in Verbindung mit bhknz verwendet wird, um den Wert für bhknz-header-name zu bilden.
+
+(Muss gesetzt werden, wenn eine `registration` mit `bhknz` konfiguriert ist)
+|===
 
 
 === Tokenweitergabe an Nachbarsysteme
@@ -260,6 +297,19 @@ spring.security.oauth2.client.registration.client1.client-id=client-credentials-
 spring.security.oauth2.client.registration.client1.client-secret=client-credentials-secret
 spring.security.oauth2.client.registration.client1.authorization-grant-type=client_credentials
 spring.security.oauth2.client.registration.client1.provider=testrealm
+
+### Beispiel: ClientRegistration für den Resource Owner Password Credentials Flow
+# Spring Security Konfiguration
+spring.security.oauth2.client.registration.client2.client-id=client-credentials-client
+spring.security.oauth2.client.registration.client2.client-secret=client-credentials-secret
+spring.security.oauth2.client.registration.client2.authorization-grant-type=password
+spring.security.oauth2.client.registration.client2.provider=testrealm
+# Isyfact spezifische ClientRegistration properties für den Resource Owner Password Credentials Flow
+isy.security.oauth2.client.registration.client2.username=testuser
+isy.security.oauth2.client.registration.client2.password=testpassword
+isy.security.oauth2.client.registration.client2.bhknz=123456
+# Organizational Unit zur Verwendung mit bhknz
+isy.security.oauth2.client.default-certificate-ou=TESTOU
 ----
 
 [[webclient-authentication]]
@@ -786,6 +836,7 @@ Der OpenId Connect Provider Mock wurde mithilfe von WireMock realisiert.
 Es werden die folgenden OAuth2 und OpenID Connect Verfahren unterstützt.
 
 * Client Credentials Flow
+* Resource Owner Password Credentials Flow
 
 Das folgende Beispiel zeigt die Initialisierung des `EmbeddedOidcProviderMock` mit einem Client mit genau einer Rolle und mit einem User mit derselben Rolle:
 
@@ -798,6 +849,9 @@ public EmbeddedOidcProviderMock createMock() {
             new EmbeddedOidcProviderMock("localhost", 9095, "/auth/realms/testrealm");
 
     mock.addClient("client-credentials-client", "supersecretpassword",
+            Collections.singleton("Test_Role"));
+    mock.addUser("ressource-owner-password-credentials-client", "hypersecretpassword",
+            "admin", "adminpassword", Optional.of("123456"),
             Collections.singleton("Test_Role"));
 
     return mock;
