@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.server.resource.authentication.AbstractOAuth2TokenAuthenticationToken;
 
 import de.bund.bva.isyfact.security.config.AdditionalCredentials;
+import de.bund.bva.isyfact.security.config.IsyOAuth2ClientConfigurationProperties;
 
 /**
  * Provides methods for performing authentication via OAuth 2.0 clients outside of the context of a {@code HttpServletRequest},
@@ -23,7 +24,13 @@ public interface Authentifizierungsmanager {
      * After successful authentication the authenticated principal in the {@link SecurityContext} will be updated.
      * <p>
      * The chosen OAuth 2.0 Flow will depend on the authorization grant type configured in the application properties.
-     * The currently supported flow is: Client Credentials (grant type: client_credentials)
+     * The currently supported flows are:
+     * <ul>
+     *     <li>Client Credentials (grant type: client_credentials)</li>
+     *     <li>Resource Owner Password Credentials (grant type: password)</li>
+     * </ul>
+     * Additional properties for the Resource Owner Password Credentials Flow will be resolved via the matching
+     * registration in {@link IsyOAuth2ClientConfigurationProperties#getRegistration()}.
      *
      * @param oauth2ClientRegistrationId
      *         registration ID of the OAuth 2.0 Client to authorize
@@ -38,11 +45,15 @@ public interface Authentifizierungsmanager {
      * After successful authentication the authenticated principal in the {@link SecurityContext} will be updated.
      * <p>
      * The chosen OAuth 2.0 Flow will depend on the authorization grant type configured in the application properties.
-     * The currently supported flow is: Client Credentials (grant type: client_credentials).
+     * The currently supported flows are:
+     * <ul>
+     *     <li>Client Credentials (grant type: client_credentials)</li>
+     * </ul>
+     *
      * @param oauth2ClientRegistrationId
      *         registration ID of the OAuth 2.0 Client to authorize
      * @param credentials
-     *         additional credentials to use for authentication, such as bhknz
+     *         additional credentials to use for authentication, such as username, password, and/or bhknz
      * @throws AuthenticationException
      *         if authentication fails
      * @see AdditionalCredentials
@@ -81,7 +92,9 @@ public interface Authentifizierungsmanager {
      * This method allows authentication with a manually created {@link ClientRegistration} when no registration ID
      * is configured.
      * <p>
-     * This method only supports the Client Credentials flow (grant type: client_credentials)
+     * This method only supports the Client Credentials flow (grant type: client_credentials). For authentication using
+     * the Resource Owner Password Credentials flow, use
+     * {@link #authentifiziere(ClientRegistration, AdditionalCredentials) authentifiziere with AdditionalCredentials} instead.
      * The registration ID from {@link ClientRegistration} must be unique.
      *
      * @param clientRegistration
@@ -103,13 +116,14 @@ public interface Authentifizierungsmanager {
      * The currently supported flows are:
      * <ul>
      *     <li>Client Credentials (grant type: client_credentials)</li>
+     *     <li>Resource Owner Password Credentials (grant type: password)</li>
      * </ul>
      * The registration ID from {@link ClientRegistration} must be unique.
      *
      * @param clientRegistration
      *         the client registration containing all necessary information for authentication
      * @param credentials
-     *         additional credentials to use for authentication, such as bhknz
+     *         additional credentials to use for authentication, such as username, password, and/or bhknz
      * @throws AuthenticationException
      *         if authentication fails
      * @see AdditionalCredentials
