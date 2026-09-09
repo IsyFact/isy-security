@@ -12,13 +12,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.http.converter.OAuth2ErrorHttpMessageConverter;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -90,21 +90,26 @@ public class RestClientOAuth2TokenClient implements OAuth2TokenClient {
      * @param bhknzHeaderName the name of the HTTP header used to pass the BHKNZ, may be {@code null}
      */
     public RestClientOAuth2TokenClient(RestClient restClient, @Nullable String bhknzHeaderName) {
-        Assert.notNull(restClient, "restClient cannot be null");
+        if (restClient == null) {
+            throw new IllegalArgumentException("restClient cannot be null");
+        }
         this.restClient = restClient;
         this.bhknzHeaderName = bhknzHeaderName;
     }
 
     @Override
     public OAuth2TokenResponse passwordGrant(OAuth2PasswordGrantRequest request) {
-        Assert.notNull(request, "request cannot be null");
+        if (request == null) {
+            throw new BadCredentialsException("request cannot be null");
+        }
         ClientRegistration clientRegistration = request.clientRegistration();
         validateClientAuthenticationMethod(clientRegistration);
 
         RestClient client = this.restClient;
         if (request.bhknz() != null) {
-            Assert.state(this.bhknzHeaderName != null,
-                    "bhknzHeaderName must be configured to send a BHKNZ header");
+            if (!StringUtils.hasText(this.bhknzHeaderName)) {
+                throw new BadCredentialsException("bhknzHeaderName must be configured to send a BHKNZ header");
+            }
             String headerName = this.bhknzHeaderName;
             String headerValue = request.bhknz();
             // set the optional BHKNZ header via a RestClient request interceptor

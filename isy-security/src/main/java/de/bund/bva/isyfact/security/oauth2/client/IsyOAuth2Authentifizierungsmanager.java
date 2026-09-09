@@ -23,7 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import de.bund.bva.isyfact.security.config.AdditionalCredentials;
 import de.bund.bva.isyfact.security.config.IsyOAuth2ClientConfigurationProperties;
@@ -229,8 +229,12 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
      * @return an unauthenticated token that can be passed to the provider manager
      */
     private Authentication getAuthTokenForRegistrationIdAndAdditionalCredentials(String oauth2ClientRegistrationId, AdditionalCredentials credentials) {
-        Assert.notNull(oauth2ClientRegistrationId, "Parameter oauth2ClientRegistrationId cannot be null");
-        Assert.notNull(credentials, "Parameter credentials cannot be null");
+        if (oauth2ClientRegistrationId == null) {
+            throw new IllegalArgumentException("Parameter oauth2ClientRegistrationId cannot be null");
+        }
+        if (credentials == null) {
+            throw new BadCredentialsException("Parameter credentials cannot be null");
+        }
 
         ClientRegistration clientRegistration = null;
         if (clientRegistrationRepository != null) {
@@ -255,6 +259,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
                         "No configured credentials (username, password) found for client with registrationId: %s.".formatted(
                                 clientRegistration.getRegistrationId()));
             } else {
+                validateBhknzUsable(credentials.getBhknz(), clientRegistration.getRegistrationId());
                 return new PasswordClientRegistrationAuthenticationToken(clientRegistration,
                         credentials.getUsername(), credentials.getPassword(), credentials.getBhknz());
             }
@@ -304,7 +309,9 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
      * @return an unauthenticated token that can be passed to the provider manager
      */
     private Authentication getAuthTokenForClientRegistration(ClientRegistration clientRegistration) {
-        Assert.notNull(clientRegistration, "Parameter clientRegistration cannot be null");
+        if (clientRegistration == null) {
+            throw new IllegalArgumentException("Parameter clientRegistration cannot be null");
+        }
 
         AuthorizationGrantType grantType = clientRegistration.getAuthorizationGrantType();
         if (AuthorizationGrantType.CLIENT_CREDENTIALS.equals(grantType)) {
@@ -326,8 +333,12 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
     private Authentication getAuthTokenForClientRegistrationAndAdditionalCredentials(
             ClientRegistration clientRegistration,
             AdditionalCredentials credentials) {
-        Assert.notNull(clientRegistration, "Parameter clientRegistration cannot be null");
-        Assert.notNull(credentials, "Parameter credentials cannot be null");
+        if (clientRegistration == null) {
+            throw new IllegalArgumentException("Parameter clientRegistration cannot be null");
+        }
+        if (credentials == null) {
+            throw new BadCredentialsException("Parameter credentials cannot be null");
+        }
 
         Authentication unauthenticatedToken;
         AuthorizationGrantType grantType = clientRegistration.getAuthorizationGrantType();
@@ -336,6 +347,7 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
             unauthenticatedToken = new ClientCredentialsClientRegistrationAuthenticationToken(clientRegistration, credentials.getBhknz());
         } else if (PASSWORD.equals(grantType)) {
             if (credentials.hasUsernamePassword()) {
+                validateBhknzUsable(credentials.getBhknz(), clientRegistration.getRegistrationId());
                 unauthenticatedToken = new PasswordClientRegistrationAuthenticationToken(clientRegistration,
                         credentials.getUsername(), credentials.getPassword(), credentials.getBhknz());
             } else {
@@ -346,6 +358,22 @@ public class IsyOAuth2Authentifizierungsmanager implements Authentifizierungsman
             throw new IllegalArgumentException("The AuthorizationGrantType '" + grantType.getValue() + "' is not supported.");
         }
         return unauthenticatedToken;
+    }
+
+    /**
+     * Verifies that a BHKNZ passed at runtime via {@link AdditionalCredentials} is not null and a default
+     * certificate OU is configured to form the value of the bhknz header.
+     *
+     * @param bhknz the bhknz from the additional credentials, may be {@code null}
+     * @param registrationId the client registration ID, used for the error message
+     * @throws BadCredentialsException if a bhknz is set but no default certificate OU is configured
+     */
+    private void validateBhknzUsable(@Nullable String bhknz, String registrationId) {
+        if (bhknz != null && !StringUtils.hasText(isyOAuth2ClientProps.getDefaultCertificateOu())) {
+            throw new BadCredentialsException(
+                    "Cannot use bhknz: defaultCertificateOu must be configured when bhknz is set for client with registrationId: %s."
+                            .formatted(registrationId));
+        }
     }
 
     /**
