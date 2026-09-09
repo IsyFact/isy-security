@@ -2,6 +2,7 @@ package de.bund.bva.isyfact.security.oauth2.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -13,6 +14,7 @@ import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -38,11 +41,13 @@ import de.bund.bva.isyfact.security.AbstractOidcProviderTest;
 import de.bund.bva.isyfact.security.autoconfigure.IsyOAuth2ClientAutoConfiguration;
 import de.bund.bva.isyfact.security.autoconfigure.IsySecurityAutoConfigurationTest;
 import de.bund.bva.isyfact.security.config.AdditionalCredentials;
+import de.bund.bva.isyfact.security.config.IsyOAuth2ClientConfigurationProperties;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsAuthorizedClientAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsClientRegistrationAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.PasswordClientRegistrationAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.token.ClientCredentialsClientRegistrationAuthenticationToken;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.token.ClientCredentialsRegistrationIdAuthenticationToken;
+import de.bund.bva.isyfact.security.oauth2.client.authentication.token.PasswordClientRegistrationAuthenticationToken;
 
 /**
  * Tests the Authentifizierungsmanager with all available authentication providers.
@@ -74,9 +79,22 @@ public class AuthentifizierungsmanagerTest extends AbstractOidcProviderTest {
     @Autowired
     private ProviderManager isyOAuth2AuthenticationProviderManager;
 
+    @Autowired
+    private IsyOAuth2ClientConfigurationProperties isyOAuth2ClientProps;
+
     private JwtAuthenticationToken mockJwt;
 
     private Jwt mockToken;
+
+    private ClientRegistration ropcClientRegistration() {
+        return ClientRegistration.withRegistrationId("custom-ropc-client")
+                .tokenUri("http://localhost:9095/auth/realms/testrealm/protocol/openid-connect/token")
+                .jwkSetUri("http://localhost:9095/auth/realms/testrealm/protocol/openid-connect/certs")
+                .clientId("resource-owner-password-credentials-test-client")
+                .clientSecret("hypersecretpassword")
+                .authorizationGrantType(new AuthorizationGrantType("password"))
+                .build();
+    }
 
     @BeforeEach
     public void configureMocks() throws NoSuchFieldException, IllegalAccessException {
@@ -142,7 +160,7 @@ public class AuthentifizierungsmanagerTest extends AbstractOidcProviderTest {
 
     @Test
     public void testAuthWithRegistrationIdAndNullCredentials() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(BadCredentialsException.class,
                 () -> authentifizierungsmanager.authentifiziere("cc-client", (AdditionalCredentials) null));
     }
 
@@ -254,7 +272,7 @@ public class AuthentifizierungsmanagerTest extends AbstractOidcProviderTest {
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .build();
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(BadCredentialsException.class,
                 () -> authentifizierungsmanager.authentifiziere(clientRegistration, null));
     }
 
@@ -330,6 +348,108 @@ public class AuthentifizierungsmanagerTest extends AbstractOidcProviderTest {
     }
 
     @Test
+    public void testAuthWithRegistrationIdROPC() {
+        authentifizierungsmanager.authentifiziere("ropc-client");
+
+        ArgumentCaptor<PasswordClientRegistrationAuthenticationToken> tokenCaptor =
+                ArgumentCaptor.forClass(PasswordClientRegistrationAuthenticationToken.class);
+        verify(passwordClientRegistrationAuthenticationProvider).authenticate(tokenCaptor.capture());
+
+        PasswordClientRegistrationAuthenticationToken token = tokenCaptor.getValue();
+        assertEquals("ropc-client", token.getClientRegistration().getRegistrationId());
+        assertEquals("testuser", token.getUsername());
+        assertNull(token.getBhknz());
+        assertEquals(mockJwt, SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    public void testAuthWithRegistrationIdROPCAndConfiguredBhknz() {
+        authentifizierungsmanager.authentifiziere("ropc-client-with-bhknz");
+
+        ArgumentCaptor<PasswordClientRegistrationAuthenticationToken> tokenCaptor =
+                ArgumentCaptor.forClass(PasswordClientRegistrationAuthenticationToken.class);
+        verify(passwordClientRegistrationAuthenticationProvider).authenticate(tokenCaptor.capture());
+
+        assertEquals("testuser-with-bhknz", tokenCaptor.getValue().getUsername());
+        assertEquals("123456", tokenCaptor.getValue().getBhknz());
+    }
+
+    @Test
+    public void testAuthWithRegistrationIdROPCAndUsernamePassword() {
+        AtomicReference<String> passwordAtAuthentication = new AtomicReference<>();
+        when(passwordClientRegistrationAuthenticationProvider.authenticate(any(Authentication.class)))
+                .thenAnswer(invocation -> {
+                    PasswordClientRegistrationAuthenticationToken token = invocation.getArgument(0);
+                    passwordAtAuthentication.set(token.getPassword());
+                    return mockJwt;
+                });
+
+        authentifizierungsmanager.authentifiziere("ropc-client",
+                AdditionalCredentials.createWithUsernamePassword("otheruser", "otherpw"));
+
+        ArgumentCaptor<PasswordClientRegistrationAuthenticationToken> tokenCaptor =
+                ArgumentCaptor.forClass(PasswordClientRegistrationAuthenticationToken.class);
+        verify(passwordClientRegistrationAuthenticationProvider).authenticate(tokenCaptor.capture());
+
+        assertEquals("otheruser", tokenCaptor.getValue().getUsername());
+        assertEquals("otherpw", passwordAtAuthentication.get());
+        assertThrows(IllegalStateException.class, () -> tokenCaptor.getValue().getPassword());
+    }
+
+    @Test
+    public void testAuthWithRegistrationIdROPCAndUsernamePasswordBhknz() {
+        authentifizierungsmanager.authentifiziere("ropc-client",
+                AdditionalCredentials.createWithUsernamePasswordBhknz("otheruser", "otherpw", "900600"));
+
+        ArgumentCaptor<PasswordClientRegistrationAuthenticationToken> tokenCaptor =
+                ArgumentCaptor.forClass(PasswordClientRegistrationAuthenticationToken.class);
+        verify(passwordClientRegistrationAuthenticationProvider).authenticate(tokenCaptor.capture());
+
+        assertEquals("otheruser", tokenCaptor.getValue().getUsername());
+        assertEquals("900600", tokenCaptor.getValue().getBhknz());
+    }
+
+    @Test
+    public void testAuthWithRegistrationIdROPCAndBhknzFailsWithoutDefaultCertificateOu() {
+        String initialOu = isyOAuth2ClientProps.getDefaultCertificateOu();
+        isyOAuth2ClientProps.setDefaultCertificateOu("");
+        try {
+            BadCredentialsException exception = assertThrows(BadCredentialsException.class,
+                    () -> authentifizierungsmanager.authentifiziere("ropc-client",
+                            AdditionalCredentials.createWithUsernamePasswordBhknz("otheruser", "otherpw", "900600")));
+
+            assertThat(exception).hasMessageContaining("Cannot use bhknz", "defaultCertificateOu", "ropc-client");
+        } finally {
+            isyOAuth2ClientProps.setDefaultCertificateOu(initialOu);
+        }
+    }
+
+    @Test
+    public void testAuthWithDirectClientRegistrationROPCAndCredentials() {
+        authentifizierungsmanager.authentifiziere(ropcClientRegistration(),
+                AdditionalCredentials.createWithUsernamePasswordBhknz("testuser", "pw1234", "900600"));
+
+        ArgumentCaptor<PasswordClientRegistrationAuthenticationToken> tokenCaptor =
+                ArgumentCaptor.forClass(PasswordClientRegistrationAuthenticationToken.class);
+        verify(passwordClientRegistrationAuthenticationProvider).authenticate(tokenCaptor.capture());
+
+        PasswordClientRegistrationAuthenticationToken token = tokenCaptor.getValue();
+        assertEquals("custom-ropc-client", token.getClientRegistration().getRegistrationId());
+        assertEquals("resource-owner-password-credentials-test-client", token.getClientRegistration().getClientId());
+        assertEquals("testuser", token.getUsername());
+        assertEquals("900600", token.getBhknz());
+        assertEquals(mockJwt, SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    public void testAuthWithRegistrationIdROPCFailsWithoutConfiguredCredentials() {
+        BadCredentialsException exception = assertThrows(BadCredentialsException.class,
+                () -> authentifizierungsmanager.authentifiziere("ropc-client-without-resource-owner"));
+
+        assertThat(exception).hasMessageContaining("ropc-client-without-resource-owner");
+    }
+
+    @Test
     public void testNoCachingForClientCredentialsRegistrationId() {
         authentifizierungsmanager.authentifiziere("cc-client");
         verify(clientCredentialsAuthorizedClientAuthenticationProvider, times(1)).authenticate(any());
@@ -357,6 +477,36 @@ public class AuthentifizierungsmanagerTest extends AbstractOidcProviderTest {
         authentifizierungsmanager.authentifiziere(reg);
 
         verify(clientCredentialsClientRegistrationAuthenticationProvider, times(2)).authenticate(any());
+    }
+
+    @Test
+    public void testCacheHitOnSecondAuthentication() {
+        when(mockJwt.isAuthenticated()).thenReturn(true);
+
+        authentifizierungsmanager.authentifiziere("ropc-client");
+        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+
+        SecurityContextHolder.clearContext();
+        authentifizierungsmanager.authentifiziere("ropc-client");
+
+        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+
+        assertEquals(mockJwt, SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    public void testCacheWithSameUsernameButDifferentPassword() {
+        when(mockJwt.isAuthenticated()).thenReturn(true);
+
+        authentifizierungsmanager.authentifiziere("ropc-client",
+                AdditionalCredentials.createWithUsernamePassword("testuser", "pw1234"));
+        verify(passwordClientRegistrationAuthenticationProvider, times(1)).authenticate(any());
+
+        SecurityContextHolder.clearContext();
+        authentifizierungsmanager.authentifiziere("ropc-client",
+                AdditionalCredentials.createWithUsernamePassword("testuser", "anotherpw"));
+
+        verify(passwordClientRegistrationAuthenticationProvider, times(2)).authenticate(any());
     }
 
     @AfterEach
