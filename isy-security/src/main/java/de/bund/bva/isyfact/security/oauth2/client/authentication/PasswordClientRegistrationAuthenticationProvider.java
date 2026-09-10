@@ -2,7 +2,9 @@ package de.bund.bva.isyfact.security.oauth2.client.authentication;
 
 import java.time.Instant;
 
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.ClientAuthorizationException;
@@ -14,7 +16,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ropc.OAuth2PasswordGrantRequest;
@@ -53,12 +54,11 @@ public class PasswordClientRegistrationAuthenticationProvider extends IsyOAuth2A
 
     @Override
     @Nullable
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        if (!(authentication instanceof PasswordClientRegistrationAuthenticationToken)) {
+    public Authentication authenticate(@NonNull Authentication authentication) throws AuthenticationException {
+        if (!(authentication instanceof PasswordClientRegistrationAuthenticationToken token)) {
             return null;
         }
 
-        PasswordClientRegistrationAuthenticationToken token = (PasswordClientRegistrationAuthenticationToken) authentication;
         ClientRegistration clientRegistration = token.getClientRegistration();
 
         OAuth2AuthorizedClient authorizedClient =
@@ -72,7 +72,7 @@ public class PasswordClientRegistrationAuthenticationProvider extends IsyOAuth2A
     }
 
     @Override
-    public boolean supports(Class<?> authentication) {
+    public boolean supports(@NonNull Class<?> authentication) {
         return PasswordClientRegistrationAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
@@ -89,8 +89,9 @@ public class PasswordClientRegistrationAuthenticationProvider extends IsyOAuth2A
     @Nullable
     protected OAuth2AuthorizedClient obtainAuthorizedClient(ClientRegistration clientRegistration,
                                                             String username, String password, @Nullable String bhknz) {
-        Assert.hasText(username, "username cannot be empty for client: " + clientRegistration.getRegistrationId());
-        Assert.hasText(password, "password cannot be empty for client: " + clientRegistration.getRegistrationId());
+        if (!StringUtils.hasText(username) || !StringUtils.hasText(password)) {
+            throw new BadCredentialsException("username or password cannot be empty for client: " +  clientRegistration.getClientId());
+        }
 
         if (!PASSWORD.equals(clientRegistration.getAuthorizationGrantType())) {
             return null;
@@ -122,13 +123,16 @@ public class PasswordClientRegistrationAuthenticationProvider extends IsyOAuth2A
      *
      * @param bhknz the bhknz, may be {@code null} if no bhknz should be sent
      * @return the combined header value, or {@code null} if bhknz is {@code null}
+     * @throws BadCredentialsException if a bhknz is set but no default certificate OU is configured
      */
     @Nullable
     private String buildBhknzHeaderValue(@Nullable String bhknz) {
         if (bhknz == null) {
             return null;
         }
-        Assert.state(StringUtils.hasText(defaultCertificateOu), "defaultCertificateOu must be configured when bhknz is set");
+        if (!StringUtils.hasText(defaultCertificateOu)) {
+            throw new BadCredentialsException("defaultCertificateOu must be configured when bhknz is set");
+        }
         return bhknz + ":" + defaultCertificateOu;
     }
 }
