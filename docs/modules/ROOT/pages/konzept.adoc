@@ -410,8 +410,7 @@ Hierzu werden aus dem Access-Token dessen Signatur, dessen Ablaufdatum und die d
 Die neue System-Architektur hat den Vorteil, dass in der externen Anwendung eine Wiederverwendung des Access-Tokens ermöglicht,
 was zu einer starken Verringerung der Authentifizierungs-Anfragen an das IAM führt.
 
-Dabei wird (wie in der bisherigen Systemarchitektur) neben der neuen Authentifizierungslogik des _Client-Credential-Flows_ auch die bisherige Authentifizierungslogik des _Resource-Owner-Password-Credentials-Flows_ unterstützt.
-Der _Client-Credential-Flow_ dient dabei der Authentifizierung eines technischen Clients, und über den _Resource-Owner-Password-Credentials-Flow_ erfolgt die Authentifizierung eines technischen Nutzers.
+Dabei wird ausschließlich der _Client-Credential-Flow_ mittels einer signierten JWT-Client-Assertion nach dem Verfahren `client_secret_jwt` zur Authentifizierung eines technischen Clients unterstützt.
 
 Das nachfolgende Sequenzdiagramm zeigt noch einmal schematisch den logischen Ablauf der Authentifizierung und Autorisierung im Zusammenspiel der System-Komponenten und dem Authentication-Gateway:
 
