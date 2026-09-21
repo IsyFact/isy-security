@@ -25,6 +25,7 @@
 - `IFS-5746` Integration des ROPC-Flows in bestehenden Authentifzierungsmanager
     - BREAKING CHANGE:
         - Änderungen in den geworfenen Exceptions an diversen Stellen: Austausch von IllegalArgumentException durch BadCredentialsException
+- `IFS-5747` Erweiterung der isy-security-test um ROPC-Flow
 
 #### Bug-Fixes
 
