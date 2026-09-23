@@ -1,5 +1,15 @@
 package de.bund.bva.isyfact.security.test.oidcprovider;
 
+import static de.bund.bva.isyfact.security.test.oidcprovider.EmbeddedOidcProviderStub.BHKNZ_CLAIM_NAME;
+import static de.bund.bva.isyfact.security.test.oidcprovider.OidcProviderMockBase.BHKNZ_HEADER_NAME;
+import static de.bund.bva.isyfact.security.test.oidcprovider.OidcProviderMockBase.JWKS_ENDPOINT;
+import static de.bund.bva.isyfact.security.test.oidcprovider.OidcProviderMockBase.OIDC_CONFIG_ENDPOINT;
+import static de.bund.bva.isyfact.security.test.oidcprovider.OidcProviderMockBase.TOKEN_ENDPOINT;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Optional;
@@ -19,15 +29,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
-
-import static de.bund.bva.isyfact.security.test.oidcprovider.EmbeddedOidcProviderStub.BHKNZ_CLAIM_NAME;
-import static de.bund.bva.isyfact.security.test.oidcprovider.OidcProviderMockBase.JWKS_ENDPOINT;
-import static de.bund.bva.isyfact.security.test.oidcprovider.OidcProviderMockBase.OIDC_CONFIG_ENDPOINT;
-import static de.bund.bva.isyfact.security.test.oidcprovider.OidcProviderMockBase.TOKEN_ENDPOINT;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import reactor.core.publisher.Mono;
 
@@ -55,8 +56,9 @@ class EmbeddedOidcProviderMockTest {
     public static final String ROPC_CLIENT_SECRET = "ropc-secret";
     public static final String ROPC_USERNAME = "ropc-user";
     public static final String ROPC_PASSWORD = "ropc-pw";
-    public static final String ROPC_USERNAME_WITH_BHKNZ = "ropc-user-with-bhknz";
-    public static final String ROPC_BHKNZ = "123456:TESTOU";
+    public static final String ROPC_USERNAME_WITH_BHKNZ = "ropc-bhknz-user";
+    public static final String ROPC_BHKNZ = "123456";
+    public static final String ROPC_BHKNZ_HEADER_VALUE = ROPC_BHKNZ + ":TESTOU";
 
     private static WebClient webClient;
 
@@ -174,7 +176,10 @@ class EmbeddedOidcProviderMockTest {
     @Test
     void testRopcUserWithBhknzWorks() throws JsonProcessingException, ParseException {
         String body = webClient.post().uri(TOKEN_ENDPOINT)
-                .headers(headers -> headers.setBasicAuth(ROPC_CLIENT_ID, ROPC_CLIENT_SECRET))
+                .headers(headers -> {
+                    headers.setBasicAuth(ROPC_CLIENT_ID, ROPC_CLIENT_SECRET);
+                    headers.add(BHKNZ_HEADER_NAME, ROPC_BHKNZ_HEADER_VALUE);
+                })
                 .body(BodyInserters.fromFormData(OAuth2ParameterNames.GRANT_TYPE, PASSWORD_GRANT_TYPE)
                         .with("username", ROPC_USERNAME_WITH_BHKNZ)
                         .with("password", ROPC_PASSWORD)
@@ -220,4 +225,86 @@ class EmbeddedOidcProviderMockTest {
         assertThat(body).contains("invalid_grant");
     }
 
+    @Test
+    void testRopcUserWithoutUsernameFails() {
+        String body = webClient.post().uri(TOKEN_ENDPOINT)
+                .headers(headers -> headers.setBasicAuth(ROPC_CLIENT_ID, ROPC_CLIENT_SECRET))
+                .body(BodyInserters.fromFormData(OAuth2ParameterNames.GRANT_TYPE, PASSWORD_GRANT_TYPE)
+                        .with("password", ROPC_PASSWORD)
+                ).exchangeToMono(response -> {
+                    assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode());
+                    return response.bodyToMono(String.class);
+                }).block();
+
+        assertThat(body).contains("invalid_grant", "Missing username");
+    }
+
+    @Test
+    void testRopcUserWithoutPasswordFails() {
+        String body = webClient.post().uri(TOKEN_ENDPOINT)
+                .headers(headers -> headers.setBasicAuth(ROPC_CLIENT_ID, ROPC_CLIENT_SECRET))
+                .body(BodyInserters.fromFormData(OAuth2ParameterNames.GRANT_TYPE, PASSWORD_GRANT_TYPE)
+                        .with("username", ROPC_USERNAME)
+                ).exchangeToMono(response -> {
+                    assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode());
+                    return response.bodyToMono(String.class);
+                }).block();
+
+        assertThat(body).contains("invalid_grant", "Missing password");
+    }
+
+    @Test
+    void testRopcBhknzUserWithoutHeaderFails() {
+        String body = webClient.post().uri(TOKEN_ENDPOINT)
+                .headers(headers -> headers.setBasicAuth(ROPC_CLIENT_ID, ROPC_CLIENT_SECRET))
+                .body(BodyInserters.fromFormData(OAuth2ParameterNames.GRANT_TYPE, PASSWORD_GRANT_TYPE)
+                        .with("username", ROPC_USERNAME_WITH_BHKNZ)
+                        .with("password", ROPC_PASSWORD)
+                ).exchangeToMono(response -> {
+                    assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode());
+                    return response.bodyToMono(String.class);
+                }).block();
+
+        assertThat(body).contains("invalid_grant", "Invalid bhknz");
+    }
+
+    @Test
+    void testRopcBhknzUserWithWrongHeaderFails() {
+        String body = webClient.post().uri(TOKEN_ENDPOINT)
+                .headers(headers -> {
+                    headers.setBasicAuth(ROPC_CLIENT_ID, ROPC_CLIENT_SECRET);
+                    headers.add(BHKNZ_HEADER_NAME, "invalid-header-value");
+                })
+                .body(BodyInserters.fromFormData(OAuth2ParameterNames.GRANT_TYPE, PASSWORD_GRANT_TYPE)
+                        .with("username", ROPC_USERNAME_WITH_BHKNZ)
+                        .with("password", ROPC_PASSWORD)
+                ).exchangeToMono(response -> {
+                    assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode());
+                    return response.bodyToMono(String.class);
+                }).block();
+
+        assertThat(body).contains("invalid_grant", "Invalid bhknz");
+    }
+
+    @Test
+    void testRopcUserWithBhknzHeaderWorks() throws JsonProcessingException, ParseException {
+        String body = webClient.post().uri(TOKEN_ENDPOINT)
+                .headers(headers -> {
+                    headers.setBasicAuth(ROPC_CLIENT_ID, ROPC_CLIENT_SECRET);
+                    headers.add(BHKNZ_HEADER_NAME, ROPC_BHKNZ_HEADER_VALUE);
+                })
+                .body(BodyInserters.fromFormData(OAuth2ParameterNames.GRANT_TYPE, PASSWORD_GRANT_TYPE)
+                        .with("username", ROPC_USERNAME)
+                        .with("password", ROPC_PASSWORD)
+                ).exchangeToMono(response -> {
+                    assertEquals(HttpStatus.OK, response.statusCode());
+                    return response.bodyToMono(String.class);
+                }).block();
+
+        String token = mapper.readTree(body).get("access_token").asText();
+        JWTClaimsSet claims = JWTParser.parse(token).getJWTClaimsSet();
+
+        assertEquals(ROPC_USERNAME, claims.getStringClaim(StandardClaimNames.PREFERRED_USERNAME));
+        assertFalse(claims.getClaims().containsKey(BHKNZ_CLAIM_NAME));
+    }
 }
