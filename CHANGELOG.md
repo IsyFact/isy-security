@@ -10,6 +10,7 @@
 
 #### Dokumentation
 
+- `IFS-5813` Konzept an den AGW-Standard für externe Anwendungen mit Client Credentials und `client_secret_jwt` angepasst; SGW-ROPC als befristete Interimslösung eingeordnet. ROPC-Unterstützung in 5.1/DEV nach IFS-5745 dokumentiert und Software-Architektur sowie Nutzungsvorgaben an die eigene ROPC-Infrastruktur angepasst.
 - `IFS-5748` Aufnahme des ROPC-Supports in die IsyFact-Dokumentation
 
 #### Features
