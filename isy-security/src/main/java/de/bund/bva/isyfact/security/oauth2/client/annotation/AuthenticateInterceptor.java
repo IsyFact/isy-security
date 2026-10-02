@@ -64,8 +64,7 @@ public class AuthenticateInterceptor extends EmbeddedValueResolutionSupport impl
             // clear the authenticated principal, when authentication was null
             if (initialAuthentication == null) {
                 SecurityContextHolder.clearContext();
-            }
-            else {
+            } else {
                 // set authentication in context, when authentication was not null
                 SecurityContextHolder.getContext().setAuthentication(initialAuthentication);
             }

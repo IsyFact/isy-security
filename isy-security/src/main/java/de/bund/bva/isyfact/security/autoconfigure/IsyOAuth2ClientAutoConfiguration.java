@@ -35,6 +35,9 @@ import de.bund.bva.isyfact.security.oauth2.client.annotation.AuthenticateInterce
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsAuthorizedClientAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.ClientCredentialsClientRegistrationAuthenticationProvider;
 import de.bund.bva.isyfact.security.oauth2.client.authentication.IsyAccessTokenDecoderFactory;
+import de.bund.bva.isyfact.security.oauth2.client.authentication.PasswordClientRegistrationAuthenticationProvider;
+import de.bund.bva.isyfact.security.oauth2.client.authentication.ropc.OAuth2TokenClient;
+import de.bund.bva.isyfact.security.oauth2.client.authentication.ropc.RestClientOAuth2TokenClient;
 
 /**
  * Autoconfiguration for beans related to OAuth 2.0 client authentication.
@@ -67,6 +70,28 @@ public class IsyOAuth2ClientAutoConfiguration {
     public ClientCredentialsClientRegistrationAuthenticationProvider clientCredentialsClientRegistrationAuthenticationProvider(
             JwtAuthenticationConverter jwtAuthenticationConverter) {
         return new ClientCredentialsClientRegistrationAuthenticationProvider(jwtAuthenticationConverter);
+    }
+
+    /**
+     * Provides the {@link OAuth2TokenClient} used to execute OAuth2 ROPC password grant requests.
+     * Uses {@link org.springframework.web.client.RestClient} for communication with the token endpoint,
+     * since the previously used Spring Security components for the ROPC flow were removed in Spring Security 7.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public OAuth2TokenClient oauth2TokenClient(IsyOAuth2ClientConfigurationProperties isyOAuth2ClientConfigurationProperties) {
+        return new RestClientOAuth2TokenClient(isyOAuth2ClientConfigurationProperties.getBhknzHeaderName());
+    }
+
+    // does not have a dependency on ClientRegistrations and should always be created
+    @Bean
+    @ConditionalOnMissingBean
+    public PasswordClientRegistrationAuthenticationProvider passwordClientRegistrationAuthenticationProvider(
+            JwtAuthenticationConverter jwtAuthenticationConverter,
+            OAuth2TokenClient oauth2TokenClient,
+            IsyOAuth2ClientConfigurationProperties isyOAuth2ClientConfigurationProperties) {
+        return new PasswordClientRegistrationAuthenticationProvider(jwtAuthenticationConverter, oauth2TokenClient,
+                isyOAuth2ClientConfigurationProperties.getDefaultCertificateOu());
     }
 
     @Bean

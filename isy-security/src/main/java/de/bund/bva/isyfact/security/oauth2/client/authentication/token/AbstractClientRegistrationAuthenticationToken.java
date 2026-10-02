@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.util.SerializationUtils;
 
 /**
  * Token that holds a {@link ClientRegistration}.
@@ -57,8 +56,7 @@ public abstract class AbstractClientRegistrationAuthenticationToken extends Abst
                 String.valueOf(clientReg.getAuthorizationGrantType())
             );
 
-            byte[] serializedBytes = SerializationUtils.serialize(stringsToHash);
-            digest.update(serializedBytes);
+            updateDigest(digest, stringsToHash);
 
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {

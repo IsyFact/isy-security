@@ -13,6 +13,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -41,7 +45,12 @@ class ClientCredentialsExchangeFilterFunctionAuthenticationTest extends Abstract
     @Qualifier("cc-client")
     private WebClient webClient;
 
+    @Autowired
+    private OAuth2AuthorizedClientManager authorizedClientManager;
+
     private String pingUri;
+
+    private OAuth2AuthorizedClient client;
 
     @BeforeEach
     public void setup() {
@@ -57,10 +66,22 @@ class ClientCredentialsExchangeFilterFunctionAuthenticationTest extends Abstract
     void shouldAllowPingFromClientWithRole() {
         embeddedOidcProvider.addClient("client-credentials-test-client", "supersecretpassword", Collections.singleton("Rolle_A"));
 
-        String body = webClient.get().uri(pingUri).exchangeToMono(response -> {
-            assertEquals(HttpStatus.OK, response.statusCode());
-            return response.bodyToMono(String.class);
-        }).block();
+        OAuth2AuthorizedClient client =
+                authorizedClientManager.authorize(
+                        OAuth2AuthorizeRequest
+                                .withClientRegistrationId("cc-client")
+                                .principal("test")
+                                .build());
+
+        assert client != null;
+        String body = webClient.get()
+                .uri(pingUri)
+                .attributes(
+                        ServletOAuth2AuthorizedClientExchangeFilterFunction
+                                .oauth2AuthorizedClient(client))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
 
         assertEquals("true", body);
     }
@@ -69,7 +90,19 @@ class ClientCredentialsExchangeFilterFunctionAuthenticationTest extends Abstract
     void shouldDenyPingFromClientWithoutRole() {
         embeddedOidcProvider.addClient("client-credentials-test-client", "supersecretpassword", Collections.emptySet());
 
-        HttpStatusCode statusCode = webClient.get().uri(pingUri)
+        OAuth2AuthorizedClient client =
+                authorizedClientManager.authorize(
+                        OAuth2AuthorizeRequest
+                                .withClientRegistrationId("cc-client")
+                                .principal("test")
+                                .build());
+
+        assert client != null;
+        HttpStatusCode statusCode = webClient.get()
+                .uri(pingUri)
+                .attributes(
+                        ServletOAuth2AuthorizedClientExchangeFilterFunction
+                                .oauth2AuthorizedClient(client))
                 .exchangeToMono(response -> Mono.just(response.statusCode()))
                 .block();
 

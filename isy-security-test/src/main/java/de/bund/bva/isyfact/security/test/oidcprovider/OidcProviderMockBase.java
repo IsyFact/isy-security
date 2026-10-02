@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.github.tomakehurst.wiremock.matching.NegativeRegexPattern;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
@@ -60,19 +61,19 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
     private static final String DEFAULT_SECOND_OU = "TESTOU";
 
     /**
-     * Current value of the second OU used for validation during login.
+     * OAuth2 grant type value for the ROPC flow.
      */
-    private String secondOu = DEFAULT_SECOND_OU;
-
-    /**
-     * Stores all user-related stub mappings keyed by username.
-     */
-    private final Map<String, Set<StubMapping>> userMappings = new HashMap<>();
+    private static final String PASSWORD_GRANT_TYPE_VALUE = "password";
 
     /**
      * Stores all client-related stub mappings keyed by client ID.
      */
     private final Map<String, Set<StubMapping>> clientMappings = new HashMap<>();
+
+    /**
+     * Stores all user-related ROPC stub mappings keyed by {@code clientId + ":" + username}.
+     */
+    private final Map<String, Set<StubMapping>> userMappings = new HashMap<>();
 
 
     public OidcProviderMockBase(String host, int port, String issuerPath) {
@@ -91,20 +92,6 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
         super(host, port, issuerPath, publicKey, privateKey, tokenLifespan);
     }
 
-    public String getSecondOu() {
-        return secondOu;
-    }
-
-    /**
-     * Sets the second OU value which is checked on login. The default is {@link #DEFAULT_SECOND_OU}. The value
-     * <em>must</em> be set before the first call to {@link #addUser(String, String, String, String, Optional, Set)}!
-     *
-     * @param secondOu second OU to check during login
-     */
-    public void setSecondOu(String secondOu) {
-        this.secondOu = secondOu;
-    }
-
     protected void init(String host, int port) {
         WireMock.configureFor(host, port);
         WireMock.reset();
@@ -113,29 +100,9 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
         setupJwksEndpoint();
     }
 
-    public void addUser(String clientId, String secret, String username, String password, Optional<String> bhknz, Set<String> roles) {
-        final String accessTokenResponse = getAccessTokenResponse(clientId, username, bhknz, roles);
-        userMappings.put(username, generateUserMapping(clientId, secret, username, password, bhknz, accessTokenResponse));
-    }
-
     public void addClient(String clientId, String secret, Set<String> roles) {
         final String accessTokenResponse = getAccessTokenResponse(clientId, "service-account-" + clientId, Optional.empty(), roles);
         clientMappings.put(clientId, generateClientMapping(clientId, secret, accessTokenResponse));
-    }
-
-    public void removeUser(String username) {
-        final Set<StubMapping> userMapping = userMappings.remove(username);
-        if (userMapping != null) {
-            for (StubMapping mapping : userMapping) {
-                WireMock.removeStub(mapping);
-            }
-        }
-    }
-
-    public void removeAllUsers() {
-        for (String user : userMappings.keySet()) {
-            removeUser(user);
-        }
     }
 
     public void removeClient(String clientId) {
@@ -151,6 +118,44 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
         for (String client : clientMappings.keySet()) {
             removeClient(client);
         }
+    }
+
+    /**
+     * Registers a resource owner (user) that can be authenticated via the OAuth2 ROPC flow
+     * against the client identified by {@code clientId}/{@code secret}.
+     *
+     * @param clientId the client ID of the ROPC client (sent via HTTP Basic auth)
+     * @param secret   the client secret of the ROPC client
+     * @param username the resource owner's username
+     * @param password the resource owner's password
+     * @param bhknz    an optional BHKNZ to include in the issued access token
+     * @param roles    the roles to include in the issued access token
+     */
+    public void addUser(String clientId, String secret, String username, String password, Optional<String> bhknz, Set<String> roles) {
+        String accessTokenResponse = getAccessTokenResponse(clientId, username, bhknz, roles);
+        userMappings.put(userKey(clientId, username), generateUserMapping(clientId, secret, username, password, bhknz, accessTokenResponse));
+    }
+
+    public void removeUser(String clientId, String username) {
+        final Set<StubMapping> userMapping = userMappings.remove(userKey(clientId, username));
+        if (userMapping != null) {
+            for (StubMapping mapping : userMapping) {
+                WireMock.removeStub(mapping);
+            }
+        }
+    }
+
+    public void removeAllUsers() {
+        for (String key : new HashSet<>(userMappings.keySet())) {
+            final Set<StubMapping> userMapping = userMappings.remove(key);
+            for (StubMapping mapping : userMapping) {
+                WireMock.removeStub(mapping);
+            }
+        }
+    }
+
+    private String userKey(String clientId, String username) {
+        return clientId + ":" + username;
     }
 
     /**
@@ -221,32 +226,77 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
                         .withBody(createErrorResponse("invalid_grant", "Missing password"))
                 )));
 
+        String passwordGrantType = "%s=%s".formatted(GRANT_TYPE, PASSWORD_GRANT_TYPE_VALUE);
+        stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(5)
+                .withRequestBody(new ContainsPattern(passwordGrantType))
+                .withRequestBody(new ContainsPattern("username="))
+                .withRequestBody(new ContainsPattern("password="))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.UNAUTHORIZED.value())
+                        .withHeader(HttpHeaders.WWW_AUTHENTICATE, "dummy")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(createErrorResponse("invalid_grant", "Invalid username or password"))
+                )));
+
         return stubMappings;
     }
 
-    private Set<StubMapping> generateUserMapping(String clientId, String secret, String username, String password, Optional<String> bhknz,
-                                                 String accessTokenResponse) {
+    /**
+     * Builds the stub mapping for a successful ROPC token request for the given resource owner.
+     *
+     * @param clientId            the client ID of the ROPC client (sent via HTTP Basic auth)
+     * @param secret              the client secret of the ROPC client
+     * @param username            the resource owner's username
+     * @param password            the resource owner's password
+     * @param bhknz               an optional BHKNZ to include in the issued access token
+     * @param accessTokenResponse the JSON access token response to return on a successful match
+     * @return the stub mappings created for this user
+     */
+    private Set<StubMapping> generateUserMapping(String clientId, String secret, String username, String password,
+                                                 Optional<String> bhknz, String accessTokenResponse) {
         Set<StubMapping> stubMappings = new HashSet<>();
 
         String tokenEndpoint = appendToIssuerPath(TOKEN_ENDPOINT);
+        String passwordGrantType = "%s=%s".formatted(GRANT_TYPE, PASSWORD_GRANT_TYPE_VALUE);
 
-        stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(5)
-                .withRequestBody(new NegativeRegexPattern(".*username=%s.*".formatted(username)))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.UNAUTHORIZED.value())
-                        .withHeader(HttpHeaders.WWW_AUTHENTICATE, "dummy")
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(createErrorResponse("invalid_grant", "Invalid username"))
-                )));
+        if (bhknz.isPresent()) {
+            String bhknzHeaderValue = bhknz.get() + ":" + DEFAULT_SECOND_OU;
 
-        stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(5)
-                .withRequestBody(new NegativeRegexPattern(".*password=%s.*".formatted(password)))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.UNAUTHORIZED.value())
-                        .withHeader(HttpHeaders.WWW_AUTHENTICATE, "dummy")
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(createErrorResponse("invalid_grant", "Invalid password"))
-                )));
+            stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(1)
+                    .withRequestBody(new ContainsPattern(passwordGrantType))
+                    .withRequestBody(new ContainsPattern("username=" + username))
+                    .withRequestBody(new ContainsPattern("password=" + password))
+                    .withHeader(BHKNZ_HEADER_NAME, new EqualToPattern(bhknzHeaderValue))
+                    .withBasicAuth(clientId, secret)
+                    .willReturn(aResponse()
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                            .withStatus(HttpStatus.OK.value())
+                            .withBody(accessTokenResponse)
+                    )));
+
+            stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(5)
+                    .withRequestBody(new ContainsPattern(passwordGrantType))
+                    .withRequestBody(new ContainsPattern("username=" + username))
+                    .withRequestBody(new ContainsPattern("password=" + password))
+                    .withBasicAuth(clientId, secret)
+                    .willReturn(aResponse()
+                            .withHeader(HttpHeaders.WWW_AUTHENTICATE, "dummy")
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                            .withStatus(HttpStatus.UNAUTHORIZED.value())
+                            .withBody(createErrorResponse("invalid_grant", "Invalid bhknz"))
+                    )));
+        } else {
+            stubMappings.add(stubFor(post(urlEqualTo(tokenEndpoint)).atPriority(1)
+                    .withRequestBody(new ContainsPattern(passwordGrantType))
+                    .withRequestBody(new ContainsPattern("username=" + username))
+                    .withRequestBody(new ContainsPattern("password=" + password))
+                    .withBasicAuth(clientId, secret)
+                    .willReturn(aResponse()
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                            .withStatus(HttpStatus.OK.value())
+                            .withBody(accessTokenResponse)
+                    )));
+        }
 
         return stubMappings;
     }
@@ -256,15 +306,14 @@ public abstract class OidcProviderMockBase extends EmbeddedOidcProviderStub {
 
         String clientCredentialsGrantType = "%s=%s".formatted(GRANT_TYPE, CLIENT_CREDENTIALS.getValue());
 
-        stubMappings.add(stubFor(
-                post(urlEqualTo(appendToIssuerPath(TOKEN_ENDPOINT)))
-                        .atPriority(1)
-                        .withRequestBody(new EqualToPattern(clientCredentialsGrantType)).withBasicAuth(clientId, secret)
-                        .willReturn(aResponse()
-                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                                .withStatus(HttpStatus.OK.value())
-                                .withBody(accessTokenResponse)
-                        )));
+        stubMappings.add(stubFor(post(urlEqualTo(appendToIssuerPath(TOKEN_ENDPOINT)))
+                .atPriority(1)
+                .withRequestBody(new EqualToPattern(clientCredentialsGrantType)).withBasicAuth(clientId, secret)
+                .willReturn(aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withStatus(HttpStatus.OK.value())
+                        .withBody(accessTokenResponse)
+                )));
 
         return stubMappings;
     }

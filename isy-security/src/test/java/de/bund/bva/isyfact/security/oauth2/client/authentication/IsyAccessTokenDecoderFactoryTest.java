@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -28,7 +27,6 @@ public class IsyAccessTokenDecoderFactoryTest {
     @RegisterExtension
     static EmbeddedOidcProviderMock oidcProvider = new EmbeddedOidcProviderMock("localhost", 8080, "/auth/realms/test");
 
-    @Disabled
     @Test
     void shouldAcceptTokenWithAccountAudience() {
         oidcProvider.addClient("clientId", "secret", Set.of("Rolle_A"));
