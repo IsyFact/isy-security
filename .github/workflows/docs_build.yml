@@ -1,8 +1,8 @@
 name: Documentation Build
 
 on:
-  pull_request:
-    types: [ opened, synchronize, reopened ]
+  #pull_request:
+  #  types: [ opened, synchronize, reopened ]
   push:
     tags:
       - '^\\d+\\.\\d+\\.\\d+$'
