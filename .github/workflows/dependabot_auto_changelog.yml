@@ -8,4 +8,6 @@ on:
 
 jobs:
   generate-changelog-entry:
+    permissions:
+      contents: read
     uses: IsyFact/isy-github-actions-templates/.github/workflows/dependabot_auto_changelog_template.yml@v3.0.0
