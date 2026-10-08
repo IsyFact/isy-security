@@ -1,8 +1,11 @@
 name: Documentation Build
 
 on:
-  #pull_request:
-  #  types: [ opened, synchronize, reopened ]
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches-ignore:
+      - main
+      - 'support/**'
   push:
     tags:
       - '^\\d+\\.\\d+\\.\\d+$'
