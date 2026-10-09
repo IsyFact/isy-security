@@ -40,21 +40,13 @@ NOTE: Es empfiehlt sich, die Beans direkt zu 'autowiren'.
 Die folgenden Methoden bieten Zugriff auf eine Liste von allen im System hinterlegten Rollen, den Berechtigungsmanager und den optionalen Authentifizierungsmanager:
 
 `Set<String> getAlleRollen()`:: Liefert die Menge aller im System konfigurierten Rollen.
-`Berechtigungsmanager getBerechtigungsmanager()`:: Stellt eine Referenz auf das `Berechtigungsmanager` Bean bereit.
-`Optional<Authentifizierungsmanager> getAuthentifizierungsmanager()`:: Liefert ein `Optional`, das eine Referenz auf den `Authentifizierungsmanager` enthält. Ist kein Authentifizierungsmanager vorhanden, wird `Optional.empty()` zurückgegeben.
+`Berechtigungsmanager getBerechtigungsManager()`:: Stellt eine Referenz auf das `Berechtigungsmanager` Bean bereit.
+`Optional<Authentifizierungsmanager> getAuthentifizierungsManager()`:: Liefert ein `Optional`, das eine Referenz auf den `Authentifizierungsmanager` enthält, oder `null` falls die Anwendung als Resource-Server agiert und kein `Authentifizierungsmanager` benötigt wird.
 
 [[authentifizierungsmanager-interface]]
 === Authentifizierungsmanager
 
-Der Authentifizierungsmanager stellt eine gemeinsame öffentliche Schnittstelle für den _Client Credentials_ Flow und den _Resource Owner Password Credentials_ Flow (ROPC) bereit.
-Die Auswahl des Flows erfolgt anhand des `AuthorizationGrantType` der `ClientRegistration`.
-Client Credentials authentifiziert den technischen OAuth-Client; bei ROPC wird zusätzlich der technische Benutzer mit Benutzername und Passwort authentifiziert.
-
-In `isy-security` 5.1/DEV ist ROPC mit IFS-5745 über eine eigene isy-security-Infrastruktur wiederhergestellt worden; in 5.0.1 ist die ROPC-Clientunterstützung nicht vorhanden.
-Die Versionsabgrenzung zur IAM-seitigen Unterstützung des Password Grants ist im xref:konzept.adoc#resource-owner-password-credential-flow[Konzept] beschrieben.
-Für externe Anwendungen ist der <<auth_sgw,SGW-ROPC-Weg>> nur als befristete Interimslösung vorgesehen.
-
-Folgende Methoden stehen zur Verfügung:
+Zur Authentifizierung von OAuth 2.0 Clients stehen folgende Methoden zur Verfügung:
 
 `void authentifiziere(String oauth2ClientRegistrationId)`::
 Authentifiziert einen OAuth 2.0 Client anhand seiner Client-Registration-ID. Unterstützt den `client_credentials` (_Client Credentials_ Flow) und `password` (_Resource Owner Password Credentials_ Flow) GrantType.
@@ -75,8 +67,8 @@ Dieser Wert ist als Standardwert durch eine Implementierung in Spring Security v
 
 `void authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)`::
 Authentifiziert einen OAuth 2.0 Client anhand seiner Client-Registration-ID mit zusätzlichen dynamischen Authentifizierungsdaten. Unterstützt:
-* `client_credentials`-GrantType: Ein BHKNZ kann in den AdditionalCredentials enthalten sein, wird durch den vorhandenen Client-Credentials-Pfad aber nicht an den IAM-Service übertragen.
-* `password`-GrantType: Benutzername und Passwort müssen vollständig in den AdditionalCredentials enthalten sein; das BHKNZ ist optional. Die übergebenen Werte ersetzen die zusätzlichen Authentifizierungsmerkmale aus der Konfiguration; fehlende Werte werden nicht daraus ergänzt.
+* `client_credentials`-GrantType: Hier kann ein BHKNZ über die AdditionalCredentials übergeben werden.
+* `password`-GrantType: Hier können Benutzername und Passwort, sowie optional das BHKNZ übergeben werden. Diese Authentifizierungsdaten werden anstelle der eventuell in der Konfiguration hinterlegten Werte verwendet.
 
 `void authentifiziere(ClientRegistration clientRegistration)`::
 Authentifiziert einen OAuth 2.0 Client anhand des übergebenen ClientRegistration-Objektes. Unterstützt:
@@ -84,23 +76,8 @@ Authentifiziert einen OAuth 2.0 Client anhand des übergebenen ClientRegistratio
 
 `void authentifiziere(ClientRegistration clientRegistration, AdditionalCredentials credentials)`::
 Authentifiziert einen OAuth 2.0 Client anhand des übergebenen ClientRegistration-Objektes mit zusätzlichen dynamischen Authentifizierungsdaten. Unterstützt:
-* `client_credentials`-GrantType: Ein BHKNZ kann in den AdditionalCredentials enthalten sein, wird durch den vorhandenen Client-Credentials-Pfad aber nicht an den IAM-Service übertragen.
+* `client_credentials`-GrantType: Hier kann ein BHKNZ über die AdditionalCredentials übergeben werden.
 * `password`-GrantType: Hier *müssen* Benutzername und Passwort in den AdditionalCredentials enthalten sein, da sie nicht aus der Konfiguration geladen werden können.
-
-Für ROPC müssen Benutzername und Passwort vorhanden und nicht leer sein.
-`AdditionalCredentials.createWithUsernamePassword(...)` übergibt beide Werte, `AdditionalCredentials.createWithUsernamePasswordBhknz(...)` zusätzlich ein BHKNZ.
-Ein BHKNZ allein (`AdditionalCredentials.createWithBhknz(...)`) ersetzt diese Zugangsdaten nicht und reicht für ROPC nicht aus.
-Bei Übergabe von AdditionalCredentials ist auch beim Aufruf über eine Registration-ID keine teilweise Ergänzung von Benutzername oder Passwort aus der Konfiguration möglich.
-Bei ROPC mit dynamisch übergebenem BHKNZ muss `isy.security.oauth2.client.default-certificate-ou` gesetzt sein; außerdem muss ein Headername konfiguriert sein.
-Beim dynamischen Client-Credentials-Aufruf prüft der Manager diese OU-Voraussetzung nicht; der vorhandene Client-Credentials-Pfad überträgt das BHKNZ nicht an den IAM-Service.
-Für bereits in der Konfiguration hinterlegte BHKNZ bleibt die Prüfung der OU-Konfiguration beim Start bestehen.
-Die ROPC-Anfrage überträgt den Wert `BHKNZ:OU` im konfigurierten Header (siehe <<isyfact-specific-client-registration>>).
-
-Der ROPC-Client von `isy-security` unterstützt zur zusätzlichen Authentifizierung des OAuth-Clients ausschließlich `client_secret_basic` und `client_secret_post`.
-`client_secret_jwt` wird von diesem ROPC-Client nicht unterstützt; dieses Verfahren gehört zum xref:konzept.adoc#aufruf-service-gateway-mit-authentication-gateway[AGW-Standardweg] mit Client Credentials.
-
-Das folgende Beispiel zeigt die Nutzung des Authentifizierungsmanagers in 5.1/DEV.
-Für den ROPC-Aufruf mit BHKNZ gelten die oben genannten OU- und Header-Voraussetzungen.
 
 .Verwendung der Authentifizierungsverfahren
 [source,java]
@@ -117,17 +94,16 @@ ClientRegistration clientCredentialsRegistration = ClientRegistration.withRegist
 //Einfache Authentifizierung mit ClientRegistration
 authentifizierungsmanager.authentifiziere(clientCredentialsRegistration);
 
-//BHKNZ wird beim Client Credentials Flow nicht an den IAM-Service übertragen
+//Einfache Authentifizierung mit ClientRegistration inkl. BHKNZ
 AdditionalCredentials credentialsWithBhknz = AdditionalCredentials.createWithBhknz("123456");
 authentifizierungsmanager.authentifiziere(clientCredentialsRegistration, credentialsWithBhknz);
 
-//Resource Owner Password Credentials Flow Beispiel für isy-security 5.1/DEV
+//Resource Owner Password Credentials Flow Beispiel
 ClientRegistration passwordFlowRegistration = ClientRegistration.withRegistrationId("sgw-service")
 .tokenUri("http://iam-provider/auth/realms/testrealm/protocol/openid-connect/token")
 .jwkSetUri("http://iam-provider/auth/realms/testrealm/protocol/openid-connect/certs")
 .clientId("sgw-client")
 .clientSecret("sgw-secret")
-.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 .authorizationGrantType(new AuthorizationGrantType("password"))
 .build();
 
@@ -214,8 +190,7 @@ Das Präfix sämtlicher Konfigurationsparameter `spring.security.oauth2` wird zu
 |Parameter |Wertebereich |Beschreibung
 |client.registration._<registrationId>_.client-id |String |Identifier der Client-Applikation im Autorisierungsserver.
 |client.registration._<registrationId>_.client-secret |String |Secret, das nur der Anwendung und dem Autorisierungsserver bekannt ist.
-|client.registration._<registrationId>_.authorization-grant-type |String |Methode, durch welche die Anwendung ein Bearer-Token erhält. Auf `client_credentials` (Client Credentials Flow) oder `password` (Resource Owner Password Credentials Flow) zu setzen. ROPC ist in `isy-security` 5.1/DEV wieder verfügbar, nicht in 5.0.1.
-|client.registration._<registrationId>_.client-authentication-method |String |Verfahren zur Authentifizierung des OAuth-Clients. Für den ROPC-Client von `isy-security` werden ausschließlich `client_secret_basic` und `client_secret_post` unterstützt. `client_secret_jwt` gehört zum AGW-Standardweg mit Client Credentials und wird vom ROPC-Client nicht unterstützt.
+|client.registration._<registrationId>_.authorization-grant-type |String |Methode, durch welche die Anwendung ein Bearer-Token erhält. Abhängig von dem zu verwendenden auf `client_credentials` (Client Credentials Flow) oder `password` (Resource Owner Password Credentials Flow) zu setzen.
 |client.registration._<registrationId>_.provider |String |(Optional) ID des zu verwendenden Client-Providers, falls diese nicht mit der Registration-ID übereinstimmt.
 |client.provider._<providerId>_.issuer-uri |String |Der OpenID Connect Issuer Identifier für die Konfiguration des Clients über den Discovery Endpoint, beispielsweise in der Form `http://<identity-provider>/auth/realms/<realm>`.
 |===
@@ -225,22 +200,20 @@ Das Präfix sämtlicher Konfigurationsparameter `spring.security.oauth2` wird zu
 
 :linkaktuell: xref:spring-oauth2-client-registration[Client-Credentials-Flow]
 
-Zugangsdaten für technische Benutzer zur Authentifizierung mit dem _Resource-Owner-Password-Credential_ Flow können in `isy-security` 5.1/DEV über die folgenden Parameter konfiguriert werden.
-Beim Aufruf über eine Registration-ID ohne AdditionalCredentials werden die konfigurierten Werte verwendet; bei Übergabe von AdditionalCredentials gelten die Anforderungen aus <<authentifizierungsmanager-interface>>.
-Die technische Verfügbarkeit bedeutet nicht automatisch eine fachliche Freigabe für jeden Batch-/Task-Einsatzfall (xref:konzept.adoc#ausfuehrung-batch-u-task[]).
+Zugangsdaten für technische Nutzer zur Authentifizierung von Tasks und Batches mit dem _Resource-Owner-Password-Credential_ Flow können über die folgenden Parameter konfiguriert werden:
 
 [[table-isyfact-client-registration-extension]]
 .Isyfact spezifische Erweiterung der Spring ClientRegistration
 [cols="3m,2m,2m,8",options="header"]
 |===
 |Parameter |Wertebereich |Default |Beschreibung
-|isy.security.oauth2.client.registration._<registrationId>_.username |String | null | Benutzername für Grant-Type `password`. Bei Authentifizierung aus der Konfiguration zusammen mit `password` erforderlich.
-|isy.security.oauth2.client.registration._<registrationId>_.password |String | null | Benutzerpasswort für Grant-Type `password`. Bei Authentifizierung aus der Konfiguration zusammen mit `username` erforderlich.
+|isy.security.oauth2.client.registration._<registrationId>_.username |String | null | Benutzername für Grant-Type `password`.
+|isy.security.oauth2.client.registration._<registrationId>_.password |String | null | Benutzerpassword für Grant-Type `password`.
 |isy.security.oauth2.client.registration._<registrationId>_.bhknz |String | null | Behördenkennzeichen für Grant-Type `password`. (optional)
 |isy.security.oauth2.client.bhknz-header-name |String | x-client-cert-bhknz |Konfigurierbarer Headername für Zwei-Faktor-Authentifizierung.
 |isy.security.oauth2.client.default-certificate-ou |String | null | Organisational Unit, die in Verbindung mit bhknz verwendet wird, um den Wert für bhknz-header-name zu bilden.
 
-(Muss gesetzt werden, wenn eine `registration` mit `bhknz` konfiguriert ist oder ein BHKNZ für ROPC dynamisch über AdditionalCredentials übergeben wird)
+(Muss gesetzt werden, wenn eine `registration` mit `bhknz` konfiguriert ist)
 |===
 
 
@@ -325,12 +298,11 @@ spring.security.oauth2.client.registration.client1.client-secret=client-credenti
 spring.security.oauth2.client.registration.client1.authorization-grant-type=client_credentials
 spring.security.oauth2.client.registration.client1.provider=testrealm
 
-### Beispiel: ClientRegistration für den Resource Owner Password Credentials Flow in isy-security 5.1/DEV
+### Beispiel: ClientRegistration für den Resource Owner Password Credentials Flow
 # Spring Security Konfiguration
 spring.security.oauth2.client.registration.client2.client-id=client-credentials-client
 spring.security.oauth2.client.registration.client2.client-secret=client-credentials-secret
 spring.security.oauth2.client.registration.client2.authorization-grant-type=password
-spring.security.oauth2.client.registration.client2.client-authentication-method=client_secret_basic
 spring.security.oauth2.client.registration.client2.provider=testrealm
 # Isyfact spezifische ClientRegistration properties für den Resource Owner Password Credentials Flow
 isy.security.oauth2.client.registration.client2.username=testuser
@@ -339,9 +311,6 @@ isy.security.oauth2.client.registration.client2.bhknz=123456
 # Organizational Unit zur Verwendung mit bhknz
 isy.security.oauth2.client.default-certificate-ou=TESTOU
 ----
-
-Für den ROPC-Client kann alternativ `client-authentication-method=client_secret_post` konfiguriert werden.
-Die Beispiele beschreiben die Client-Konfiguration in `isy-security`; der AGW-Standardweg mit Client Credentials und `client_secret_jwt` ist davon zu unterscheiden (xref:konzept.adoc#aufruf-service-gateway-mit-authentication-gateway[]).
 
 [[webclient-authentication]]
 === Automatische Authentifizierung eines WebClient mit Client Credentials
@@ -390,14 +359,14 @@ NOTE: `ClientCredentialsRegistrationIdAuthenticationToken` wird nicht gecacht, d
 [cols="3m,1m,5",options="header"]
 |===
 |Parameter |Default |Beschreibung
-|isy.security.cache.ttl |0 |Zusätzliche Begrenzung der Aufbewahrungsdauer im Cache in Sekunden. `0` = Cache ist deaktiviert.
+|isy.security.cache.ttl |0 |Time-to-Live in Sekunden. `0` = Cache ist deaktiviert.
 |isy.security.cache.maxelements |10000 |Maximale Anzahl von gecachten Einträgen.
-|isy.security.cache.token-expiration-time-offset|60 |Zeitlicher Vorlauf für die Ablaufprüfung eines gecachten Tokens in Sekunden. Ist das Token unter Berücksichtigung dieses Offsets abgelaufen, wird das Cache-Ergebnis verworfen und erneut authentifiziert.
+|isy.security.cache.token-expiration-time-offset|60 |Minimale Restlebensdauer eines gecachten Tokens in Sekunden. Ist die Restlebensdauer kürzer als die Tokengültigkeit, wird ein neuer Token angefordert.
 |isy.security.cache.salt-bytes|64 |Anzahl der verwendeten Bytes für den Salt.
 |isy.security.cache.hash-algorithm|SHA-512 |Algorithmus für das Hashing der Tokens beim Generieren von Cache Keys.
 |===
 
-NOTE: Bei jedem Cachetreffer wird der Tokenablauf einschließlich `token-expiration-time-offset` geprüft. Die Cache-TTL begrenzt zusätzlich die Aufbewahrungsdauer; sie muss nicht kürzer als die Tokenlaufzeit sein.
+WARNING: Die Cache-TTL muss kürzer als die Token-Gültigkeitsdauer konfiguriert werden, um die Verwendung abgelaufener Authentifizierungen zu verhindern.
 
 Zum Löschen des Cache steht die folgende Methode zur Verfügung:
 
@@ -405,20 +374,14 @@ Zum Löschen des Cache steht die folgende Methode zur Verfügung:
 
 [[auth_sgw]]
 == Authentifizierung über das SGW am IAM-Service
-Externe Anwendungen bzw. Behörden beschaffen ihr Access-Token regulär über das Authentication-Gateway (AGW) mit Client Credentials und `client_secret_jwt`.
-Anschließend senden sie die fachliche Anfrage mit dem Access-Token über das Service-Gateway (SGW).
-Dieser Weg ist der dauerhafte Standard (xref:konzept.adoc#aufruf-service-gateway-mit-authentication-gateway[]).
+Die Authentifizierung über das Service-Gateway (SGW) stellt einen wichtigen Schritt in der Sicherung von Anwendungen dar.
+Um diesen Prozess effektiv umzusetzen, empfiehlt sich die Verwendung des neu entwickelten Authentifizierungsmanagers und dessen Methoden.
 
-Der SGW-ROPC-Weg ist ausschließlich eine befristete Interimslösung für den Übergang und muss durch den AGW-Standard abgelöst werden.
-Die Übergangslösung ist für ungefähr ein Jahr vorgesehen; ein konkretes Start- oder Abschaltdatum wird damit nicht festgelegt (xref:konzept.adoc#aufruf-service-gateway-ohne-authentication-gateway[]).
+Die Methoden erlauben es technische Nutzer zur Laufzeit mit ihren Zugangsdaten über den IAM-Service zu authentifizieren.
+Mit diesem Mechanismus wird sichergestellt, dass nur autorisierte Clients Zugriff auf die Ressourcen erhalten.
+Durch die Nutzung dieses speziellen Authentifizierungsmechanismus wird eine robuste und zuverlässige Sicherheitsschicht implementiert, um unautorisierten Zugriff und potenzielle Sicherheitslücken zu verhindern.
 
-Bei diesem Übergangsweg übergibt die externe Anwendung die Zugangsdaten des technischen Benutzers mit der fachlichen Anfrage an das SGW.
-Das SGW verwendet den <<authentifizierungsmanager-interface>> mit einer ClientRegistration für den Grant-Type `password` und vollständigen AdditionalCredentials mit Benutzername und Passwort sowie optionalem BHKNZ.
-Die Registration kann über ihre konfigurierte ID oder als dynamisch erstelltes ClientRegistration-Objekt übergeben werden.
-Für die zusätzliche OAuth-Clientauthentifizierung am IAM werden `client_secret_basic` oder `client_secret_post` verwendet, nicht `client_secret_jwt`.
-Nach erfolgreicher Authentifizierung stellt der Authentifizierungsmanager die Authentication im SecurityContext bereit; das SGW leitet die fachliche Anfrage mit dem Access-Token an die Geschäftsanwendung weiter.
-Bei aktiviertem <<authentication-caching,Authentifizierungscache>> können passende, noch gültige Authentifizierungsergebnisse wiederverwendet werden.
-Eine fachliche Anfrage mit Zugangsdaten bedeutet daher nicht zwingend einen neuen Tokenabruf beim IAM.
+Weitere Informationen und detaillierte Anleitungen zur Verwendung können im Abschnitt zum <<authentifizierungsmanager-interface>> gefunden werden.
 
 [[absicherung_von_batches_tasks]]
 == Absicherung von Batches und Tasks
@@ -874,10 +837,6 @@ Es werden die folgenden OAuth2 und OpenID Connect Verfahren unterstützt.
 
 * Client Credentials Flow
 * Resource Owner Password Credentials Flow
-
-In `isy-security-test` 5.1/DEV ist die ROPC-Mock-Unterstützung wieder vorhanden; IFS-5747 hat sie einschließlich der Fälle mit BHKNZ ergänzt.
-Die Mock-Unterstützung beschreibt die Testmöglichkeiten und ist von der produktiven ROPC-Clientunterstützung in `isy-security` zu unterscheiden; sie belegt keine ROPC-Clientunterstützung in `isy-security` 5.0.1.
-Sie bedeutet auch keine ROPC-Unterstützung am AGW: Dort gilt der Standardweg mit Client Credentials und `client_secret_jwt` (xref:konzept.adoc#aufruf-service-gateway-mit-authentication-gateway[]).
 
 Das folgende Beispiel zeigt die Initialisierung des `EmbeddedOidcProviderMock` mit einem Client mit genau einer Rolle und mit einem User mit derselben Rolle:
 
