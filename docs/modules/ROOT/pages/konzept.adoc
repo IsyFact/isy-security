@@ -356,9 +356,9 @@ Das aufgerufene IT-System validiert das Access-Token und prüft die Berechtigung
 Der SGW-ROPC-Weg bezeichnet die Authentifizierung über das Service-Gateway (SGW) unter Verwendung des OAuth-2.0-Verfahrens Resource Owner Password Credentials (ROPC, auch Password Grant genannt).
 
 Die nachfolgende Abbildung zeigt diesen Weg, bei dem das Service-Gateway mithilfe des IAM-Service die notwendige Authentifizierung durchführt.
-Dieser SGW-ROPC-Weg ist deprecated und für externe Anwendungen ausschließlich als befristete Interimslösung vorgesehen.
-Die Interimslösung ist für einen Zeitraum in der Größenordnung von etwa einem Jahr vorgesehen.
-Ein verbindliches Abschaltdatum ist nicht festgelegt.
+Dieser SGW-ROPC-Weg ist veraltet (deprecated) und für externe Anwendungen ausschließlich als befristete Übergangslösung vorgesehen.
+Die Ablösung erfolgt im Rahmen der Migration auf den AGW-Standard.
+Ein verbindlicher Abschalttermin ist derzeit nicht festgelegt.
 Der SGW-ROPC-Weg ist nicht Bestandteil der dauerhaften Zielarchitektur und muss durch den AGW-Standardweg abgelöst werden.
 Die dauerhafte Standard- und Zielarchitektur für externe Anwendungen ist die vorgelagerte Tokenbeschaffung über das AGW mit Client Credentials und `client_secret_jwt` sowie der anschließende fachliche Zugriff mit dem Access-Token über das SGW (xref:aufruf-service-gateway-mit-authentication-gateway[]).
 Die für den SGW-ROPC-Weg benötigte ROPC-Clientunterstützung wird durch die eigene Infrastruktur in `isy-security` bereitgestellt (xref:resource-owner-password-credential-flow[]).
