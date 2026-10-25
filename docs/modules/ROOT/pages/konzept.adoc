@@ -73,7 +73,7 @@ Im Folgenden werden die Aufgaben und grobe Funktionsweise der Komponenten für d
 
 Der Baustein `isy-security` basiert auf dem Framework Spring Security und bietet querschnittliche Funktionalität zur Authentifizierung und Autorisierung von Anfragen, die von internen oder externen Anwendungen an eine IsyFact-Anwendung gestellt werden (M2M-Kommunikation).
 Die Authentifizierung und Autorisierung von Anfragen, die von menschlichen Nutzern über eine Benutzeroberfläche (Browser) gestellt werden, findet im Zuge der Einführung von Single-Page-Applications (SPAs) nicht mehr über das Backend oder den Baustein `isy-security` statt, sondern innerhalb des Portal-Webservers.
-Außerdem sichert der Baustein `isy-security` die Services der IsyFact-Anwendungen ab, indem er Funktionalität zur Berechtigungsprüfung anbietet. 
+Außerdem sichert der Baustein `isy-security` die Services der IsyFact-Anwendungen ab, indem er Funktionalität zur Berechtigungsprüfung anbietet.
 Hier wird geprüft, ob die gewährte Autorisierung auch das Recht zur Nutzung des angefragten Services beinhaltet.
 
 Um IsyFact-spezifische Anforderungen, wie z.B. die Nutzung des Behördenkennzeichens, zu erfüllen, existiert eine Zugriffsschicht, die eben diese Funktionalität bereitstellt und den Zugriff auf Spring Security (und das IAM-System) kapselt.
@@ -146,16 +146,17 @@ Die nachfolgenden fachlichen Anfragen werden anschließend zusammen mit dem aus 
 
 - Der Authentifizierungsmanager stellt folgende Methoden bereit:
 * `authentifiziere(String oauth2ClientRegistrationId)`: Nutzt die in der Anwendungskonfiguration hinterlegte Client-Registration mit der angegebenen ID. Die Client-ID und das Client-Secret werden aus der Konfiguration gelesen.
-* `authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)`: Wie oben, ermöglicht jedoch die Angabe eines BHKNZ über die AdditionalCredentials.
+* `authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)`: Wie oben, mit zusätzlichem Parameter für Authentifizierungsdaten. Bei direkt im IAM-Service verwalteten Clients wird das BHKNZ nicht als zusätzliches Authentifizierungsmerkmal verwendet.
 * `authentifiziere(ClientRegistration clientRegistration)`: Erlaubt die direkte Verwendung eines ClientRegistration-Objekts mit Token-URI und JWKS-URI.
-* `authentifiziere(ClientRegistration clientRegistration, AdditionalCredentials credentials)`: Wie oben, ergänzt um die Möglichkeit, ein BHKNZ über die AdditionalCredentials anzugeben.
+* `authentifiziere(ClientRegistration clientRegistration, AdditionalCredentials credentials)`: Wie oben, mit zusätzlichem Parameter für Authentifizierungsdaten. Bei direkt im IAM-Service verwalteten Clients wird das BHKNZ nicht als zusätzliches Authentifizierungsmerkmal verwendet.
 
 - Für den Credential-Typ bzw. _Credential_-Flow xref:resource-owner-password-credential-flow[] sind folgende Methoden verfügbar:
 * `authentifiziere(String oauth2ClientRegistrationId)`: Nutzt die in der Anwendungskonfiguration hinterlegte Client-Registration mit der angegebenen ID. Benutzername und Passwort müssen in der Konfiguration konfiguriert sein.
 * `authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)`: Ermöglicht die Verwendung dynamischer Benutzeranmeldedaten zur Laufzeit. Die AdditionalCredentials müssen Benutzername und Passwort enthalten und überschreiben ggf. in der Konfiguration hinterlegte Werte.
 * `authentifiziere(ClientRegistration clientRegistration, AdditionalCredentials credentials)`: Erlaubt die vollständig dynamische Authentifizierung mit einem selbst erstellten ClientRegistration-Objekt und Benutzerdaten. Die AdditionalCredentials müssen Benutzername und Passwort enthalten.
 
-Die Klasse `AdditionalCredentials` dient zur Kapselung zusätzlicher Authentifizierungsdaten bei der Authentifizierung mit ClientRegistration-Objekten.
+Die Klasse `AdditionalCredentials` dient zur Kapselung zusätzlicher Authentifizierungsdaten.
+Die Übergabe eines BHKNZ über `AdditionalCredentials` ist für die Authentifizierung direkt im IAM-Service verwalteter Clients nicht vorgesehen. Die mögliche BHKNZ-Nutzung bei der Authentifizierung von Anwendern bleibt davon unberührt.
 Über statische Builder-Methoden können Instanzen mit den gewünschten Kombinationen erstellt werden:
 
 - `createWithUsernamePassword` für Benutzername und Passwort,
@@ -683,15 +684,22 @@ Hierbei muss Sicherheit gegen Benutzerkomfort abgewogen werden.
 [[nutzung-des-behoerdenkennzeichens]]
 === Nutzung des Behördenkennzeichens
 
-Als optional mögliche 2-Faktor-Authentifizierung ist im IAM-Service die Übermittlung und Auswertung des Behördenkennzeichens (BHKNZ) vorgesehen.
-Die Implementierung des IAM-Service muss für die 2-Faktor-Authentifizierung dieses Feature unterstützen, andernfalls wird das BHKNZ als optionales Attribut betrachtet.
-Wenn die IAM-Service-Implementierung dieses Feature unterstützt, dann wird ein mit den Authentifizierungsdaten gemeinsam übergebenes Behördenkennzeichen gegen das Behördenkennzeichen aus dem zu authentifizierenden Nutzerprofil geprüft.
+Gemäß StB-ADR058 wird das Behördenkennzeichen (BHKNZ) bei der Authentifizierung von Clients, die direkt im IAM-Service verwaltet werden, nicht als zusätzlicher Authentifizierungsfaktor ausgewertet.
+Für diese Clients wird kein alternativer zweiter Faktor eingeführt. Die Authentifizierung erfolgt über die vom IAM-Service unterstützten Client-Authentifizierungsverfahren, beispielsweise Client-ID und Client-Secret oder eine daraus abgeleitete signierte Client-Assertion.
+Das BHKNZ wird bei diesen Clients nicht als Parameter im Authentifizierungs-Request erwartet und nicht mit Informationen aus einem Client-Zertifikat abgeglichen. Die Übergabe des BHKNZ über `AdditionalCredentials` ist für deren Client-Authentifizierung nicht vorgesehen (siehe <<aussensicht-der-komponente-security>>).
 
-Bei ROPC sind Benutzername und Passwort erforderlich; das Behördenkennzeichen kann zusätzlich optional übergeben werden und ersetzt diese Zugangsdaten nicht.
+Die Entscheidung betrifft ausschließlich die Authentifizierung direkt im IAM-Service verwalteter Clients. Die Authentifizierung von Anwendern bleibt unberührt; das BHKNZ kann bei Anwendern weiterhin als zusätzliches Merkmal berücksichtigt werden, sofern das verwendete Authentifizierungsverfahren dies unterstützt.
+Ebenso bleibt die Verwendung von Zertifikaten als Zugangsmedium oder zur Transportverschlüsselung unberührt.
+
+Für die weiterhin unterstützte Benutzer-Authentifizierung über ROPC sind Benutzername und Passwort erforderlich.
+Ein Behördenkennzeichen kann zusätzlich optional übergeben werden, soweit das verwendete Verfahren dies unterstützt; es ersetzt diese Zugangsdaten nicht.
 Werden ROPC-Zugangsdaten dynamisch über `AdditionalCredentials` übergeben, müssen Benutzername und Passwort vollständig vorhanden sein; fehlende Werte werden nicht aus der Konfiguration ergänzt.
-Für die Übertragung eines dynamisch übergebenen Behördenkennzeichens gelten die in den xref:nutzungsvorgaben.adoc#authentifizierungsmanager-interface[Nutzungsvorgaben] beschriebenen OU- und Header-Voraussetzungen.
-Bei Client Credentials können `AdditionalCredentials` auf Ebene des Authentifizierungsmanagers ebenfalls ein Behördenkennzeichen enthalten.
-Der vorhandene Client-Credentials-Pfad überträgt dieses jedoch nicht an den IAM-Service; der für ROPC verwendete Headermechanismus wird hier nicht genutzt.
+Für die optionale Übertragung eines Behördenkennzeichens im ROPC-Weg gelten die in den xref:nutzungsvorgaben.adoc#authentifizierungsmanager-interface[Nutzungsvorgaben] beschriebenen OU- und Header-Voraussetzungen.
+
+Das BHKNZ bleibt für Clients ein fachlich relevantes Attribut. Für direkt im IAM-Service verwaltete Clients ist die Client-Konfiguration im IAM-Service die maßgebliche Quelle dieses Attributs. Ein BHKNZ im Access-Token ist daher fachlich und nicht als Nachweis eines zusätzlichen Authentifizierungsfaktors zu verstehen.
+Sofern nachgelagerte Fachverfahren oder Querschnittskomponenten das BHKNZ im `SecurityContext` benötigen, ist es bei tokenbasierten Client-Aufrufen aus dem validierten Access-Token zu übernehmen. Ein aus dem Client-Zertifikat ausgelesenes BHKNZ darf bei diesen Clients nicht als fachlich maßgebliche Quelle des `SecurityContext` verwendet werden.
+
+Die konkrete Bereitstellung des BHKNZ als Claim im Access-Token und seine Übernahme in den `SecurityContext` werden gemäß StB-ADR058 in gesonderten Nachfolge-Tickets geklärt.
 
 
 [[multiple-uris]]
