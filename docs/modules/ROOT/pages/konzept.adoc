@@ -353,7 +353,9 @@ Das aufgerufene IT-System validiert das Access-Token und prüft die Berechtigung
 [[aufruf-service-gateway-ohne-authentication-gateway]]
 ===== Authentifizierung über das SGW am IAM-Service
 
-Die nachfolgende Abbildung zeigt den SGW-ROPC-Weg, bei dem das Service-Gateway mithilfe des IAM-Service die notwendige Authentifizierung durchführt.
+Der SGW-ROPC-Weg bezeichnet die Authentifizierung über das Service-Gateway (SGW) unter Verwendung des OAuth-2.0-Verfahrens Resource Owner Password Credentials (ROPC, auch Password Grant genannt).
+
+Die nachfolgende Abbildung zeigt diesen Weg, bei dem das Service-Gateway mithilfe des IAM-Service die notwendige Authentifizierung durchführt.
 Dieser SGW-ROPC-Weg ist deprecated und für externe Anwendungen ausschließlich als befristete Interimslösung vorgesehen.
 Die Interimslösung ist für einen Zeitraum in der Größenordnung von etwa einem Jahr vorgesehen.
 Ein verbindliches Abschaltdatum ist nicht festgelegt.
