@@ -11,6 +11,7 @@
 #### Dokumentation
 
 - `IFS-5813` Konzept an den AGW-Standard für externe Anwendungen mit Client Credentials und `client_secret_jwt` angepasst; SGW-ROPC als befristete Interimslösung eingeordnet und Software-Architektur an die eigene ROPC-Infrastruktur angepasst.
+- `IFS-5826` Anpassung des Security-Konzepts gemäß StB-ADR058 zur Nicht-Auswertung des BHKNZ bei der Authentifizierung direkt im IAM-Service verwalteter Clients
 
 #### Features
 
@@ -29,3 +30,5 @@
 - keine
 
 ### DEPENDENCY UPGRADES
+
+- keine
