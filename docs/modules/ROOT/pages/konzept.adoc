@@ -134,10 +134,11 @@ Außerdem kann die Geschäftsanwendung über die Methode `getAlleRollen` eine Li
 Der `Authentifizierungsmanager` übernimmt die programmatische Authentifizierung und Autorisierung interner und externer Anwendungen durch das IAM für den Zugang zu IsyFact-Nachbaranwendungen.
 Er bietet verschiedene Methoden für die Authentifizierung, sowohl über Registration-IDs als auch über direkte ClientRegistration-Objekte.
 
-Batches und Tasks sind als Confidential Client eingestuft und verwahren ihre OAuth-Client-Zugangsdaten (Client-ID u. Client-Secret) in ihrer Konfiguration (mit einer `oauth2ClientRegistrationId` als Schlüssel).
-Bei ROPC werden zusätzlich Benutzername und Passwort des technischen Benutzers verwendet.
+Batches und Tasks sind als Confidential Clients eingestuft und können je nach Konfiguration entweder den ROPC-Flow oder den Client-Credentials-Flow verwenden.
+Beim ROPC-Flow werden neben der Client-Kennung Benutzername und Passwort eines technischen Benutzers verwendet. Beim Client-Credentials-Flow erfolgt die Authentifizierung mit Client-ID und Client-Secret.
+Die OAuth-Client-Konfiguration wird über eine `oauth2ClientRegistrationId` referenziert. Erforderliche Benutzeranmeldedaten können aus der betrieblichen Konfiguration gelesen oder bei den dafür vorgesehenen Methoden dynamisch übergeben werden.
 Die Methode `authentifiziere(String oauth2ClientRegistrationId)` im Authentifizierungsmanager liest diese Authentifizierungsdaten aus der betrieblichen Konfiguration und führt damit eine OAuth2.0-konforme Authentifizierung und Autorisierung der Anwendung gegenüber dem IAM-System durch.
-Dabei wird der passende Authentication-Flow anhand des konfigurierten `AuthorizationGrantType` der `ClientRegistration` ausgewählt.
+Abhängig vom konfigurierten Authentifizierungsverfahren verwendet der Authentifizierungsmanager den passenden OAuth-2.0-Flow mit den dafür erforderlichen Authentifizierungsdaten.
 Mit der Methode `authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)` können die zur `oauth2ClientRegistrationId` gehörenden Benutzerdaten mit den `AdditionalCredentials` überschrieben werden.
 
 xref:glossary::terms-definitions.adoc#externes-system[Externe Systeme] beschaffen ihr Access-Token im Standardfall über das _Authentication-Gateway (AGW)_ als vorgelagerten Zugang zum IAM-System.
