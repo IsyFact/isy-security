@@ -3,7 +3,7 @@
 ### FEATURES
 - `IFS-4734`: Verwendungen des Begriffs "Service" und damit verwandter Begriffe korrigieren
 - `IFS-4924`: Anpassungen im Text und Grafiken wegen der Einführung des Begriffs "API-Gateway"
-- `IFS-5813`: Security-Konzept und Diagramme an den AGW-Standard für externe Anwendungen mit Client Credentials und `client_secret_jwt` angepasst; SGW-ROPC als veralteten Übergangsweg eingeordnet und fehlende ROPC-Clientunterstützung in `isy-security` 5.0.x klargestellt.
+- `IFS-5813`: Security-Konzept und Diagramme an den AGW-Standard für externe Anwendungen mit Client Credentials und `client_secret_jwt` angepasst; SGW-Zugangsweg mit Client Credentials als auslaufenden Ansatz eingeordnet und fehlende ROPC-Clientunterstützung in `isy-security` 5.0.x klargestellt.
 - `IFS-4577`: Portierung fehlender Tickets aus `isyfact-standards`
 - `IFS-4591`: Hinzufügen von Authentifizierungsmethoden zur Authentifizierung von Clients und Systemen ohne Issuer-URI.
 - `IFS-4754`: Einführung von Caching im Authentifizierungsprozess
