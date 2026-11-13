@@ -91,6 +91,9 @@ Die Authentifizierung (Anmeldung) von internen oder externen Anwendungen verläu
 Das Ergebnis einer erfolgreichen Authentifizierung ist die Autorisierung durch ein Access-Token, das die dem Benutzer zugeordneten Rollen enthält.
 Dieses Access-Token legt die aufrufende Anwendung (bzw. das Service-Gateway als Mittelsmann) anschließend im `SecurityContext` ab und präsentiert es dem aufgerufenen Service der IsyFact-Anwendung.
 
+In `isy-security` 5.0.x unterstützt er ausschließlich den _Client-Credential_-Flow mit dem Grant-Type `client_credentials`.
+Eine ROPC-Clientunterstützung für den Password Grant ist in dieser Version nicht vorhanden.
+
 Über den `Berechtigungsmanager` kann die Anwendung die Rollen und anwendungsspezifischen Rechte des angemeldeten Benutzers abfragen.
 
 Der `RolePrivilegeGrantedAuthoritiesConverter` ist für die Konvertierung der vom IAM-Service im Access-Token übermittelten Rollen des Benutzers in die anwendungsspezifischen Rechte zuständig.
@@ -125,16 +128,17 @@ Außerdem kann die Geschäftsanwendung über die Methode `getAlleRollen` eine Li
 Der `Authentifizierungsmanager` übernimmt die programmatische Authentifizierung und Autorisierung interner und externer Anwendungen durch das IAM für den Zugang zu IsyFact-Nachbaranwendungen.
 Er bietet verschiedene Methoden für die Authentifizierung, sowohl über Registration-IDs als auch über direkte ClientRegistration-Objekte.
 
-Batches und Tasks sind als Confidential Client eingestuft und verwahren ihre Authentifizierungsdaten (Client-ID u. Client-Secret) in ihrer Konfiguration (mit einer `oauth2ClientRegistrationId` als Schlüssel).
+Batches und Tasks sind als Confidential Client eingestuft und verwahren ihre Authentifizierungsdaten in ihrer Konfiguration (mit einer `oauth2ClientRegistrationId` als Schlüssel).
+Mit `isy-security 5.0.x` können diese nur den ClientCredential-Flow verwenden und müssten dazu - falls noch nicht erfolgt - ihre Authentifizierungsdaten von _Benutzername_ u. _Passwort_ auf _ClientID_ u. _ClientSecret_ mit Anpassung des `grant-type` auf den korrekten CC-Flow umkonfigurieren.
 Die Methode `authentifiziere(String oauth2ClientRegistrationId)` im Authentifizierungsmanager liest diese Authentifizierungsdaten aus der betrieblichen Konfiguration und führt damit eine OAuth2.0-konforme Authentifizierung und Autorisierung der Anwendung gegenüber dem IAM-System durch.
-Dabei wird anhand des Typs der Authentifizierungsdaten der passende Authentication-Flow mit den konfigurierten Authentifizierungsdaten verwendet.
+Dabei wird anhand des Typs der Authentifizierungsdaten der passende Authentication-Flow mit den konfigurierten Authentifizierungsdaten verwendet, wobei in dieser Version nur noch der CC-Flow unterstützt wird.
 Mit der Methode `authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)` können die zur `oauth2ClientRegistrationId` gehörenden Benutzerdaten mit den `AdditionalCredentials` überschrieben werden.
 
-xref:glossary::terms-definitions.adoc#externes-system[Externe Systeme] übermitteln ihre Authentifizierungsdaten (Client-ID u. Client-Secret) mit im Header der HTTP-Anfrage an das Service-Gateway bzw. Authentication-Gateway.
-Das Gateway führt damit eine OAuth2.0-konforme Authentifizierung und Autorisierung des Systems gegenüber dem IAM-System durch.
-Dabei wird anhand des Typs der Authentifizierungsdaten der _Credential_-Flow xref:client-credential-flow[] verwendet:
+xref:glossary::terms-definitions.adoc#externes-system[Externe Systeme] beschaffen ihr Access-Token im Standardfall über das _Authentication-Gateway (AGW)_ als vorgelagerten Zugang zum IAM-System.
+Für die Authentifizierung wird der _Client-Credential-Flow_ mittels einer signierten JWT-Client-Assertion nach dem Verfahren `client_secret_jwt` verwendet.
+Die nachfolgenden fachlichen Anfragen werden anschließend zusammen mit dem aus der AGW-Authentifizierung erhaltenen Access-Token über das _Service-Gateway (SGW)_ an das aufzurufende IT-System gesendet.
 
-- Dafür sind folgende Methoden verfügbar:
+- Der Authentifizierungsmanager stellt für Client-Credentials-Aufrufe folgende Methoden bereit:
 * `authentifiziere(String oauth2ClientRegistrationId)`: Nutzt die in der Anwendungskonfiguration hinterlegte Client-Registration mit der angegebenen ID. Die Client-ID und das Client-Secret werden aus der Konfiguration gelesen.
 * `authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)`: Wie oben, ermöglicht jedoch die Angabe eines BHKNZ über die AdditionalCredentials.
 * `authentifiziere(ClientRegistration clientRegistration)`: Erlaubt die direkte Verwendung eines ClientRegistration-Objekts mit Token-URI und JWKS-URI.
@@ -142,9 +146,6 @@ Dabei wird anhand des Typs der Authentifizierungsdaten der _Credential_-Flow xre
 
 Die Klasse `AdditionalCredentials` dient zur Kapselung eines BHKNZ (Behördenkennzeichen) als zusätzliches Authentifizierungsmerkmal bei der Authentifizierung mit ClientRegistration-Objekten.
 Eine Instanz wird über die statische Factory-Methode `createWithBhknz` erstellt, die ein BHKNZ als Parameter erwartet.
-
-zusätzlicher Authentifizierungsdaten
-Sie ermöglicht die flexible Kombination verschiedener Credentials wie Benutzername, Passwort und BHKNZ.
 
 Die Klasse bietet zudem die Prüfmethoden `hasBhknz`, um die Verfügbarkeit des BHKNZ zu ermitteln.
 
@@ -210,7 +211,10 @@ Ein (menschlicher) Endbenutzer kann mithilfe eines Autorisierungsservers (IAM-Se
 Der Endbenutzer kann so der Anwendung gestatten, in seinem Namen einen Service zu benutzen.
 Dazu wird der Endbenutzer auf eine Login-Seite des Autorisierungsservers (IAM-Service) umgeleitet und nach erfolgreicher Authentifizierung zurück in die Anwendung.
 Dabei wird die Übermittlung von vertraulichen Daten wie z.B. Passwörtern an die Anwendung vermieden.
-Bei M2M-Kommunikation (Machine to Machine) enthält die Konfiguration der Anwendung die zur Authentifizierung notwendigen Daten des dafür verwendeten technischen Nutzers (Client), die direkt an den IAM-Service geschickt werden.
+Bei M2M-Kommunikation (Machine to Machine) authentifiziert der Client-Credentials-Flow einen technischen OAuth-Client mit dessen eigenen Zugangsdaten.
+Externe Anwendungen verwenden den xref:aufruf-service-gateway-mit-authentication-gateway[AGW-Standardweg] mit Client Credentials und `client_secret_jwt`.
+Für interne M2M-Szenarien kann die Authentifizierung mit Client Credentials direkt am IAM-Service erfolgen.
+Der xref:aufruf-service-gateway-ohne-authentication-gateway[SGW-Zugangsweg ohne AGW] verwendet ebenfalls Client Credentials und wird durch den AGW-Standardweg abgelöst.
 Bei erfolgreicher Authentifizierung erhält die Anwendung ein Access-Token (Zugriffstoken), eine Art 'Freibrief' für die Anwendung, mit dem der IAM-Service das Zugangsrecht bestätigt.
 
 OpenID Connect (OIDC) ist ein offenes Identitätsprotokoll, das die Autorisierungs- und Authentifizierungsmechanismen von OAuth 2.0 nutzt und als Schicht oberhalb des OAuth-Frameworks Anwendungen ermöglicht, zusätzlich zur oben beschriebenen Autorisierung auch grundlegende Profilinformationen des Benutzers auf interoperable Weise zu erhalten.
@@ -326,17 +330,22 @@ image::konzept/authorization-code-flow.dn.svg[align="center"]
 ==== Aufruf Service-Gateway
 
 Anfragen von _externen IT-Systemen_ an ein IsyFact-IT-System, müssen über den IAM-Service authentifiziert und zur Nutzung des aufgerufenen IsyFact-Service autorisiert werden.
-Um das zu gewährleisten, ist in der Informations- und Dienstezone ein _Service-Gateway (SGW)_ zwischen der externen Anwendung und dem internen IsyFact-Service geschaltet.
-Das Service-Gateway nimmt diese fachliche Anfrage von außen entgegen,
-leitet diese zur Authentifizierung an den IAM-Service und bei Erfolg wird die fachliche Anfrage inklusive der Rollen und Rechte an den internen IsyFact-Service weitergeleitet,
-der dann die noch ausstehende Autorisierung auf Basis der Rollen und Rechte selbst initiiert, bevor er mit der eigentlichen fachlichen Bearbeitung beginnen kann.
+Die Standardlösung für die Authentifizierung externer Anwendungen bzw. Behörden ist das _Authentication-Gateway (AGW)_ als vorgelagerter Zugang zum IAM-Service.
+Die externe Anwendung beschafft sich zunächst über das AGW ein Access-Token und sendet anschließend ihre fachlichen Anfragen zusammen mit diesem Token an das _Service-Gateway (SGW)_.
+Das Service-Gateway ist in der Informations- und Dienstezone zwischen der externen Anwendung und dem internen IsyFact-Service geschaltet.
+Es leitet die fachliche Anfrage zusammen mit dem Access-Token an den internen IsyFact-Service weiter.
+Das aufgerufene IT-System validiert das Access-Token und prüft die Berechtigungen, bevor es mit der eigentlichen fachlichen Bearbeitung beginnt.
 
 [[aufruf-service-gateway-ohne-authentication-gateway]]
 ===== Authentifizierung über das SGW am IAM-Service
 
-Die nachfolgende Abbildung zeigt die aktuell verwendete System-Architektur, in der das Service-Gateway mithilfe des IAM-Service die hier notwendige Authentifizierung durchführt.
+Die Authentifizierung über das Service-Gateway (SGW) ohne vorgelagertes AGW verwendet in `isy-security` 5.0.x ausschließlich den Client-Credentials-Flow.
+Die externe Anwendung übergibt dabei die Authentifizierungsdaten des OAuth-Clients (Client-ID und Client-Secret) zusammen mit der fachlichen Anfrage an das SGW.
+Dieser SGW-Zugangsweg ist gegenüber dem xref:aufruf-service-gateway-mit-authentication-gateway[AGW-Standardweg] ein auslaufender Ansatz und soll durch diesen abgelöst werden.
+Ein verbindlicher Abschalttermin ist nicht festgelegt.
+Die nachfolgende Abbildung zeigt diesen Weg, bei dem das Service-Gateway mithilfe des IAM-Service die notwendige Authentifizierung durchführt.
 
-.Authentifizierung ohne Authentication-Gateway
+.Authentifizierung ohne Authentication-Gateway mit Client Credentials
 [id="image-servicegateway-ohne-authgateway",reftext="{figure-caption} {counter:figures}"]
 image::konzept/ServiceGateway-Authentifizierung.dn.svg[align="center"]
 
@@ -351,34 +360,32 @@ In der Anwendung kann anschließend die Ausführungsberechtigung des Benutzers v
 
 Zu beachten ist, dass die externe Anwendung die Authentifizierungsdaten bei jeder fachlichen Anfrage an das Service-Gateway sendet.
 Das Service-Gateway initiiert die Authentifizierung über den Baustein `isy-security`, erhält ein gültiges Access-Token vom IAM-Service und leitet dieses dann in Verbindung mit der fachlichen Anfrage an die Geschäftsanwendung weiter.
-Das Access-Token wird dabei nicht an die externe Anwendung ausgeliefert, daher muss jede fachliche Anfrage der externen Anwendung erneut authentifiziert werden, obwohl das vorherige Access-Token noch gültig wäre.
+Das Access-Token wird dabei nicht an die externe Anwendung ausgeliefert.
 
 Im nachfolgenden Sequenzdiagramm sieht man den logischen Ablauf von Authentifizierung und Autorisierung im Zusammenspiel der System-Komponenten mit dem _Service-Gateway_
 aber ohne _Authentication-Gateway_ noch einmal verdeutlicht:
 
-.Sequenzdiagramm Authentifizierung ohne Authentication-Gateway
+.Sequenzdiagramm Authentifizierung ohne Authentication-Gateway mit Client Credentials
 [id="image-sequenzdiagramm-sgw-without-agw",reftext="{figure-caption} {counter:figures}"]
 image::konzept/Squenzdiagramm_ServiceGateway_ohne_AuthGateway.dn.svg[align="center"]
 
-Die Authentifizierung über das Service-Gateway stellt einen wichtigen Schritt in der Sicherung von Anwendungen dar.
 Um diesen Prozess effektiv umzusetzen, empfiehlt sich die Verwendung der Methode `authentifiziere` des Authentifizierungsmanagers.
 Mit dessen Hilfe ist es möglich, den Client zu authentifizieren und sicherzustellen, dass nur autorisierte Clients Zugriff auf die Ressourcen erhalten.
-Durch die Nutzung dieses speziellen Authentifizierungsmechanismus wird eine robuste und zuverlässige Sicherheitsschicht implementiert, um unautorisierten Zugriff und potenzielle Sicherheitslücken zu verhindern.
 
 Weitere Informationen und detaillierte Anleitungen zur Verwendung der `authentifiziere`-Methode können in der entsprechenden Dokumentation des Authentifizierungsmanagers oder in den xref:nutzungsvorgaben.adoc#authentifizierungsmanager-interface[Nutzungsvorgaben] gefunden werden.
 
-
-In einer zukünftigen Version von `IsyFact` wird in einer neu eingeführten aber separierten Komponente der Anwendungslandschaft (_Authentication-Gateway_) eine neue Authentifizierungslogik (xref:aufruf-service-gateway-mit-authentication-gateway[]) für die Authentifizierung von Anwendungen eingeführt.
-Die Authentifizierung wird von der eigentlichen fachlichen Anfrage getrennt, sodass sie nur einmal durchgeführt werden muss und das erhaltene Access-Token (innerhalb seiner Gültigkeit) auch für die weiteren fachlichen Anfragen verwendet werden kann.
+Beim xref:aufruf-service-gateway-mit-authentication-gateway[AGW-Standardweg] ist die Authentifizierung von der eigentlichen fachlichen Anfrage getrennt.
+Die externe Anwendung authentifiziert sich als OAuth-Client über das AGW und erhält das Access-Token über das AGW zurück.
+Sie verwendet dieses Access-Token innerhalb seiner Gültigkeit für mehrere fachliche Anfragen über das Service-Gateway.
 
 [[aufruf-service-gateway-mit-authentication-gateway]]
-===== Direkte Authentifizierung am IAM-Service
+===== Authentifizierung über das Authentication-Gateway am IAM-Service
 
 Damit eine externe Anwendung auf die Ressourcen eines aufgerufenen IT-Systems zugreifen kann, benötigt sie ein gültiges Access-Token.
-Dieses Token muss sich die externe Anwendung zuerst beschaffen, indem sie sich beim IdentityAccessManagement-Service (IAM-Service) authentifiziert.
+Dieses Token beschafft sich die externe Anwendung zuerst über das Authentication-Gateway, das den vorgelagerten Zugang zum IAM-Service bereitstellt.
 
-Die folgende Abbildung zeigt die zukünftig intendierte System-Architektur, die hier zum Einsatz kommen soll.
-Zukünftig sollen die Aufrufe des IAM-Service direkt aus der externen Anwendung über ein Authentication-Gateway erfolgen.
+Die folgende Abbildung zeigt die Standardlösung für die Authentifizierung externer Anwendungen bzw. Behörden.
+Die externe Anwendung ruft zur Tokenbeschaffung das Authentication-Gateway auf, das die Anfrage an den IAM-Service weiterleitet.
 
 .Authentifizierung am Authentication-Gateway
 [id="image-servicegateway-plus-authgateway",reftext="{figure-caption} {counter:figures}"]
@@ -396,11 +403,10 @@ Dort werden von der externen Anwendung die Authentifizierungsdaten übergeben.
 Im aufgerufenen IT-System wird anschließend das jeweils mitgelieferte Access-Token validiert.
 Hierzu werden aus dem Access-Token dessen Signatur, dessen Ablaufdatum und die dort hinterlegten Berechtigungen entnommen und überprüft.
 
-Die neue System-Architektur hat den Vorteil, dass in der externen Anwendung eine Wiederverwendung des Access-Tokens ermöglicht,
+Diese System-Architektur ermöglicht in der externen Anwendung eine Wiederverwendung des Access-Tokens,
 was zu einer starken Verringerung der Authentifizierungs-Anfragen an das IAM führt.
 
-Dabei wird (wie in der bisherigen Systemarchitektur) neben der neuen Authentifizierungslogik des _Client-Credential-Flows_ auch die bisherige Authentifizierungslogik des _Resource-Owner-Password-Credentials-Flows_ unterstützt.
-Der _Client-Credential-Flow_ dient dabei der Authentifizierung eines technischen Clients, und über den _Resource-Owner-Password-Credentials-Flow_ erfolgt die Authentifizierung eines technischen Nutzers.
+Am Authentication-Gateway wird ausschließlich der _Client-Credential-Flow_ mittels einer signierten JWT-Client-Assertion nach dem Verfahren `client_secret_jwt` zur Authentifizierung eines technischen Clients unterstützt.
 
 Das nachfolgende Sequenzdiagramm zeigt noch einmal schematisch den logischen Ablauf der Authentifizierung und Autorisierung im Zusammenspiel der System-Komponenten und dem Authentication-Gateway:
 
@@ -482,23 +488,28 @@ Der _Aufgaben_-Prozess erhält dann den initialisierten `SecurityContext` zurüc
 
 Mit SpringSecurity (OAuth2.0) werden die Berechtigungszuteilungsverfahren (Credential Flows) _Authorization-Code-Credentials_, _Implicit-Credentials_
 und _Client-Credentials_ spezifiziert.
-Innerhalb der IsyFact wird bei der Autorisierung von Anwendungsaufrufen (von intern oder extern) das Verfahren  _Client-Credential_ angewendet, da es sich hierbei ausschließlich um die Berechtigungszuteilung für _Confidential-Clients_ dreht.
+Der Authentifizierungsmanager von `isy-security` 5.0.x unterstützt hierfür den _Client-Credential_-Flow.
+Externe Anwendungen verwenden den xref:aufruf-service-gateway-mit-authentication-gateway[AGW-Standardweg].
 
 [[client-credential-flow]]
 ===== Client-Credential Flow
 
 Der _Client-Credential_-Flow wird und darf nur zur Berechtigungszuteilung eingesetzt werden, wenn die Client-Anwendung selbst auch der Besitzer der Authentifizierungsdaten und damit als Confidential-Client-Anwendung eingestuft ist.
-Dieser Credential-Flow ist nach SpringSecurity OAuth2.0 auch die einzige Möglichkeit einen technischen Nutzer (Client) zu authentifizieren.
+Dieser Credential-Flow authentifiziert einen technischen OAuth-Client mit dessen eigenen Zugangsdaten.
 Es erfolgt hierbei keine Interaktion durch einen Benutzer, der sein Passwort eingeben müsste, sondern die Schritte zur Authentifizierung und Autorisierung der Client-Anwendung laufen selbständig als Hintergrundprozess analog einer Batch-Anwendung ab.
 Die dabei verwendeten Authentifizierungsdaten `Client-ID` und `Client-Secret` müssen vor der Nutzung für die Client-Anwendung definiert und mit dem IAM-System abgestimmt sein.
 Die Verwaltung des Clients mit dem ihm zugeordneten Rollen erfolgt im IAM-System.
+
+Externe Anwendungen bzw. Behörden verwenden diesen Flow im Standardfall zur Tokenbeschaffung über das Authentication-Gateway als vorgelagerten Zugang zum IAM-Service.
+Dabei erfolgt die Client-Authentifizierung mittels einer signierten JWT-Client-Assertion nach dem Verfahren `client_secret_jwt` (xref:aufruf-service-gateway-mit-authentication-gateway[]).
+Die fachliche Anfrage wird anschließend mit dem erhaltenen Access-Token über das Service-Gateway gestellt.
 
 .OAuth2.0 Client-Credential Flow
 [id="image-clientcredential-flow",reftext="{figure-caption} {counter:figures}"]
 image::konzept/Client-Credential-Flow.dn.svg[align="center"]
 
 Im vorherigen Bild wird der logische Ablauf des _Client-Credential_-Flows dargestellt.
-Hierbei kann die Client-Anwendung nach einem Access-Token beim IAM anfragen (1.), indem sie dabei ihre eigenen Client-Authentifizierungsdaten oder anderweitig unterstützte Authentifizierungskriterien verwendet.
+Hierbei kann die Client-Anwendung nach einem Access-Token beim IAM anfragen (1.), indem sie dabei ihre eigenen Client-Authentifizierungsdaten oder anderweitig unterstützte Authentifizierungskriterien verwendet; bei externen Anwendungen erfolgt diese Anfrage im Standardfall über das Authentication-Gateway.
 Die Authentifizierung mit diesen so übermittelten Authentifizierungsdaten erfolgt dann im IAM-Service.
 Bei erfolgreicher Authentifizierung wird (2.) ein gültiges Access-Token mit den Rollen des Clients als Antwort zurückgeliefert.
 Mit dem so erhaltenen Access-Token kann die Client-Anwendung dann ihre Fachanwendungen aufrufen.
@@ -655,7 +666,7 @@ Beispiele für eine Trennung nach:
 
 *Zugriffsweg:*
 
-* Trennung zwischen sgw- und Portal-Authentifizierungen
+* Trennung zwischen der Authentifizierung externer Anwendungen über das AGW mit anschließendem fachlichem Zugriff über das SGW und der Portal-Authentifizierung
 
 *IAM-Instanz:*
 
@@ -687,6 +698,10 @@ image::konzept/security_multi-tenancy_with_multi_iams.dn.svg[align="center"]
 
 Die verschiedenen dargestellten Zugriffswege _Portal_, _Service-Gateway_, _Authentication-Gateway_ oder _Batch/Task_ bis hin zu mehrfachen IAM-Instanzen können daher als einzelne Tenants nicht nur unterschieden, sondern auch als Multi-Instanzen des gleichen Typs identifiziert werden.
 
+Die Darstellung mehrerer Zugriffswege bedeutet nicht, dass diese gleichwertige dauerhafte Authentifizierungswege sind.
+Für externe Anwendungen ist die Tokenbeschaffung über das AGW mit anschließendem fachlichem Zugriff über das SGW der Standard.
+Der in der Abbildung dargestellte SGW-Zugangsweg mit Client Credentials ist gegenüber dem AGW-Standardweg ein auslaufender Ansatz; es gilt die Beschreibung aus <<aufruf-service-gateway-ohne-authentication-gateway>>.
+
 Die an den Zugriffswegen beteiligten Komponenten unterscheiden sich in ihrem Aufbau, ihrer Konfiguration und ihrer Funktionalität, sodass jede genau die speziellen Eigenheiten - siehe dazu Kapitel <<aufruf-weboberflaeche-portal>>, <<aufruf-service-gateway-ohne-authentication-gateway>>, <<aufruf-service-gateway-mit-authentication-gateway>> und <<ausfuehrung-batch-u-task>> bzw. <<aufruf-von-nachbarsystemen>> - am besten bedienen oder erfüllen kann.
 Die Umsetzung und sicherheitsrelevante Trennung dieser Zugriffswege werden als eigenständige Tenants betrachtet und können somit auch als mehrere Instanzen pro Zugriffsweg eingerichtet werden.
 Dadurch ist es möglich fachliche Unterschiede über den gleichen technischen Zugriffsweg bei der Authentifizierung zu machen.
@@ -706,7 +721,7 @@ Die IsyFact sieht weiterhin die Nutzung eines einzelnen IAM-Services je Anwendun
 Ihnen steht der Zugang über das Portal zur Verfügung.
 
 * Externen Anwendungen wird der Tenant 2 (T 2) zugewiesen.
-Der Zugriff auf die Anwendungslandschaft erfolgt über das SGW.
+Die Tokenbeschaffung erfolgt im Standardfall über das AGW; der fachliche Zugriff auf die Anwendungslandschaft erfolgt mit dem Access-Token über das SGW.
 
 * Batch-Anwendungen und Tasks wird der Tenant 3 (T 3) zugewiesen.
 
