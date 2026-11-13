@@ -14,6 +14,10 @@ Die IsyFact richtet sich beim Thema Sicherheit nach behördlichen Standards sowi
 * https://oauth.net/2/[OAuth 2.0 Homepage]
 
 Allgemeine xref:isyfact-standards-doku:referenzarchitektur:software-technisch.adoc#prinzipien-der-sicherheitsarchitektur[Prinzipien der Sicherheitsarchitektur] werden als Teil der xref:isyfact-standards-doku:referenzarchitektur:software-technisch.adoc[software-technischen Referenzarchitektur] beleuchtet.
+
+Zero Trust ist das übergeordnete Architekturprinzip für die Sicherheitsarchitektur der IsyFact.
+Es bildet den Rahmen für die Anwendung der genannten Grundlagen von BSI, OWASP und OAuth 2.0 sowie der bestehenden Sicherheitsmechanismen.
+
 Dieses Dokument konzentriert sich auf die konzeptionellen Aspekte der Authentifizierung und Autorisierung.
 Es sorgt dafür, dass Authentifizierung und Autorisierung in allen IT-Systemen gleichartig umgesetzt wird und grundlegende Anforderungen an die IT-Sicherheit eingehalten werden.
 Es richtet sich vor allem an Software-Architekten, die eine Geschäftsanwendung gemäß den Vorgaben der IsyFact absichern müssen und beschreibt, wie und in welchen Teilen eines IT-Systems die Authentifizierung und Autorisierung stattfindet.
@@ -34,6 +38,13 @@ Das Kapitel <<rollen-und-rechte>> beschreibt dann abschließend, wie Rollen und 
 Der Baustein Security bildet eine Komponente des Querschnitts der xref:isyfact-standards-doku:referenzarchitektur:software-technisch/backend.adoc[].
 Er ist von jedem IT-System zur Autorisierung von Zugriffen und Vorgängen zu verwenden.
 
+Zero Trust dient als Designprinzip für die Sicherheitsarchitektur von IT-Systemen.
+Die Herkunft einer Anfrage begründet keine automatische Vertrauenswürdigkeit; dies gilt auch für Anfragen aus einem internen Netz oder IT-System.
+Eine erfolgreiche Authentifizierung bedeutet keine pauschale Zugriffsberechtigung.
+Das aufgerufene IT-System trifft die fachliche Zugriffsentscheidung auf Grundlage geprüfter Autorisierungsinformationen und der für den jeweiligen Zugriff erforderlichen systemspezifischen Rechte.
+Diese Entscheidung gilt nur für den geprüften Zugriff und seinen Kontext.
+Die im Folgenden beschriebenen Komponenten und Sicherheitsmechanismen konkretisieren diese Prinzipien.
+
 Die Mechanismen zur Absicherung IsyFact-konformer IT-Systeme haben zum Ziel, die Autorisierung von Zugriffen _systematisch_, _einheitlich_ und _einfach_ umzusetzen.
 
 Die *Systematik* und Vollständigkeit der Berechtigungsprüfungen wird dadurch erreicht, dass Berechtigungsprüfungen in den IT-Systemen an definierten Stellen und auf identische Weise stattfinden.
@@ -48,17 +59,24 @@ Die *Einfachheit* der Nutzung der Bibliothek `isy-security` wird durch weitgehen
 
 Aus den xref:isyfact-standards-doku:referenzarchitektur:software-technisch.adoc#prinzipien-der-sicherheitsarchitektur[Prinzipien der Sicherheitsarchitektur] leiten sich die folgenden Randbedingungen für die Umsetzung der Berechtigungsprüfung innerhalb eines IT-Systems ab:
 
-* Anfragen, die am Dialog (Web-App) eines IT-Systems eingehen, sind immer vorher über die mitgegebenen Authentifizierungsdaten durch das IAM-System bzw. die lokale Authentifizierung erfolgreich authentifiziert.
+* Anfragen, die am Dialog (Web-App) eines IT-Systems eingehen, sind im vorgesehenen Ablauf bereits durch das IAM-System bzw. die lokale Authentifizierung erfolgreich authentifiziert.
 Durch die Authentifizierung des IAM-Systems enthält der HTTP-Header der Anfrage die Identifikation des Anwenders und dessen Rollen (in Form eines JWT Zugriffstoken).
-* Anfragen, die an einen Service (von außen über ein Service-Gateway (SGW) oder von anderen IT-Systemen innerhalb der IT-Systemlandschaft) eines IT-Systems eingehen, sind ebenso bereits authentifiziert.
+* Anfragen, die an einen Service (von außen über ein Service-Gateway (SGW) oder von anderen IT-Systemen innerhalb der IT-Systemlandschaft) eines IT-Systems eingehen, sind im vorgesehenen Ablauf ebenso bereits authentifiziert.
+Auch interne Aufrufe sind nicht allein aufgrund ihrer Herkunft vertrauenswürdig.
 * Prozesse, die unabhängig von eingehenden Anfragen (über Dialog und Service) durch ein IT-System gestartet werden (z.B. Batch/Task), müssen zunächst einen (technischen) Nutzer gegen das IAM-System bzw. die lokale Authentifizierung erfolgreich authentifizieren, um ein JWT Access-Token zu erhalten.
 Mit diesem können sie dann Services anderer IT-Systeme innerhalb derselben Anwendungslandschaft verwenden.
-* Das aufgerufene IT-System prüft das Vorhandensein eines (gültigen) Access-Tokens und übernimmt dieses mit den darin enthaltenen Anwenderinformationen in den `SecurityContext`, wobei es die Rollen des Anwenders auf systemspezifische Rechte abbildet.
-Vor Ausführung des Service prüft das IT-System, ob der Anwender die dafür benötigten Rechte besitzt.
-* Innerhalb der Anwendungslandschaft eines IT-Systems wird das `JWT Access-Token` weitergegeben. Zur Stärkung der Vertrauenswürdigkeit wird jedes `JWT Access-Token` beim Eintritt in ein IT-System auf Gültigkeit und Authentizität geprüft.
+* Das aufgerufene IT-System prüft das Vorhandensein sowie die Authentizität und Gültigkeit des Access-Tokens (siehe <<validierung-der-token>>).
+Erst nach erfolgreicher Validierung übernimmt es dieses mit den darin enthaltenen Anwenderinformationen in den `SecurityContext`, wobei es die Rollen des Anwenders auf systemspezifische Rechte abbildet.
+Vor Ausführung des Service prüft das IT-System, ob der Anwender die dafür benötigten systemspezifischen Rechte besitzt, und setzt die Zugriffsentscheidung durch.
+* Bei fehlenden, nicht authentischen oder ungültigen erforderlichen Autorisierungsinformationen sowie bei unzureichenden Berechtigungen wird der jeweilige Zugriff abgelehnt.
+* Innerhalb der Anwendungslandschaft wird ein bereits vorhandenes `JWT Access-Token` entlang einer fachlichen und prozessbezogenen Aufrufkette weiterhin unverändert weitergegeben (siehe <<aufruf-von-nachbarsystemen>>).
+An jeder relevanten IT-Systemgrenze muss das Access-Token durch das aufgerufene IT-System auf Authentizität und Gültigkeit geprüft werden.
+Die Weitergabe begründet keine automatische Autorisierung im nächsten IT-System.
+* Berechtigungen sind nach dem Prinzip der minimalen Berechtigungen (Least Privilege) zu vergeben: Es werden nur die für die jeweilige Aufgabe erforderlichen Berechtigungen zugeordnet (siehe <<rollen-und-rechte>>).
 
-Die Services eines IT-Systems können also nur mit einer gültigen Legitimation aufgerufen werden und sind so vor unberechtigter Nutzung geschützt.
-Umgekehrt können die Module und Verarbeitungsprozesse innerhalb des IT-Systems sich darauf verlassen, dass ihr Aufruf legitim ist und die ihnen übergebenen Daten vertrauenswürdig sind.
+Die Authentifizierung des Aufrufers, die Validierung des Access-Tokens und die fachliche Autorisierung bleiben getrennte Prüfungen.
+Bereits authentifizierte Aufrufer können im vorgesehenen Ablauf weiterverarbeitet werden; das aufgerufene IT-System validiert das Access-Token und prüft die für den jeweiligen Zugriff erforderlichen Rechte.
+Eine erfolgreiche Prüfung gilt ausschließlich für den geprüften Zugriff und dessen Kontext und begründet keine pauschale Vertrauenswürdigkeit interner Aufrufe oder übergebener Daten.
 
 [[software-architektur]]
 === Software-Architektur
