@@ -132,7 +132,10 @@ Die Methode `authentifiziere(String oauth2ClientRegistrationId)` im Authentifizi
 Dabei wird anhand des Typs der Authentifizierungsdaten der passende Authentication-Flow mit den konfigurierten Authentifizierungsdaten verwendet.
 Mit der Methode `authentifiziere(String oauth2ClientRegistrationId, AdditionalCredentials credentials)` können die zur `oauth2ClientRegistrationId` gehörenden Benutzerdaten mit den `AdditionalCredentials` überschrieben werden.
 
-xref:glossary::terms-definitions.adoc#externes-system[Externe Systeme] übermitteln ihre Authentifizierungsdaten (Client-ID u. Client-Secret) mit im Header der HTTP-Anfrage an das Service-Gateway bzw. Authentication-Gateway.
+Bei der xref:aufruf-service-gateway-mit-authentication-gateway[direkten Authentifizierung am IAM-Service] über das Authentication-Gateway wird eine signierte JWT-Client-Assertion verwendet.
+Das Client-Secret wird dabei nicht übertragen.
+
+xref:glossary::terms-definitions.adoc#externes-system[Externe Systeme] übermitteln ihre Authentifizierungsdaten (Client-ID u. Client-Secret) mit im Header der HTTP-Anfrage an das Service-Gateway.
 Das Gateway führt damit eine OAuth2.0-konforme Authentifizierung und Autorisierung des Systems gegenüber dem IAM-System durch.
 Dabei wird anhand des Typs der Authentifizierungsdaten der jeweils passende Authentication-Flow verwendet:
 
@@ -418,6 +421,52 @@ Das nachfolgende Sequenzdiagramm zeigt noch einmal schematisch den logischen Abl
 .Sequenzdiagramm Authentifizierung am Authentication-Gateway
 [id="image-sequenzdiagramm-sgw-plus-agw",reftext="{figure-caption} {counter:figures}"]
 image::konzept/Squenzdiagramm_ServiceGateway_plus_AuthGateway.dn.svg[align="center"]
+
+[[signed-jwt-by-clientsecret]]
+====== Signed JWT by ClientSecret
+
+Bei der Authentifizierungsmethode "signed JWT by ClientSecret" erstellt die externe Anwendung eine JWT-Client-Assertion und signiert diese mit ihrem Client-Secret.
+Dieses Verfahren wird als `client_secret_jwt` bezeichnet.
+Die Client-Assertion enthält die Client-ID sowie Angaben zu ihrer Gültigkeit.
+Das Client-Secret selbst ist nicht enthalten, sondern wird zur Signierung verwendet.
+Die Signierung ersetzt keine Verschlüsselung der übertragenen Daten, daher erfolgt die Übertragung über HTTPS.
+
+Voraussetzung ist, dass die externe Anwendung als Client im IAM-Service registriert ist und über die zugehörige Client-ID und das Client-Secret verfügt.
+Das Client-Secret muss in der externen Anwendung vertraulich aufbewahrt werden.
+Im IAM-Service muss für diesen Client die Authentifizierung mittels `client_secret_jwt` eingerichtet sein.
+In Keycloak entspricht dies dem Client Authenticator "Signed JWT with Client Secret".
+Der in Keycloak gewählte Signature algorithm muss auch von der externen Anwendung zur Signierung verwendet werden.
+
+Das _Authentication-Gateway_ leitet die Anfrage mit der Client-Assertion an den _IAM-Service_ weiter.
+Der IAM-Service prüft die Client-Assertion mit dem für den Client hinterlegten Client-Secret und stellt bei erfolgreicher Authentifizierung ein Access-Token aus.
+Die Client-Assertion dient damit der Authentifizierung der externen Anwendung.
+Für die anschließenden fachlichen Anfragen an das _Service-Gateway_ verwendet die externe Anwendung das erhaltene Access-Token.
+
+[[signed-jwt-by-clientsecret-externe-anwendung]]
+====== Verwendung durch die externe Anwendung
+
+Die externe Anwendung erstellt vor jedem Authentifizierungsaufruf eine neue, kurzlebige Client-Assertion.
+Eine erneute Verwendung dieser Client-Assertion ist nicht vorgesehen.
+Die Erstellung und Verwendung erfolgt in den folgenden Schritten:
+
+. Die externe Anwendung trägt ihre Client-ID in die Claims `iss` und `sub` ein.
+Der Claim `aud` bezeichnet den IAM-Service als Empfänger und muss dessen Vorgaben entsprechen.
+Zusätzlich werden eine eindeutige Kennung (`jti`) und ein Ablaufzeitpunkt (`exp`) gesetzt.
+Die Gültigkeitsdauer ist mit dem IAM-Service abzustimmen und möglichst kurz zu halten.
+. Die externe Anwendung signiert die Client-Assertion mit ihrem Client-Secret nach dem abgestimmten Verfahren.
+. Die externe Anwendung sendet eine HTTP-POST-Anfrage über HTTPS an das Authentication-Gateway.
+Die Parameter werden im Format `application/x-www-form-urlencoded` im Body der Anfrage übertragen.
+Der Parameter `grant_type` erhält für den _Client-Credential-Flow_ den Wert `client_credentials`.
+Die Client-ID wird im Parameter `client_id` mitgegeben.
+Die signierte Client-Assertion wird im Parameter `client_assertion` übergeben.
+Der Parameter `client_assertion_type` erhält den Wert `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`.
+. Bei erfolgreicher Authentifizierung erhält die externe Anwendung ein Access-Token.
+Dieses kann innerhalb seiner Gültigkeit für mehrere fachliche Anfragen verwendet werden.
+Nach Ablauf seiner Gültigkeit muss sich die externe Anwendung erneut authentifizieren.
+
+Spring Security bietet eine Client-Implementierung zur Erstellung der signierten Client-Assertion und ihrer Verwendung in der Authentifizierungsanfrage an.
+Ein Beispiel für `client_secret_jwt` findet sich unter https://docs.spring.io/spring-security/reference/servlet/oauth2/client/client-authentication.html#oauth2-client-authentication-jwt-bearer-client-secret-jwt[Spring - Client Authentication Support].
+Die dort gezeigte Konfiguration ist an die Vorgaben des IAM-Service anzupassen.
 
 [[ausfuehrung-batch-u-task]]
 ==== Ausführung Batch & Task
