@@ -67,7 +67,7 @@ Auch interne Aufrufe sind nicht allein aufgrund ihrer Herkunft vertrauenswürdig
 Mit diesem können sie dann Services anderer IT-Systeme innerhalb derselben Anwendungslandschaft verwenden.
 * Das aufgerufene IT-System prüft das Vorhandensein sowie die Authentizität und Gültigkeit des Access-Tokens (siehe <<validierung-der-token>>).
 Erst nach erfolgreicher Validierung übernimmt es dieses mit den darin enthaltenen Anwenderinformationen in den `SecurityContext`, wobei es die Rollen des Anwenders auf systemspezifische Rechte abbildet.
-Vor Ausführung des Service prüft das IT-System, ob der Anwender die dafür benötigten systemspezifischen Rechte besitzt, und setzt die Zugriffsentscheidung durch.
+Vor Ausführung des Service prüft das IT-System, ob der Anwender die dafür benötigten systemspezifischen Rechte besitzt, um die eigentliche Service-Ausführung zuzulassen.
 * Bei fehlenden, nicht authentischen oder ungültigen erforderlichen Autorisierungsinformationen sowie bei unzureichenden Berechtigungen wird der jeweilige Zugriff abgelehnt.
 * Innerhalb der Anwendungslandschaft wird ein bereits vorhandenes `JWT Access-Token` entlang einer fachlichen und prozessbezogenen Aufrufkette weiterhin unverändert weitergegeben (siehe <<aufruf-von-nachbarsystemen>>).
 An jeder relevanten IT-Systemgrenze muss das Access-Token durch das aufgerufene IT-System auf Authentizität und Gültigkeit geprüft werden.
